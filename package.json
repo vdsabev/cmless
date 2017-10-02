@@ -3,13 +3,21 @@
   "version": "1.0.0",
   "license": "MIT",
   "main": "index.js",
-  "scripts": {},
+  "bin": {
+    "compote": "bin/index.js"
+  },
+  "scripts": {
+    "build": "webpack -p --env.production --display-modules",
+    "profile:build": "webpack --profile --json > ./build/profile.json",
+    "profile:open": "webpack-bundle-analyzer ./build/profile.json",
+    "start": "webpack-dev-server --port 3000 --history-api-fallback"
+  },
   "dependencies": {
     "autoprefixer": "7.1.4",
     "clean-webpack-plugin": "0.1.17",
     "css-loader": "0.28.7",
     "extract-text-webpack-plugin": "3.0.0",
-    "file-loader": "0.11.2",
+    "file-loader": "1.1.4",
     "html-webpack-plugin": "2.30.1",
     "node-sass": "4.5.3",
     "postcss-loader": "1.3.3",
@@ -18,7 +26,19 @@
     "ts-loader": "2.3.7",
     "var": "0.3.1",
     "webpack": "3.6.0",
+    "webpack-dev-server": "2.9.1",
     "webpack-null-plugin": "0.0.2",
     "workbox-webpack-plugin": "2.0.3"
+  },
+  "compote": {
+    "//": "Example compote-cli configuration - use in your own project's package.json file",
+    "build": {
+      "entry": {
+        "app": "./src/app.ts",
+        "vendor": true
+      },
+      "target": "./build",
+      "template": "./src/index.ejs"
+    }
   }
 }
