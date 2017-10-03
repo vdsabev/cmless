@@ -1,12 +1,35 @@
 #!/usr/bin/env node
 'use strict';
 
-const { exec } = require('child_process');
-
+// Adapted from https://github.com/ant-tool/atool-build/blob/master/src/build.js
 const script = process.argv[2];
 switch (script) {
   case 'build':
-    exec(`node ${__dirname}/../node_modules/webpack/bin/webpack --config ${__dirname}/../config.js -p --env.production --display-modules --display-error-details`, handleOutput);
+    const path = require('path');
+    const webpack = require('webpack');
+
+    const compote = require('../src/index.js');
+    const packageJson = require(path.join(process.cwd(), 'package.json'));
+    const options = packageJson.compote.build;
+    const { dependencies } = packageJson;
+
+    const optionsOverride = {
+      entry: options.entry && Object.assign(
+        {},
+        Object.keys(options.entry).reduce((entry, key) => {
+          entry[key] = typeof options.entry[key] === 'string' ? path.join(process.cwd(), options.entry[key]) : options.entry[key];
+          return entry;
+        }, {}),
+        {
+          vendor: options.entry.vendor === true && dependencies ? compote.vendor(dependencies) : options.entry.vendor
+        }
+      ),
+      target: typeof options.target === 'string' ? path.join(process.cwd(), options.target) : options.target
+    };
+
+    const config = compote.config(Object.assign({}, options, optionsOverride));
+    const compiler = webpack(config({ production: true }));
+    compiler.run(() => {});
     break;
   case 'start':
     throw new Error(`Not implemented!`);
@@ -16,9 +39,4 @@ switch (script) {
     break;
   default:
     throw new Error(`Unknown compote script: ${script}`);
-}
-
-function handleOutput(error, stdout, stderr) {
-  console.log(stdout);
-  console.log(stderr);
 }

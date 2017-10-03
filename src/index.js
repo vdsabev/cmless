@@ -1,6 +1,6 @@
-const $ = module.exports = {};
+const compote = module.exports = {};
 
-$.config = (options, dependencies) => {
+compote.config = (options) => {
   const path = require('path');
 
   const autoprefixer = require('autoprefixer');
@@ -17,12 +17,10 @@ $.config = (options, dependencies) => {
   return ({ production } = {}) => ({
     devtool: production ? false : 'inline-source-map',
     context: process.cwd(),
-    entry: options.entry ? Object.assign({}, options.entry, {
-      vendor: options.entry.vendor === true && dependencies ? $.vendor(dependencies) : options.entry.vendor
-    }) : undefined,
+    entry: options.entry,
     output: {
       publicPath: '/',
-      path: path.resolve(options.target),
+      path: options.target,
       filename: '[name].[chunkhash].js',
       sourceMapFilename: '[name].js.map'
     },
@@ -51,7 +49,7 @@ $.config = (options, dependencies) => {
       ]
     },
     plugins: [
-      production ? new CleanWebpackPlugin([`${options.target}/*`]) : new NullPlugin(),
+      production ? new CleanWebpackPlugin([`${options.target}/*`], { root: process.cwd() }) : new NullPlugin(),
 
       options && options.entry && options.entry.vendor ? new webpack.optimize.CommonsChunkPlugin('vendor') : new NullPlugin(),
       new webpack.optimize.ModuleConcatenationPlugin(),
@@ -76,4 +74,4 @@ $.config = (options, dependencies) => {
   });
 };
 
-$.vendor = (dependencies) => Object.keys(dependencies).filter((dependency) => dependency.indexOf('@types/') === -1);
+compote.vendor = (dependencies) => Object.keys(dependencies).filter((dependency) => dependency.indexOf('@types/') === -1);
