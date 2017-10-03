@@ -4,7 +4,7 @@
   "license": "MIT",
   "main": "index.js",
   "bin": {
-    "compote": "bin/index.js"
+    "compote": "./bin/compote"
   },
   "scripts": {
     "build": "webpack -p --env.production --display-modules",

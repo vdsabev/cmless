@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+'use strict';
+
+const { exec } = require('child_process');
+
+const script = process.argv[2];
+switch (script) {
+  case 'build':
+    exec(`node ${__dirname}/../node_modules/webpack/bin/webpack --config ${__dirname}/../config.js -p --env.production --display-modules --display-error-details`, handleOutput);
+    break;
+  case 'start':
+    throw new Error(`Not implemented!`);
+    break;
+  case 'profile':
+    throw new Error(`Not implemented!`);
+    break;
+  default:
+    throw new Error(`Unknown compote script: ${script}`);
+}
+
+function handleOutput(error, stdout, stderr) {
+  console.log(stdout);
+  console.log(stderr);
+}

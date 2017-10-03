@@ -1,6 +1,9 @@
-exports.config = (options) => {
-  const autoprefixer = require('autoprefixer');
+const $ = module.exports = {};
+
+$.config = (options, dependencies) => {
   const path = require('path');
+
+  const autoprefixer = require('autoprefixer');
   const env = require('var');
   const { define } = require('var/webpack');
 
@@ -14,10 +17,12 @@ exports.config = (options) => {
   return ({ production } = {}) => ({
     devtool: production ? false : 'inline-source-map',
     context: process.cwd(),
-    entry: options.entry,
+    entry: options.entry ? Object.assign({}, options.entry, {
+      vendor: options.entry.vendor === true && dependencies ? $.vendor(dependencies) : options.entry.vendor
+    }) : undefined,
     output: {
       publicPath: '/',
-      path: path.resolve(options.build),
+      path: path.resolve(options.target),
       filename: '[name].[chunkhash].js',
       sourceMapFilename: '[name].js.map'
     },
@@ -46,7 +51,7 @@ exports.config = (options) => {
       ]
     },
     plugins: [
-      production ? new CleanWebpackPlugin([`${options.build}/*`]) : new NullPlugin(),
+      production ? new CleanWebpackPlugin([`${options.target}/*`]) : new NullPlugin(),
 
       options && options.entry && options.entry.vendor ? new webpack.optimize.CommonsChunkPlugin('vendor') : new NullPlugin(),
       new webpack.optimize.ModuleConcatenationPlugin(),
@@ -63,12 +68,12 @@ exports.config = (options) => {
       new ExtractTextPlugin('styles.[contenthash].css'),
       new HtmlWebpackPlugin({ template: options.template }),
       new WorkboxPlugin({
-        globDirectory: options.build,
+        globDirectory: options.target,
         globPatterns: ['**/*.{html,js,css}'],
-        swDest: path.resolve(options.build, 'service-worker.js')
+        swDest: path.resolve(options.target, 'service-worker.js')
       })
     ]
   });
 };
 
-exports.vendor = (dependencies) => Object.keys(dependencies).filter((dependency) => dependency.indexOf('@types/') === -1);
+$.vendor = (dependencies) => Object.keys(dependencies).filter((dependency) => dependency.indexOf('@types/') === -1);
