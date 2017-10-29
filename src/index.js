@@ -1,9 +1,8 @@
-const compote = module.exports = {};
+const cmless = module.exports = {};
 
-compote.config = (options) => {
+cmless.config = (options) => {
   const path = require('path');
-
-  const autoprefixer = require('autoprefixer');
+  const cssNext = require('postcss-cssnext');
   const env = require('var');
   const { define } = require('var/webpack');
 
@@ -12,66 +11,113 @@ compote.config = (options) => {
   const ExtractTextPlugin = require('extract-text-webpack-plugin');
   const HtmlWebpackPlugin = require('html-webpack-plugin');
   const NullPlugin = require('webpack-null-plugin');
+  const PwaManifestPlugin = require('webpack-pwa-manifest');
   const WorkboxPlugin = require('workbox-webpack-plugin');
+
+  const BUILD_DIR = './build';
+  const APP_DIR = './src';
+  const packageJson = require('./package.json');
+  const style = require(`./${APP_DIR}/style`);
+  const vendor = Object.keys(packageJson.dependencies).filter((dependency) => dependency.indexOf('@types/') === -1);
+
+  const javascriptRule = {
+    test: /\.jsx?$/,
+    loader: 'babel-loader',
+    exclude: [/node_modules/],
+    query: {
+      presets: packageJson.babel.presets
+    }
+  };
+
+  const cssRule = {
+    test: /\.css$/,
+    use: ExtractTextPlugin.extract({
+      fallback: 'style-loader',
+      use: [
+        'css-loader',
+        {
+          loader: 'postcss-loader',
+          options: {
+            plugins: [
+              cssNext({
+                features: {
+                  autoprefixer: { browsers: ['last 3 versions', '> 1%'] },
+                  customProperties: { variables: style.css }
+                }
+              })
+            ]
+          }
+        }
+      ]
+    })
+  };
+
+  const assetRule = {
+    test: /\.(jpe?g|ico|gif|png|svg|wav|mp3|json)$/,
+    loader: 'file-loader?name=[name].[ext]'
+  };
+
+  const pwa = {
+    short_name: 'Civvy',
+    name: 'Civvy',
+    background_color: style.css.neutralLighter,
+    theme_color: style.css.primary,
+    start_url: '/',
+    display: 'standalone',
+    orientation: 'portrait',
+    icons: [{
+      src: path.resolve(APP_DIR, 'logo.png'),
+      sizes: [48, 96, 128, 192, 256, 384, 512]
+    }]
+  };
 
   return ({ production } = {}) => ({
     devtool: production ? false : 'inline-source-map',
     context: process.cwd(),
-    entry: options.entry,
+    entry: {
+      index: `./${APP_DIR}/index.js`,
+      vendor
+    },
     output: {
       publicPath: '/',
-      path: options.target,
+      path: path.resolve(BUILD_DIR),
       filename: '[name].[chunkhash].js',
       sourceMapFilename: '[name].js.map'
     },
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.scss']
+      extensions: ['.js', '.jsx', '.css']
     },
     module: {
       rules: [
-        // Scripts
-        { test: /\.tsx?$/, loader: 'ts-loader' },
-
-        // Styles
-        {
-          test: /\.s?css$/,
-          use: ExtractTextPlugin.extract({
-            fallback: 'style-loader',
-            use: ['css-loader', 'postcss-loader', 'sass-loader']
-          })
-        },
-
-        // Assets
-        {
-          test: /\.(jpe?g|ico|gif|png|svg|wav|mp3|json)$/,
-          loader: 'file-loader?name=[name].[ext]'
-        }
+        javascriptRule,
+        cssRule,
+        assetRule
       ]
     },
     plugins: [
-      production ? new CleanWebpackPlugin([`${options.target}/*`], { root: process.cwd() }) : new NullPlugin(),
+      production ? new CleanWebpackPlugin([`${BUILD_DIR}/*`]) : new NullPlugin(),
 
-      options && options.entry && options.entry.vendor ? new webpack.optimize.CommonsChunkPlugin('vendor') : new NullPlugin(),
+      new webpack.optimize.CommonsChunkPlugin('vendor'),
       new webpack.optimize.ModuleConcatenationPlugin(),
-      new webpack.DefinePlugin(define(env, (envJsonKeys) => ['NODE_ENV', ...envJsonKeys])),
-      new webpack.LoaderOptionsPlugin({
-        options: {
-          postcss: () => [
-            autoprefixer({ browsers: ['last 3 versions', '> 1%'] })
-          ]
-        }
-      }),
+      new webpack.DefinePlugin(Object.assign(define(env), {
+        'process.env.NODE_ENV': JSON.stringify(production ? 'production' : 'development')
+      })),
 
       // `contenthash` is specific to this plugin, we would typically use `chunkhash`
-      new ExtractTextPlugin('styles.[contenthash].css'),
-      new HtmlWebpackPlugin({ template: options.template }),
+      new ExtractTextPlugin('style.[contenthash].css'),
+      new HtmlWebpackPlugin({ template: `./${APP_DIR}/index.ejs`, style }),
+      new PwaManifestPlugin({
+        // Custom options
+        publicPath: undefined,
+        ...pwa
+      }),
       new WorkboxPlugin({
-        globDirectory: options.target,
+        globDirectory: BUILD_DIR,
         globPatterns: ['**/*.{html,js,css}'],
-        swDest: path.resolve(options.target, 'service-worker.js')
+        swDest: path.resolve(BUILD_DIR, 'service-worker.js')
       })
     ]
   });
 };
 
-compote.vendor = (dependencies) => Object.keys(dependencies).filter((dependency) => dependency.indexOf('@types/') === -1);
+cmless.vendor = (dependencies) => Object.keys(dependencies).filter((dependency) => dependency.indexOf('@types/') === -1);
