@@ -42,15 +42,13 @@
         "UNREGISTER_SERVICE_WORKERS": true
       }
     },
-    "build": {
-      "bundles": {
-        "app": "./src/app.ts",
-        "vendor": true
-      },
-      "template": "./src/index.ejs",
-      "dir": "./build",
-      "serviceWorker": "./build/service-worker.js"
+    "build": "./build",
+    "bundles": {
+      "app": "./src/app.ts",
+      "vendor": true
     },
+    "template": "./src/index.ejs",
+    "serviceWorker": "./build/service-worker.js",
     "css": {
       "variables": {
         "animationDuration": "0.3s",
