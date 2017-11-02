@@ -7,14 +7,11 @@
     "cmless": "./bin/cmless"
   },
   "scripts": {
-    "build": "cmless build",
-    "start": "cmless start",
-    "profile": "cmless profile",
-
-    "deprecated:build": "webpack -p --env.production --display-modules",
-    "deprecated:profile:build": "webpack --profile --json > ./build/profile.json",
-    "deprecated:profile:open": "webpack-bundle-analyzer ./build/profile.json",
-    "deprecated:start": "webpack-dev-server --port 3000 --history-api-fallback"
+    "build": "webpack -p --env.production --display-modules",
+    "profile": "webpack --profile --json > ./build/profile.json && webpack-bundle-analyzer ./build/profile.json",
+    "start": "webpack-dev-server --port 3000 --history-api-fallback",
+    "test": "nodeunit ./src/build.test.js",
+    "test:watch": "onchange \"src/*.js\" -- npm test"
   },
   "dependencies": {
     "babel-core": "6.26.0",
@@ -40,8 +37,10 @@
   },
   "cmless": {
     "//": "Example cmless configuration - use in your own project's package.json file",
-    "process.env": {
-      "UNREGISTER_SERVICE_WORKERS": true
+    "define": {
+      "process.env": {
+        "UNREGISTER_SERVICE_WORKERS": true
+      }
     },
     "build": {
       "bundles": {

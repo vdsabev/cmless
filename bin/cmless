@@ -5,34 +5,12 @@
 const script = process.argv[2];
 switch (script) {
   case 'build':
-    const path = require('path');
-    const webpack = require('webpack');
-
-    const cmless = require('../src/index.js');
-    const packageJson = require(path.join(process.cwd(), 'package.json'));
-    const options = packageJson.cmless.build;
-    const { dependencies } = packageJson;
-
-    const optionsOverride = {
-      entry: options.entry && Object.assign(
-        {},
-        Object.keys(options.entry).reduce((entry, key) => {
-          entry[key] = typeof options.entry[key] === 'string' ? path.join(process.cwd(), options.entry[key]) : options.entry[key];
-          return entry;
-        }, {}),
-        {
-          vendor: options.entry.vendor === true && dependencies ? cmless.vendor(dependencies) : options.entry.vendor
-        }
-      ),
-      target: typeof options.target === 'string' ? path.join(process.cwd(), options.target) : options.target
-    };
-
-    const config = cmless.config(Object.assign({}, options, optionsOverride));
-    const compiler = webpack(config({ production: true }));
-    compiler.run(() => {});
+    const build = require('../src/build');
+    build({ production: true });
     break;
   case 'start':
-    throw new Error(`Not implemented!`);
+    const start = require('../src/start');
+    start({ port: 3000 });
     break;
   case 'profile':
     throw new Error(`Not implemented!`);
