@@ -37,44 +37,24 @@
   },
   "cmless": {
     "//": "Example cmless configuration - use in your own project's package.json file",
-    "define": {
-      "process.env": {
-        "UNREGISTER_SERVICE_WORKERS": true
-      }
-    },
-    "build": "./build",
-    "bundles": {
-      "app": "./src/app.ts",
-      "vendor": true
-    },
-    "template": "./src/index.ejs",
-    "serviceWorker": "./build/service-worker.js",
-    "css": {
+    "output": "build",
+    "script": "src/app.ts",
+    "template": "src/index.ejs",
+    "style": {
       "variables": {
-        "animationDuration": "0.3s",
-        "primary": "blue",
-        "neutral": "grey"
+        "a": 1
       }
     },
-    "router": {
-      "ignoreTrailingSlash": true,
-      "routes": [
-        { "key": "Home",        "path": "/",              "title": "My App"                        },
-        { "key": "About",       "path": "/about",         "title": "{{Home}} - About"              },
-        { "key": "UserList",    "path": "/users",         "title": "{{Home}} - Users"              },
-        { "key": "UserDetails", "path": "/users/:userId", "title": "{{Home}} - {{Home.user.name}}" },
-        { "key": "NotFound",    "path": "/:url",          "title": "{{Home}} - Not Found"          }
-      ]
-    },
-    "pwa": {
-      "manifest": {
-        "name": "my-app"
-      }
-    },
-    "deploy": {
-      "firebase": {
-        "projectId": "my-app-firebase-project-id"
-      }
+    "assets": [
+      "jpeg",
+      "jpg",
+      "ico",
+      "gif",
+      "png",
+      "svg",
+      "wav",
+      "mp3",
+      "json"
+    ]
     }
-  }
 }

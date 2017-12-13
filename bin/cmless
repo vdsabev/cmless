@@ -13,8 +13,8 @@ switch (script) {
     start({ port: 3000 });
     break;
   case 'profile':
-    throw new Error(`Not implemented!`);
+    console.error(`Not implemented!`);
     break;
   default:
-    throw new Error(`Unknown cmless script: ${script}`);
+    console.error(`Unknown cmless command: ${script}`);
 }
