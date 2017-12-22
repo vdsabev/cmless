@@ -7,7 +7,7 @@ module.exports = (options) => {
     output: 'build',
     script: 'src/index.js',
     template: 'src/index.ejs',
-    style: {},
+    style: 'src/style.js',
     assets: ['jpeg', 'jpg', 'ico', 'gif', 'png', 'svg', 'wav', 'mp3', 'json']
   }, packageJson.cmless);
 
@@ -19,6 +19,19 @@ module.exports = (options) => {
 
   const plugins = [];
 
+  // TODO: CleanWebpackPlugin
+  // TODO: ModuleConcatenationPlugin
+  // TODO: DefinePlugin
+
+  if (cmless.style) {
+    const ExtractTextPlugin = require('extract-text-webpack-plugin');
+    plugins.push(new ExtractTextPlugin('style.[contenthash].css'));
+
+    if (typeof cmless.style === 'string') {
+      cmless.style = require(path.join(process.cwd(), cmless.style));
+    }
+  }
+
   if (cmless.template) {
     const HtmlWebpackPlugin = require('html-webpack-plugin');
     plugins.push(
@@ -29,10 +42,10 @@ module.exports = (options) => {
     );
   }
 
-  if (cmless.style) {
-    const ExtractTextPlugin = require('extract-text-webpack-plugin');
-    plugins.push(new ExtractTextPlugin('style.[contenthash].css'));
-  }
+  // TODO: PwaManifestPlugin
+  // TODO: WorkboxPlugin
+
+  // TODO: Support TypeScript
 
   return Object.assign(webpackConfig, {
     devtool: options.production ? false : 'inline-source-map',
@@ -52,7 +65,7 @@ module.exports = (options) => {
     module: {
       rules: [
         cmless.script ? getScriptRule(packageJson.babel.presets) : null,
-        cmless.style ? getStyleRule(cmless.style.variables) : null,
+        cmless.style ? getStyleRule(cmless.style.css) : null,
         cmless.assets ? getAssetRule(cmless.assets) : null
       ]
     },

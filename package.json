@@ -38,13 +38,9 @@
   "cmless": {
     "//": "Example cmless configuration - use in your own project's package.json file",
     "output": "build",
-    "script": "src/app.ts",
+    "script": "src/app.js",
     "template": "src/index.ejs",
-    "style": {
-      "variables": {
-        "a": 1
-      }
-    },
+    "style": "src/style.js",
     "assets": [
       "jpeg",
       "jpg",
@@ -56,5 +52,5 @@
       "mp3",
       "json"
     ]
-    }
+  }
 }
