@@ -7,14 +7,11 @@
     "cmless": "./bin/cmless"
   },
   "scripts": {
-    "build": "cmless build",
-    "start": "cmless start",
-    "profile": "cmless profile",
-
-    "deprecated:build": "webpack -p --env.production --display-modules",
-    "deprecated:profile:build": "webpack --profile --json > ./build/profile.json",
-    "deprecated:profile:open": "webpack-bundle-analyzer ./build/profile.json",
-    "deprecated:start": "webpack-dev-server --port 3000 --history-api-fallback"
+    "build": "webpack -p --env.production --display-modules",
+    "profile": "webpack --profile --json > ./build/profile.json && webpack-bundle-analyzer ./build/profile.json",
+    "start": "webpack-dev-server --port 3000 --history-api-fallback",
+    "test": "nodeunit ./src/build.test.js",
+    "test:watch": "onchange \"src/*.js\" -- npm test"
   },
   "dependencies": {
     "babel-core": "6.26.0",
@@ -40,44 +37,20 @@
   },
   "cmless": {
     "//": "Example cmless configuration - use in your own project's package.json file",
-    "process.env": {
-      "UNREGISTER_SERVICE_WORKERS": true
-    },
-    "build": {
-      "bundles": {
-        "app": "./src/app.ts",
-        "vendor": true
-      },
-      "template": "./src/index.ejs",
-      "dir": "./build",
-      "serviceWorker": "./build/service-worker.js"
-    },
-    "css": {
-      "variables": {
-        "animationDuration": "0.3s",
-        "primary": "blue",
-        "neutral": "grey"
-      }
-    },
-    "router": {
-      "ignoreTrailingSlash": true,
-      "routes": [
-        { "key": "Home",        "path": "/",              "title": "My App"                        },
-        { "key": "About",       "path": "/about",         "title": "{{Home}} - About"              },
-        { "key": "UserList",    "path": "/users",         "title": "{{Home}} - Users"              },
-        { "key": "UserDetails", "path": "/users/:userId", "title": "{{Home}} - {{Home.user.name}}" },
-        { "key": "NotFound",    "path": "/:url",          "title": "{{Home}} - Not Found"          }
-      ]
-    },
-    "pwa": {
-      "manifest": {
-        "name": "my-app"
-      }
-    },
-    "deploy": {
-      "firebase": {
-        "projectId": "my-app-firebase-project-id"
-      }
-    }
+    "output": "build",
+    "script": "src/app.js",
+    "template": "src/index.ejs",
+    "style": "src/style.js",
+    "assets": [
+      "jpeg",
+      "jpg",
+      "ico",
+      "gif",
+      "png",
+      "svg",
+      "wav",
+      "mp3",
+      "json"
+    ]
   }
 }
