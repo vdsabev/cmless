@@ -40,13 +40,12 @@ module.exports = (options) => {
 
   const plugins = [];
 
-  // TODO: Fix skipping because folder "is outside of the project root"
+  // https://github.com/johnagan/clean-webpack-plugin/issues/10
   if (cmless.clean && options.production) {
     const CleanWebpackPlugin = require('clean-webpack-plugin');
-    plugins.push(new CleanWebpackPlugin(cmless.clean.map((glob) => path.join(process.cwd(), glob))));
+    plugins.push(new CleanWebpackPlugin(cmless.clean, { root: process.cwd() }));
   }
 
-  // TODO: Check if only useful in production
   if (options.production) {
     const webpack = require('webpack');
     plugins.push(new webpack.optimize.ModuleConcatenationPlugin());
