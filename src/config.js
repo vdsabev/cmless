@@ -1,45 +1,72 @@
 module.exports = (options) => {
   const path = require('path');
-
   const packageJson = require(path.join(process.cwd(), 'package.json'));
 
   const cmless = Object.assign({
     output: 'build',
+    clean: ['build/*'],
     script: 'src/index.js',
     template: 'src/index.ejs',
     style: 'src/style.js',
-    assets: ['jpeg', 'jpg', 'ico', 'gif', 'png', 'svg', 'wav', 'mp3', 'json']
+    assets: ['jpeg', 'jpg', 'ico', 'gif', 'png', 'svg', 'wav', 'mp3', 'json'],
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(options.production ? 'production' : 'development')
+    }
   }, packageJson.cmless);
 
-  let webpackConfig = {};
+  const webpackConfig = {};
   if (cmless.extends) {
     const cmlessExtends = require(path.join(process.cwd(), cmless.extends));
-    webpackConfig = cmlessExtends(options);
+    Object.assign(webpackConfig, cmlessExtends(options));
+  }
+
+  if (cmless.style && typeof cmless.style === 'string') {
+    cmless.style = require(path.join(process.cwd(), cmless.style));
+  }
+
+  const rules = [];
+  if (cmless.script) {
+    const { getScriptRule } = require('./plugins/script');
+    rules.push(getScriptRule(packageJson.babel.presets));
+  }
+  if (cmless.style) {
+    const { getStyleRule } = require('./plugins/style');
+    rules.push(getStyleRule(cmless.style.css));
+  }
+  if (cmless.assets) {
+    const { getAssetRule } = require('./plugins/asset');
+    rules.push(getAssetRule(cmless.assets));
   }
 
   const plugins = [];
 
-  // TODO: CleanWebpackPlugin
-  // TODO: ModuleConcatenationPlugin
-  // TODO: DefinePlugin
+  // TODO: Fix skipping because folder "is outside of the project root"
+  if (cmless.clean && options.production) {
+    const CleanWebpackPlugin = require('clean-webpack-plugin');
+    plugins.push(new CleanWebpackPlugin(cmless.clean.map((glob) => path.join(process.cwd(), glob))));
+  }
+
+  // TODO: Check if only useful in production
+  if (options.production) {
+    const webpack = require('webpack');
+    plugins.push(new webpack.optimize.ModuleConcatenationPlugin());
+  }
+
+  if (cmless.define) {
+    const env = require('var');
+    const { define } = require('var/webpack');
+    const webpack = require('webpack');
+    plugins.push(new webpack.DefinePlugin(Object.assign(define(env), cmless.define)));
+  }
 
   if (cmless.style) {
     const ExtractTextPlugin = require('extract-text-webpack-plugin');
     plugins.push(new ExtractTextPlugin('style.[contenthash].css'));
-
-    if (typeof cmless.style === 'string') {
-      cmless.style = require(path.join(process.cwd(), cmless.style));
-    }
   }
 
   if (cmless.template) {
     const HtmlWebpackPlugin = require('html-webpack-plugin');
-    plugins.push(
-      new HtmlWebpackPlugin({
-        template: cmless.template,
-        style: cmless.style
-      })
-    );
+    plugins.push(new HtmlWebpackPlugin({ template: cmless.template, style: cmless.style }));
   }
 
   // TODO: PwaManifestPlugin
@@ -62,55 +89,7 @@ module.exports = (options) => {
     resolve: {
       extensions: ['.js', '.jsx', '.css']
     },
-    module: {
-      rules: [
-        cmless.script ? getScriptRule(packageJson.babel.presets) : null,
-        cmless.style ? getStyleRule(cmless.style.css) : null,
-        cmless.assets ? getAssetRule(cmless.assets) : null
-      ]
-    },
+    module: { rules },
     plugins
   });
 };
-
-const getScriptRule = (presets) => ({
-  test: /\.jsx?$/,
-  loader: 'babel-loader',
-  exclude: [/node_modules/],
-  query: { presets }
-});
-
-const getStyleRule = (variables) => {
-  const ExtractTextPlugin = require('extract-text-webpack-plugin');
-  const cssNext = require('postcss-cssnext');
-
-  return {
-    test: /\.css$/,
-    use: ExtractTextPlugin.extract({
-      fallback: 'style-loader',
-      use: [
-        'css-loader',
-        {
-          loader: 'postcss-loader',
-          options: {
-            plugins: [
-              cssNext({
-                features: {
-                  autoprefixer: { browsers: ['last 3 versions', '> 1%'] },
-                  customProperties: { variables }
-                }
-              })
-            ]
-          }
-        }
-      ]
-    })
-  }
-};
-
-const getAssetRule = (assets) => ({
-  // TODO: Use assets parameter
-  // test: new RegExp(`/\\.(${assets.join('|')})$`),
-  test: /\.(jpe?g|ico|gif|png|svg|wav|mp3|json)$/,
-  loader: 'file-loader?name=[name].[ext]'
-});
