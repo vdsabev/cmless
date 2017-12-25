@@ -11,6 +11,11 @@ module.exports = (options) => {
     assets: ['jpeg', 'jpg', 'ico', 'gif', 'png', 'svg', 'wav', 'mp3', 'json'],
     define: {
       'process.env.NODE_ENV': JSON.stringify(options.production ? 'production' : 'development')
+    },
+    sw: {
+      globDirectory: 'build',
+      globPatterns: ['**/*.{html,js,css}'],
+      swDest: 'build/service-worker.js'
     }
   }, packageJson.cmless);
 
@@ -22,6 +27,10 @@ module.exports = (options) => {
 
   if (cmless.style && typeof cmless.style === 'string') {
     cmless.style = require(path.join(process.cwd(), cmless.style));
+  }
+
+  if (cmless.pwa && typeof cmless.pwa === 'string') {
+    cmless.pwa = require(path.join(process.cwd(), cmless.pwa));
   }
 
   const rules = [];
@@ -68,8 +77,30 @@ module.exports = (options) => {
     plugins.push(new HtmlWebpackPlugin({ template: cmless.template, style: cmless.style }));
   }
 
-  // TODO: PwaManifestPlugin
-  // TODO: WorkboxPlugin
+  if (cmless.pwa) {
+    const PwaManifestPlugin = require('webpack-pwa-manifest');
+    plugins.push(new PwaManifestPlugin(Object.assign({
+      start_url: '/',
+      display: 'standalone',
+      orientation: 'portrait',
+      icons: [{
+        src: 'src/avatar.png',
+        sizes: [48, 96, 128, 192, 256, 384, 512]
+      }],
+
+      // Custom options
+      publicPath: undefined
+    }, cmless.pwa)));
+  }
+
+  if (cmless.sw) {
+    const WorkboxPlugin = require('workbox-webpack-plugin');
+    plugins.push(new WorkboxPlugin({
+      globDirectory: 'build',
+      globPatterns: ['**/*.{html,js,css}'],
+      swDest: 'build/service-worker.js'
+    }, cmless.sw));
+  }
 
   // TODO: Support TypeScript
 
