@@ -10,7 +10,7 @@ switch (script) {
     break;
   case 'start':
     const start = require('../src/start');
-    start({ port: 3000 });
+    start();
     break;
   case 'profile':
     console.error(`Not implemented!`);

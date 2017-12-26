@@ -1,4 +1,4 @@
-module.exports = (options) => {
+module.exports = (options = {}) => {
   const path = require('path');
   const packageJson = require(path.join(process.cwd(), 'package.json'));
 
@@ -12,7 +12,8 @@ module.exports = (options) => {
     define: {
       'process.env.NODE_ENV': JSON.stringify(options.production ? 'production' : 'development')
     },
-    sw: {
+    pwa: 'src/pwa.js',
+    'service-worker': {
       globDirectory: 'build',
       globPatterns: ['**/*.{html,js,css}'],
       swDest: 'build/service-worker.js'
@@ -93,13 +94,13 @@ module.exports = (options) => {
     }, cmless.pwa)));
   }
 
-  if (cmless.sw) {
+  if (cmless['service-worker']) {
     const WorkboxPlugin = require('workbox-webpack-plugin');
     plugins.push(new WorkboxPlugin({
       globDirectory: 'build',
       globPatterns: ['**/*.{html,js,css}'],
       swDest: 'build/service-worker.js'
-    }, cmless.sw));
+    }, cmless['service-worker']));
   }
 
   // TODO: Support TypeScript

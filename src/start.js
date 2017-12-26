@@ -1,4 +1,4 @@
-module.exports = (options) => {
+module.exports = (options = {}) => {
   const webpack = require('webpack');
   const config = require('./config');
   const cmless = config(options);
