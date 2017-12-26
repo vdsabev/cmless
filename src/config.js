@@ -59,6 +59,9 @@ module.exports = (options = {}) => {
   if (options.production) {
     const webpack = require('webpack');
     plugins.push(new webpack.optimize.ModuleConcatenationPlugin());
+
+    const UglifyJsPlugin  = require('uglifyjs-webpack-plugin');
+    plugins.push(new UglifyJsPlugin());
   }
 
   if (cmless.define) {
