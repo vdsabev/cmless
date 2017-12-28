@@ -36,8 +36,19 @@ module.exports = (options = {}) => {
 
   const rules = [];
   if (cmless.script) {
-    const { getScriptRule } = require('./plugins/script');
-    rules.push(getScriptRule(packageJson.babel.presets));
+    const { getScriptRule, getTypeScriptRule } = require('./plugins/script');
+    switch (path.extname(cmless.script)) {
+      case '.js':
+      case '.jsx':
+        rules.push(getScriptRule(packageJson.babel.presets));
+        break;
+      case '.ts':
+      case '.tsx':
+        rules.push(getTypeScriptRule());
+        break;
+      default:
+        throw new Error(`Unsupported script extension for ${cmless.script}, please use .js, .jsx, .ts, .tsx`);
+    }
   }
   if (cmless.style) {
     const { getStyleRule } = require('./plugins/style');
@@ -121,7 +132,7 @@ module.exports = (options = {}) => {
       sourceMapFilename: '[name].js.map'
     },
     resolve: {
-      extensions: ['.js', '.jsx', '.css']
+      extensions: ['.ts', '.tsx', '.js', '.jsx', '.css']
     },
     module: { rules },
     plugins

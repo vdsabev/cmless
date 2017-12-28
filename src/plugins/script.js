@@ -5,4 +5,10 @@ const getScriptRule = (presets) => ({
   query: { presets }
 });
 
+const getTypeScriptRule = () => ({
+  test: /\.tsx?$/,
+  loader: 'ts-loader'
+});
+
 exports.getScriptRule = getScriptRule;
+exports.getTypeScriptRule = getTypeScriptRule;

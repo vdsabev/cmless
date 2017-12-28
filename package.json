@@ -1,6 +1,6 @@
 {
   "name": "cmless",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "license": "MIT",
   "main": "./src/index.js",
   "bin": {
@@ -25,6 +25,7 @@
     "postcss-cssnext": "^3.0.2",
     "postcss-loader": "^2.0.8",
     "style-loader": "^0.19.0",
+    "ts-loader": "^3.2.0",
     "uglifyjs-webpack-plugin": "1.1.4",
     "var": "^0.3.2",
     "webpack": "^3.8.1",
