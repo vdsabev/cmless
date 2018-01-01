@@ -27,6 +27,11 @@ module.exports = (options = {}) => {
   }
 
   if (cmless.style && typeof cmless.style === 'string') {
+    if (path.extname(cmless.style) === '.ts') {
+      // TODO: Fix package version when this issue is fixed:
+      // https://github.com/theblacksmith/typescript-require/issues/48
+      require('typescript-require');
+    }
     cmless.style = require(path.join(process.cwd(), cmless.style));
   }
 
