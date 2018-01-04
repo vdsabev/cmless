@@ -104,7 +104,7 @@ module.exports = (options = {}) => {
       display: 'standalone',
       orientation: 'portrait',
       icons: [{
-        src: 'src/avatar.png',
+        src: 'src/logo.png',
         sizes: [48, 96, 128, 192, 256, 384, 512]
       }],
 
