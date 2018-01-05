@@ -1,48 +1,58 @@
 module.exports = (options = {}) => {
-  const path = require('path');
-  const packageJson = require(path.join(process.cwd(), 'package.json'));
+  const { join, extname } = require('path');
+  const packageJson = require(join(process.cwd(), 'package.json'));
 
-  const cmless = Object.assign({
-    output: 'build',
-    clean: ['build/*'],
-    script: 'src/index.js',
-    template: 'src/index.ejs',
-    style: 'src/style.js',
-    assets: ['jpeg', 'jpg', 'ico', 'gif', 'png', 'svg', 'wav', 'mp3', 'json'],
+  const input = getValueOrDefault(packageJson.cmless, 'input', '');
+  const output = getValueOrDefault(packageJson.cmless, 'output', 'build');
+
+  const cmless = {
+    template: join(input, 'index.html'),
+    script: join(input, 'index.js'),
+    style: join(input, 'style.js'),
+    pwa: join(input, 'pwa.js'),
     define: {
       'process.env.NODE_ENV': JSON.stringify(options.production ? 'production' : 'development')
     },
-    pwa: 'src/pwa.js',
-    'service-worker': {
-      globDirectory: 'build',
-      globPatterns: ['**/*.{html,js,css}'],
-      swDest: 'build/service-worker.js'
-    }
-  }, packageJson.cmless);
+    assets: ['jpeg', 'jpg', 'ico', 'gif', 'png', 'svg', 'wav', 'mp3', 'json'],
 
+    clean: output ? [join(output, '*')] : undefined,
+    serviceWorker: {
+      globDirectory: output,
+      globPatterns: ['**/*.{html,js,css}'],
+      swDest: join(output, 'service-worker.js')
+    }
+  };
+
+  // Merge options
+  Object.assign(cmless, packageJson.cmless, { input, output });
+
+  // Webpack config
   const webpackConfig = {};
   if (cmless.extends) {
-    const cmlessExtends = require(path.join(process.cwd(), cmless.extends));
+    const cmlessExtends = require(join(process.cwd(), cmless.extends));
     Object.assign(webpackConfig, cmlessExtends(options));
   }
 
   if (cmless.style && typeof cmless.style === 'string') {
-    if (path.extname(cmless.style) === '.ts') {
-      // TODO: Fix package version when this issue is fixed:
-      // https://github.com/theblacksmith/typescript-require/issues/48
-      require('typescript-require');
+    switch (extname(cmless.style)) {
+      case '.ts':
+      case '.tsx':
+        // TODO: Fix package version when this issue is fixed:
+        // https://github.com/theblacksmith/typescript-require/issues/48
+        require('typescript-require');
+        break;
     }
-    cmless.style = require(path.join(process.cwd(), cmless.style));
+    cmless.style = require(join(process.cwd(), cmless.style));
   }
 
   if (cmless.pwa && typeof cmless.pwa === 'string') {
-    cmless.pwa = require(path.join(process.cwd(), cmless.pwa));
+    cmless.pwa = require(join(process.cwd(), cmless.pwa));
   }
 
   const rules = [];
   if (cmless.script) {
     const { getScriptRule, getTypeScriptRule } = require('./plugins/script');
-    switch (path.extname(cmless.script)) {
+    switch (extname(cmless.script)) {
       case '.js':
       case '.jsx':
         rules.push(getScriptRule(packageJson.babel.presets));
@@ -104,7 +114,7 @@ module.exports = (options = {}) => {
       display: 'standalone',
       orientation: 'portrait',
       icons: [{
-        src: 'src/logo.png',
+        src: join(input, 'logo.png'),
         sizes: [48, 96, 128, 192, 256, 384, 512]
       }],
 
@@ -113,26 +123,20 @@ module.exports = (options = {}) => {
     }, cmless.pwa)));
   }
 
-  if (cmless['service-worker']) {
+  if (cmless.serviceWorker) {
     const WorkboxPlugin = require('workbox-webpack-plugin');
-    plugins.push(new WorkboxPlugin({
-      globDirectory: 'build',
-      globPatterns: ['**/*.{html,js,css}'],
-      swDest: 'build/service-worker.js'
-    }, cmless['service-worker']));
+    plugins.push(new WorkboxPlugin(cmless.serviceWorker));
   }
-
-  // TODO: Support TypeScript
 
   return Object.assign(webpackConfig, {
     devtool: options.production ? false : 'inline-source-map',
     context: process.cwd(),
     entry: {
-      index: path.join(process.cwd(), `${cmless.script}`),
+      index: join(process.cwd(), `${cmless.script}`),
     },
     output: {
       publicPath: '/',
-      path: path.join(process.cwd(), cmless.output),
+      path: join(process.cwd(), cmless.output),
       filename: '[name].[chunkhash].js',
       sourceMapFilename: '[name].js.map'
     },
@@ -143,3 +147,5 @@ module.exports = (options = {}) => {
     plugins
   });
 };
+
+const getValueOrDefault = (obj, key, defaultValue) => obj && obj[key] != null ? obj[key] : defaultValue;

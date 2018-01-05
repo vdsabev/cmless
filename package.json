@@ -1,6 +1,6 @@
 {
   "name": "cmless",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "license": "MIT",
   "main": "./src/index.js",
   "bin": {
@@ -36,14 +36,16 @@
     "workbox-webpack-plugin": "^2.1.0"
   },
   "cmless": {
-    "//": "Example cmless configuration - copy and customize in your own project's package.json file",
-    "output": "build",
-    "clean": [
-      "build/*"
-    ],
-    "script": "src/index.js",
-    "template": "src/index.ejs",
-    "style": "src/style.js",
+    "//": "Default cmless configuration - customize in your own project's package.json file",
+
+    "input": "",
+    "template": "index.html",
+    "script": "index.js",
+    "style": "style.js",
+    "pwa": "pwa.js",
+    "define": {
+      "process.env.NODE_ENV": "production"
+    },
     "assets": [
       "jpeg",
       "jpg",
@@ -55,11 +57,10 @@
       "mp3",
       "json"
     ],
-    "define": {
-      "process.env.NODE_ENV": "production"
-    },
-    "pwa": "src/pwa.js",
-    "service-worker": {
+
+    "output": "build",
+    "clean": ["build/*"],
+    "serviceWorker": {
       "globDirectory": "build",
       "globPatterns": [
         "**/*.{html,js,css}"
