@@ -137,7 +137,9 @@ module.exports = (options = {}) => {
     output: {
       publicPath: '/',
       path: join(process.cwd(), cmless.output),
-      filename: '[name].[chunkhash].js',
+      // Don't use [chunkhash] in development since this will increase compilation time
+      // https://github.com/webpack/webpack/issues/2393
+      filename: `[name].[${options.production ? 'chunkhash' : 'hash'}].js`,
       sourceMapFilename: '[name].js.map'
     },
     resolve: {

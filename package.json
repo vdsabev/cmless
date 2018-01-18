@@ -1,6 +1,6 @@
 {
   "name": "cmless",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "MIT",
   "main": "./src/index.js",
   "bin": {
@@ -37,7 +37,6 @@
   },
   "cmless": {
     "//": "Default cmless configuration - customize in your own project's package.json file",
-
     "input": "",
     "template": "index.html",
     "script": "index.js",
@@ -57,9 +56,10 @@
       "mp3",
       "json"
     ],
-
     "output": "build",
-    "clean": ["build/*"],
+    "clean": [
+      "build/*"
+    ],
     "serviceWorker": {
       "globDirectory": "build",
       "globPatterns": [
