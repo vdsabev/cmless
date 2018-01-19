@@ -11,7 +11,7 @@ module.exports = (options = {}) => {
     style: join(input, 'style.js'),
     pwa: join(input, 'pwa.js'),
     define: {
-      'process.env.NODE_ENV': JSON.stringify(options.production ? 'production' : 'development')
+      'process.env.NODE_ENV': JSON.stringify(options.production ? 'production' : 'development'),
     },
     assets: ['jpeg', 'jpg', 'ico', 'gif', 'png', 'svg', 'wav', 'mp3', 'json'],
 
@@ -19,8 +19,8 @@ module.exports = (options = {}) => {
     serviceWorker: {
       globDirectory: output,
       globPatterns: ['**/*.{html,js,css}'],
-      swDest: join(output, 'service-worker.js')
-    }
+      swDest: join(output, 'service-worker.js'),
+    },
   };
 
   // Merge options
@@ -86,7 +86,7 @@ module.exports = (options = {}) => {
     const webpack = require('webpack');
     plugins.push(new webpack.optimize.ModuleConcatenationPlugin());
 
-    const UglifyJsPlugin  = require('uglifyjs-webpack-plugin');
+    const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
     plugins.push(new UglifyJsPlugin());
   }
 
@@ -109,18 +109,27 @@ module.exports = (options = {}) => {
 
   if (cmless.pwa) {
     const PwaManifestPlugin = require('webpack-pwa-manifest');
-    plugins.push(new PwaManifestPlugin(Object.assign({
-      start_url: '/',
-      display: 'standalone',
-      orientation: 'portrait',
-      icons: [{
-        src: join(input, 'logo.png'),
-        sizes: [48, 96, 128, 192, 256, 384, 512]
-      }],
+    plugins.push(
+      new PwaManifestPlugin(
+        Object.assign(
+          {
+            start_url: '/',
+            display: 'standalone',
+            orientation: 'portrait',
+            icons: [
+              {
+                src: join(input, 'logo.png'),
+                sizes: [48, 96, 128, 192, 256, 384, 512],
+              },
+            ],
 
-      // Custom options
-      publicPath: undefined
-    }, cmless.pwa)));
+            // Custom options
+            publicPath: undefined,
+          },
+          cmless.pwa
+        )
+      )
+    );
   }
 
   if (cmless.serviceWorker) {
@@ -140,14 +149,14 @@ module.exports = (options = {}) => {
       // Don't use [chunkhash] in development since this will increase compilation time
       // https://github.com/webpack/webpack/issues/2393
       filename: `[name].[${options.production ? 'chunkhash' : 'hash'}].js`,
-      sourceMapFilename: '[name].js.map'
+      sourceMapFilename: '[name].js.map',
     },
     resolve: {
-      extensions: ['.ts', '.tsx', '.js', '.jsx', '.css']
+      extensions: ['.ts', '.tsx', '.js', '.jsx', '.css'],
     },
     module: { rules },
-    plugins
+    plugins,
   });
 };
 
-const getValueOrDefault = (obj, key, defaultValue) => obj && obj[key] != null ? obj[key] : defaultValue;
+const getValueOrDefault = (obj, key, defaultValue) => (obj && obj[key] != null ? obj[key] : defaultValue);

@@ -9,7 +9,8 @@
     "label-position": true,
     "max-line-length": false,
     "member-access": false,
-    "member-ordering": [true,
+    "member-ordering": [
+      true,
       "public-static-field",
       "protected-static-field",
       "private-static-field",
@@ -30,14 +31,7 @@
     ],
     "no-arg": true,
     "no-bitwise": true,
-    "no-console": [true,
-      "debug",
-      "info",
-      "log",
-      "time",
-      "timeEnd",
-      "trace"
-    ],
+    "no-console": [true, "debug", "info", "log", "time", "timeEnd", "trace"],
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-variable": true,
@@ -53,27 +47,31 @@
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "object-literal-sort-keys": false,
-    "one-line": [true,
-      "check-open-brace",
-      "check-whitespace"
-    ],
+    "one-line": [true, "check-open-brace", "check-whitespace"],
     "quotemark": [true, "single", "avoid-escape"],
     "radix": true,
     "semicolon": [true, "always"],
-    "trailing-comma": [true, {
-      "multiline": "never",
-      "singleline": "never"
-    }],
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "never",
+        "singleline": "never"
+      }
+    ],
     "triple-equals": [true, "allow-null-check"],
-    "typedef-whitespace": [true, {
-      "call-signature": "nospace",
-      "index-signature": "nospace",
-      "parameter": "nospace",
-      "property-declaration": "nospace",
-      "variable-declaration": "nospace"
-    }],
+    "typedef-whitespace": [
+      true,
+      {
+        "call-signature": "nospace",
+        "index-signature": "nospace",
+        "parameter": "nospace",
+        "property-declaration": "nospace",
+        "variable-declaration": "nospace"
+      }
+    ],
     "variable-name": [true, "ban-keywords"],
-    "whitespace": [true,
+    "whitespace": [
+      true,
       "check-branch",
       "check-decl",
       "check-operator",
