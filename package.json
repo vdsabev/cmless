@@ -46,12 +46,26 @@
     "define": {
       "process.env.NODE_ENV": "production"
     },
-    "assets": ["jpeg", "jpg", "ico", "gif", "png", "svg", "wav", "mp3", "json"],
+    "assets": [
+      "jpeg",
+      "jpg",
+      "ico",
+      "gif",
+      "png",
+      "svg",
+      "wav",
+      "mp3",
+      "json"
+    ],
     "output": "build",
-    "clean": ["build/*"],
+    "clean": [
+      "build/*"
+    ],
     "serviceWorker": {
       "globDirectory": "build",
-      "globPatterns": ["**/*.{html,js,css}"],
+      "globPatterns": [
+        "**/*.{html,js,css}"
+      ],
       "swDest": "build/service-worker.js"
     }
   }

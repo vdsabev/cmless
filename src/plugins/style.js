@@ -11,10 +11,6 @@ const getStyleRule = (variables) => {
         {
           loader: 'postcss-loader',
           options: {
-            // TODO: Allow extending / overriding
-            config: {
-              path: '../../postcss.config.js',
-            },
             plugins: [
               cssNext({
                 features: {
