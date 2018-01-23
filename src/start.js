@@ -1,21 +1,23 @@
 module.exports = (options = {}) => {
-  const webpack = require('webpack');
-  const config = require('./config');
-  const cmless = config(options);
-  const port = cmless.port != null ? cmless.port : 3000;
-
   const WebpackDevServer = require('webpack-dev-server');
+  const config = require('./config');
+  const webpackConfig = config(options);
+
+  const { join } = require('path');
+  const { cmless } = require(join(process.cwd(), 'package.json'));
   const devServerOptions = {
     historyApiFallback: true,
     hot: false,
     inline: true,
     host: 'localhost',
-    port,
+    port: cmless.port || 3000,
     stats: { colors: true },
   };
 
-  WebpackDevServer.addDevServerEntrypoints(cmless, devServerOptions);
-  const compiler = webpack(cmless);
+  WebpackDevServer.addDevServerEntrypoints(webpackConfig, devServerOptions);
+
+  const webpack = require('webpack');
+  const compiler = webpack(webpackConfig);
   const server = new WebpackDevServer(compiler, devServerOptions);
 
   server.listen(devServerOptions.port, devServerOptions.host, (error) => {
