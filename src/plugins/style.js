@@ -15,15 +15,15 @@ const getStyleRule = (variables) => {
               cssNext({
                 features: {
                   autoprefixer: { browsers: ['last 3 versions', '> 1%'] },
-                  customProperties: { variables }
-                }
-              })
-            ]
-          }
-        }
-      ]
-    })
-  }
+                  customProperties: { variables },
+                },
+              }),
+            ],
+          },
+        },
+      ],
+    }),
+  };
 };
 
 exports.getStyleRule = getStyleRule;

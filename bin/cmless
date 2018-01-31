@@ -15,6 +15,9 @@ switch (script) {
   case 'profile':
     console.error(`Not implemented!`);
     break;
+  case 'format':
+    console.error(`Not implemented!`);
+    break;
   default:
     console.error(`Unknown cmless command: ${script}`);
 }

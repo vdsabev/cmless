@@ -2,12 +2,12 @@ const getScriptRule = (presets) => ({
   test: /\.jsx?$/,
   loader: 'babel-loader',
   exclude: [/node_modules/],
-  query: { presets }
+  query: { presets },
 });
 
 const getTypeScriptRule = () => ({
   test: /\.tsx?$/,
-  loader: 'ts-loader'
+  loader: 'ts-loader',
 });
 
 exports.getScriptRule = getScriptRule;
