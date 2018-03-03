@@ -19,19 +19,10 @@
       true,
       {
         "order": [
-          "public-static-field",
-          "protected-static-field",
-          "private-static-field",
-          "public-static-method",
-          "protected-static-method",
-          "private-static-method",
-          "public-instance-field",
-          "protected-instance-field",
-          "private-instance-field",
+          "static-field",
+          "instance-field",
           "constructor",
-          "public-instance-method",
-          "protected-instance-method",
-          "private-instance-method"
+          "instance-method"
         ]
       }
     ],
@@ -79,7 +70,7 @@
     "trailing-comma": [
       true,
       {
-        "multiline": "never",
+        "multiline": "always",
         "singleline": "never"
       }
     ],
