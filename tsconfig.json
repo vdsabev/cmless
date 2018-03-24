@@ -10,6 +10,7 @@
     "suppressImplicitAnyIndexErrors": false,
 
     "baseUrl": "src",
+    "importHelpers": true,
     "lib": [
       "dom",
       "es5",

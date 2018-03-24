@@ -1,8 +1,8 @@
-const getScriptRule = (presets) => ({
+const getScriptRule = (/*presets*/) => ({
   test: /\.jsx?$/,
   loader: 'babel-loader',
   exclude: [/node_modules/],
-  query: { presets },
+  // query: { presets },
 });
 
 const getTypeScriptRule = () => ({
