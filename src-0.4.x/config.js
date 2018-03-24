@@ -10,7 +10,9 @@ module.exports = (options = {}) => {
     script: join(input, 'index.js'),
     style: join(input, 'style.js'),
     pwa: join(input, 'pwa.js'),
-    define: {},
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(options.production ? 'production' : 'development'),
+    },
     assets: ['jpeg', 'jpg', 'ico', 'gif', 'png', 'svg', 'wav', 'mp3', 'json'],
 
     clean: output ? [join(output, '*')] : undefined,
@@ -81,11 +83,11 @@ module.exports = (options = {}) => {
   }
 
   if (options.production) {
-    // const webpack = require('webpack');
-    // plugins.push(new webpack.optimize.ModuleConcatenationPlugin());
+    const webpack = require('webpack');
+    plugins.push(new webpack.optimize.ModuleConcatenationPlugin());
 
-    // const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-    // plugins.push(new UglifyJsPlugin());
+    const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+    plugins.push(new UglifyJsPlugin());
   }
 
   if (cmless.define) {
@@ -136,7 +138,6 @@ module.exports = (options = {}) => {
   }
 
   return Object.assign(webpackConfig, {
-    mode: options.production ? 'production' : 'development',
     devtool: options.production ? false : 'inline-source-map',
     context: process.cwd(),
     entry: {
