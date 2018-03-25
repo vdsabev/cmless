@@ -1,61 +1,37 @@
-module.exports = (options = {}) => {
-  const { join, extname } = require('path');
-  const packageJson = require(join(process.cwd(), 'package.json'));
+const { join, extname } = require('path');
+const { isString } = require('./utils');
 
-  const input = getValueOrDefault(packageJson.cmless, 'input', '');
-  const output = getValueOrDefault(packageJson.cmless, 'output', 'build');
+module.exports = (options) => {
+  const cmless = require('./cmless')(options);
 
-  const cmless = {
-    template: join(input, 'index.html'),
-    script: join(input, 'index.js'),
-    style: join(input, 'style.js'),
-    pwa: join(input, 'pwa.js'),
-    define: {
-      'process.env.NODE_ENV': JSON.stringify(options.production ? 'production' : 'development'),
-    },
-    assets: ['jpeg', 'jpg', 'ico', 'gif', 'png', 'svg', 'wav', 'mp3', 'json'],
+  // Values
+  const values = {};
 
-    clean: output ? [join(output, '*')] : undefined,
-    serviceWorker: {
-      globDirectory: output,
-      globPatterns: ['**/*.{html,js,css}'],
-      swDest: join(output, 'service-worker.js'),
-    },
-  };
-
-  // Merge options
-  Object.assign(cmless, packageJson.cmless, { input, output });
-
-  // Webpack config
-  const webpackConfig = {};
-  if (cmless.extends) {
-    const cmlessExtends = require(join(process.cwd(), cmless.extends));
-    Object.assign(webpackConfig, cmlessExtends(options));
-  }
-
-  if (cmless.style && typeof cmless.style === 'string') {
+  if (cmless.style) {
     switch (extname(cmless.style)) {
       case '.ts':
       case '.tsx':
-        // TODO: Fix package version when this issue is fixed:
+        // TODO: Update package when this issue is resolved:
         // https://github.com/theblacksmith/typescript-require/issues/48
         require('typescript-require');
         break;
     }
-    cmless.style = require(join(process.cwd(), cmless.style));
+    values.style = require(join(process.cwd(), cmless.style));
   }
 
-  if (cmless.pwa && typeof cmless.pwa === 'string') {
-    cmless.pwa = require(join(process.cwd(), cmless.pwa));
+  if (cmless.pwa) {
+    values.pwa = require(join(process.cwd(), cmless.pwa));
   }
 
+  // Rules
   const rules = [];
+
   if (cmless.script) {
-    const { getScriptRule, getTypeScriptRule } = require('./plugins/script');
+    const { getScriptRule, getTypeScriptRule } = require('./rules/script');
     switch (extname(cmless.script)) {
       case '.js':
       case '.jsx':
-        rules.push(getScriptRule(packageJson.babel.presets));
+        rules.push(getScriptRule());
         break;
       case '.ts':
       case '.tsx':
@@ -65,15 +41,18 @@ module.exports = (options = {}) => {
         throw new Error(`Unsupported script extension for ${cmless.script}, please use .js, .jsx, .ts, .tsx`);
     }
   }
+
   if (cmless.style) {
-    const { getStyleRule } = require('./plugins/style');
-    rules.push(getStyleRule(cmless.style.css));
+    const { getStyleRule } = require('./rules/style');
+    rules.push(getStyleRule(values.style.css));
   }
+
   if (cmless.assets) {
-    const { getAssetRule } = require('./plugins/asset');
+    const { getAssetRule } = require('./rules/asset');
     rules.push(getAssetRule(cmless.assets));
   }
 
+  // Plugins
   const plugins = [];
 
   // https://github.com/johnagan/clean-webpack-plugin/issues/10
@@ -82,29 +61,19 @@ module.exports = (options = {}) => {
     plugins.push(new CleanWebpackPlugin(cmless.clean, { root: process.cwd() }));
   }
 
-  if (options.production) {
+  if (cmless.env) {
     const webpack = require('webpack');
-    plugins.push(new webpack.optimize.ModuleConcatenationPlugin());
-
-    const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-    plugins.push(new UglifyJsPlugin());
-  }
-
-  if (cmless.define) {
-    const env = require('var');
-    const { define } = require('var/webpack');
-    const webpack = require('webpack');
-    plugins.push(new webpack.DefinePlugin(Object.assign(define(env), cmless.define)));
+    plugins.push(new webpack.EnvironmentPlugin(cmless.env));
   }
 
   if (cmless.style) {
-    const ExtractTextPlugin = require('extract-text-webpack-plugin');
-    plugins.push(new ExtractTextPlugin('style.[contenthash].css'));
+    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+    plugins.push(new MiniCssExtractPlugin());
   }
 
   if (cmless.template) {
     const HtmlWebpackPlugin = require('html-webpack-plugin');
-    plugins.push(new HtmlWebpackPlugin({ template: cmless.template, style: cmless.style }));
+    plugins.push(new HtmlWebpackPlugin({ template: cmless.template, style: values.style }));
   }
 
   if (cmless.pwa) {
@@ -118,7 +87,7 @@ module.exports = (options = {}) => {
             orientation: 'portrait',
             icons: [
               {
-                src: join(input, 'logo.png'),
+                src: join(cmless.input, 'logo.png'),
                 sizes: [48, 96, 128, 192, 256, 384, 512],
               },
             ],
@@ -133,30 +102,26 @@ module.exports = (options = {}) => {
   }
 
   if (cmless.serviceWorker) {
-    const WorkboxPlugin = require('workbox-webpack-plugin');
-    plugins.push(new WorkboxPlugin(cmless.serviceWorker));
+    const { GenerateSW } = require('workbox-webpack-plugin');
+    plugins.push(new GenerateSW(cmless.serviceWorker));
   }
 
-  return Object.assign(webpackConfig, {
+  return {
+    mode: options.production ? 'production' : 'development',
     devtool: options.production ? false : 'inline-source-map',
-    context: process.cwd(),
     entry: {
       index: join(process.cwd(), `${cmless.script}`),
     },
     output: {
-      publicPath: '/',
       path: join(process.cwd(), cmless.output),
       // Don't use [chunkhash] in development since this will increase compilation time
       // https://github.com/webpack/webpack/issues/2393
       filename: `[name].[${options.production ? 'chunkhash' : 'hash'}].js`,
-      sourceMapFilename: '[name].js.map',
     },
     resolve: {
-      extensions: ['.ts', '.tsx', '.js', '.jsx', '.css'],
+      extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.css'],
     },
     module: { rules },
     plugins,
-  });
+  };
 };
-
-const getValueOrDefault = (obj, key, defaultValue) => (obj && obj[key] != null ? obj[key] : defaultValue);

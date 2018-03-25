@@ -10,6 +10,12 @@ cache:
   directories:
   - node_modules
 
+script:
+- npm test
+
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+
 deploy:
   provider: npm
   email: vdsabev@gmail.com
