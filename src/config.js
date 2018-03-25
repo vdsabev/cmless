@@ -19,6 +19,10 @@ module.exports = (options) => {
     values.style = require(join(process.cwd(), cmless.style));
   }
 
+  if (cmless.pwa) {
+    values.pwa = require(join(process.cwd(), cmless.pwa));
+  }
+
   // Rules
   const rules = [];
 
@@ -70,6 +74,36 @@ module.exports = (options) => {
   if (cmless.template) {
     const HtmlWebpackPlugin = require('html-webpack-plugin');
     plugins.push(new HtmlWebpackPlugin({ template: cmless.template, style: values.style }));
+  }
+
+  if (cmless.pwa) {
+    const PwaManifestPlugin = require('webpack-pwa-manifest');
+    plugins.push(
+      new PwaManifestPlugin(
+        Object.assign(
+          {
+            start_url: '/',
+            display: 'standalone',
+            orientation: 'portrait',
+            icons: [
+              {
+                src: join(cmless.input, 'logo.png'),
+                sizes: [48, 96, 128, 192, 256, 384, 512],
+              },
+            ],
+
+            // Custom options
+            publicPath: undefined,
+          },
+          cmless.pwa
+        )
+      )
+    );
+  }
+
+  if (cmless.serviceWorker) {
+    const { GenerateSW } = require('workbox-webpack-plugin');
+    plugins.push(new GenerateSW(cmless.serviceWorker));
   }
 
   return {

@@ -67,7 +67,7 @@
       "globPatterns": [
         "**/*.{html,js,css}"
       ],
-      "swDest": "${output}/service-worker.js"
+      "swDest": "service-worker.js"
     }
   },
   "devDependencies": {
