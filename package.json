@@ -38,6 +38,20 @@
     "webpack-serve": "^0.2.0",
     "workbox-webpack-plugin": "^3.0.1"
   },
+  "devDependencies": {
+    "jest": "^22.4.3"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "!bin/**",
+      "!node_modules/**",
+      "!**/*.config.js",
+      "!**/*.spec.js",
+      "**/*.js"
+    ],
+    "testRegex": "\\.spec\\.js$"
+  },
   "cmless": {
     "//": "Default cmless configuration - override in your own project's package.json file",
     "port": 3000,
@@ -69,8 +83,5 @@
       ],
       "swDest": "service-worker.js"
     }
-  },
-  "devDependencies": {
-    "jest": "^22.4.3"
   }
 }
