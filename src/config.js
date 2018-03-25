@@ -16,11 +16,12 @@ module.exports = (options) => {
         require('typescript-require');
         break;
     }
-    values.style = require(join(process.cwd(), cmless.style));
+
+    values.style = requireSafe(join(process.cwd(), cmless.style));
   }
 
   if (cmless.pwa) {
-    values.pwa = require(join(process.cwd(), cmless.pwa));
+    values.pwa = requireSafe(join(process.cwd(), cmless.pwa));
   }
 
   // Rules
@@ -44,7 +45,7 @@ module.exports = (options) => {
 
   if (cmless.style) {
     const { getStyleRule } = require('./rules/style');
-    rules.push(getStyleRule(values.style.css));
+    rules.push(getStyleRule(values.style ? values.style.css : null));
   }
 
   if (cmless.assets) {
@@ -76,7 +77,7 @@ module.exports = (options) => {
     plugins.push(new HtmlWebpackPlugin({ template: cmless.template, style: values.style }));
   }
 
-  if (cmless.pwa) {
+  if (values.pwa) {
     const PwaManifestPlugin = require('webpack-pwa-manifest');
     plugins.push(
       new PwaManifestPlugin(
@@ -95,7 +96,7 @@ module.exports = (options) => {
             // Custom options
             publicPath: undefined,
           },
-          cmless.pwa
+          values.pwa
         )
       )
     );
@@ -124,4 +125,16 @@ module.exports = (options) => {
     module: { rules },
     plugins,
   };
+};
+
+const requireSafe = (path) => {
+  try {
+    return require(path);
+  }
+  catch (error) {
+    if (error.code !== 'MODULE_NOT_FOUND') {
+      throw error;
+    }
+    console.error(`Module not found: '${path}'! Continuing...`);
+  }
 };
