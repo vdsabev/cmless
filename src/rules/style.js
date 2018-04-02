@@ -1,26 +1,37 @@
-const getStyleRule = (variables) => {
-  const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const getStyleRule = (options, variables) => {
+  const loaders = [];
+
+  // Use Extract CSS in production, style loader in development to enable HMR for CSS files
+  if (options.production) {
+    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+    loaders.push(MiniCssExtractPlugin.loader);
+  }
+  else {
+    loaders.push('style-loader');
+  }
+
+  // CSS loader
+  loaders.push('css-loader');
+
+  // cssnext loader
   const cssnext = require('postcss-cssnext');
+  loaders.push({
+    loader: 'postcss-loader',
+    options: {
+      plugins: [
+        cssnext({
+          features: {
+            autoprefixer: { browsers: ['last 3 versions', '> 1%'] },
+            customProperties: { variables },
+          },
+        }),
+      ],
+    },
+  });
 
   return {
     test: /\.css$/,
-    use: [
-      MiniCssExtractPlugin.loader,
-      'css-loader',
-      {
-        loader: 'postcss-loader',
-        options: {
-          plugins: [
-            cssnext({
-              features: {
-                autoprefixer: { browsers: ['last 3 versions', '> 1%'] },
-                customProperties: { variables },
-              },
-            }),
-          ],
-        },
-      },
-    ],
+    use: loaders,
   };
 };
 

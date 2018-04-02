@@ -32,11 +32,11 @@ module.exports = (options) => {
     switch (extname(cmless.script)) {
       case '.js':
       case '.jsx':
-        rules.push(getScriptRule());
+        rules.push(getScriptRule(options));
         break;
       case '.ts':
       case '.tsx':
-        rules.push(getTypeScriptRule());
+        rules.push(getTypeScriptRule(options));
         break;
       default:
         throw new Error(`Unsupported script extension for ${cmless.script}, please use .js, .jsx, .ts, .tsx`);
@@ -45,12 +45,12 @@ module.exports = (options) => {
 
   if (cmless.style) {
     const { getStyleRule } = require('./rules/style');
-    rules.push(getStyleRule(values.style ? values.style.css : null));
+    rules.push(getStyleRule(options, values.style ? values.style.css : null));
   }
 
   if (cmless.assets) {
     const { getAssetRule } = require('./rules/asset');
-    rules.push(getAssetRule(cmless.assets));
+    rules.push(getAssetRule(options, cmless.assets));
   }
 
   // Plugins
@@ -67,7 +67,7 @@ module.exports = (options) => {
     plugins.push(new webpack.EnvironmentPlugin(cmless.env));
   }
 
-  if (cmless.style) {
+  if (cmless.style && options.production) {
     const MiniCssExtractPlugin = require('mini-css-extract-plugin');
     plugins.push(new MiniCssExtractPlugin());
   }
