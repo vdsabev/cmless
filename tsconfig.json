@@ -1,12 +1,12 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "alwaysStrict": true,
     "experimentalDecorators": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "sourceMap": true,
+    "strict": true,
     "suppressImplicitAnyIndexErrors": false,
 
     "baseUrl": "src",

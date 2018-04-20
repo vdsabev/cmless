@@ -67,6 +67,7 @@
       true,
       "always"
     ],
+    "strict-boolean-expressions": true,
     "trailing-comma": [
       true,
       {
