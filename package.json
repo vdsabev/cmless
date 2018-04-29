@@ -1,6 +1,6 @@
 {
   "name": "@cmless/seed",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "scripts": {
     "build": "cmless build",
@@ -10,11 +10,12 @@
     "tslib": "1.9.0"
   },
   "devDependencies": {
-    "cmless": "0.5.4"
+    "cmless": "0.5.5"
   },
   "cmless": {
     "input": "src",
     "script": "${input}/index.tsx",
-    "style": "${input}/style.ts"
+    "style": "${input}/style.ts",
+    "serviceWorker": false
   }
 }

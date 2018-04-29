@@ -93,3 +93,7 @@ button {
   border: 0;
   transition-property: box-shadow;
 }
+
+img {
+  max-width: 100%;
+}
