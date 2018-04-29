@@ -14,11 +14,16 @@ body {
   padding: 0;
 }
 
+html {
+  /* 0.625 of 16px is 10px: https://engageinteractive.co.uk/blog/em-vs-rem-vs-px */
+  font-size: 62.5%;
+  font-family: var(--fontText), sans-serif;
+  color: var(--foregroundDarker);
+}
+
 body {
   background: var(--neutralLighter);
-  color: var(--foregroundDarker);
-  font-family: var(--fontText), sans-serif;
-  font-size: 16px;
+  font-size: 1.4rem;
 }
 
 a {
@@ -52,10 +57,10 @@ fieldset[disabled] button {
   cursor: not-allowed;
 }
 
-fieldset.loading,
-fieldset.loading textarea,
-fieldset.loading input,
-fieldset.loading button {
+fieldset.--loading,
+fieldset.--loading textarea,
+fieldset.--loading input,
+fieldset.--loading button {
   cursor: progress;
 }
 
@@ -65,7 +70,6 @@ button {
   margin-bottom: 1rem;
   border-radius: 0.25rem;
   padding: 1rem 0.6rem;
-  transition: all var(--transitionDuration) var(--transitionEasing);
 }
 
 textarea,
@@ -74,24 +78,27 @@ input {
   border: 1px solid var(--neutral);
   font-family: var(--fontText), sans-serif;
   font-size: 1rem;
-  transition-property: box-shadow;
-}
 
-textarea:focus,
-input:focus {
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+  transition: box-shadow var(--transitionDuration) var(--transitionEasing);
+
+  &:focus {
+    box-shadow: 0 0 0.6rem rgba(0, 0, 0, 0.3);
+  }
 }
 
 textarea {
   resize: vertical;
-  min-height: 200px;
-  max-height: 600px;
+  min-height: 20rem;
+  max-height: 60rem;
 }
 
 button {
   cursor: pointer;
   border: 0;
-  transition-property: box-shadow;
+}
+
+img {
+  max-width: 100%;
 }
 
 img {

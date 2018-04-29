@@ -1,4 +1,5 @@
-# cmless seed
+<h1 align="center">cmless seed 🌱</h1>
+<p align="center">Seed to start new projects from</p>
 
 ## Setup
 1. Make sure you have installed [Node.js](nodejs.org), minimum version 6.11.3
