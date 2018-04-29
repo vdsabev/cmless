@@ -21,7 +21,8 @@ const getStyleRule = (options, variables) => {
       plugins: [
         cssnext({
           features: {
-            autoprefixer: { browsers: ['last 3 versions', '> 1%'] },
+            // Source: https://jamie.build/last-2-versions
+            autoprefixer: { browsers: ['>0.25%', 'not ie 11', 'not op_mini all'] },
             customProperties: { variables },
           },
         }),
