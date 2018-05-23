@@ -1,7 +1,7 @@
 const { join } = require('path');
-const { isArray, isObject, isString } = require('./utils');
+const _ = require('lodash');
 
-const cmless = (options) => Object.assign(
+const cmless = (options) => _.merge(
   {},
   evaluateTemplateStrings(require(join(__dirname, '..', 'package.json')).cmless),
   evaluateTemplateStrings(require(join(process.cwd(), 'package.json')).cmless),
@@ -16,13 +16,13 @@ const evaluateTemplateStrings = (input, values) => Object.keys(input).reduce((ou
 
   Object.keys(values).forEach((valueKey) => {
     const evaluateExpressionWithKeyAndValue = evaluateExpression(valueKey, values[valueKey]);
-    if (isArray(output[key])) {
+    if (_.isArray(output[key])) {
       output[key] = output[key].map(evaluateExpressionWithKeyAndValue);
     }
-    else if (isObject(output[key])) {
+    else if (_.isObject(output[key])) {
       output[key] = evaluateTemplateStrings(output[key], values);
     }
-    else if (isString(output[key])) {
+    else if (_.isString(output[key])) {
       output[key] = evaluateExpressionWithKeyAndValue(output[key]);
     }
   });

@@ -1,4 +1,4 @@
-const getStyleRule = (options, variables) => {
+const getStyleRule = (options, cmless, variables) => {
   const loaders = [];
 
   // Use Extract CSS in production, style loader in development to enable HMR for CSS files
@@ -22,7 +22,7 @@ const getStyleRule = (options, variables) => {
         cssnext({
           features: {
             // Source: https://jamie.build/last-2-versions
-            autoprefixer: { browsers: ['>0.25%', 'not ie 11', 'not op_mini all'] },
+            autoprefixer: { browsers: cmless.target.browsers },
             customProperties: { variables },
           },
         }),
