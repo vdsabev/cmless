@@ -1,5 +1,4 @@
 const { join, extname } = require('path');
-const { isString } = require('./utils');
 
 module.exports = (options) => {
   const cmless = require('./cmless')(options);
@@ -45,7 +44,7 @@ module.exports = (options) => {
 
   if (cmless.style) {
     const { getStyleRule } = require('./rules/style');
-    rules.push(getStyleRule(options, values.style ? values.style.css : null));
+    rules.push(getStyleRule(options, cmless, values.style ? values.style.css : null));
   }
 
   if (cmless.assets) {

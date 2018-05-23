@@ -20,6 +20,7 @@
       {
         "order": [
           "static-field",
+          "static-method",
           "instance-field",
           "constructor",
           "instance-method"
@@ -78,6 +79,14 @@
     "triple-equals": [
       true,
       "allow-null-check"
+    ],
+    "typedef": [
+      true,
+      "call-signature",
+      "parameter",
+      "property-declaration",
+      "variable-declaration",
+      "member-variable-declaration"
     ],
     "typedef-whitespace": [
       true,
