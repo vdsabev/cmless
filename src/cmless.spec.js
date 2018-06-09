@@ -7,26 +7,24 @@ describe(`evaluateTemplateStrings`, () => {
   });
 
   it(`should replace expressions`, () => {
-    expect(evaluateTemplateStrings(
-      { a: '1', b: '${a}2', c: '${b}3' },
-    )).toEqual(
-      { a: '1', b: '12',    c: '123'   },
-    );
+    expect(evaluateTemplateStrings({ a: '1', b: '${a}2', c: '${b}3' })).toEqual({
+      a: '1',
+      b: '12',
+      c: '123',
+    });
   });
 
   it(`should replace expressions in arrays`, () => {
-    expect(evaluateTemplateStrings(
-      { a: '1', b: ['${a}2', '${a}3'] },
-    )).toEqual(
-      { a: '1', b: ['12',    '13']    },
-    );
+    expect(evaluateTemplateStrings({ a: '1', b: ['${a}2', '${a}3'] })).toEqual({
+      a: '1',
+      b: ['12', '13'],
+    });
   });
 
   it(`should replace expressions in nested objects`, () => {
-    expect(evaluateTemplateStrings(
-      { a: '1', b: { c: '${a}2', d: { e: '${a}3' } } },
-    )).toEqual(
-      { a: '1', b: { c: '12',    d: { e: '13'    } } },
-    );
+    expect(evaluateTemplateStrings({ a: '1', b: { c: '${a}2', d: { e: '${a}3' } } })).toEqual({
+      a: '1',
+      b: { c: '12', d: { e: '13' } },
+    });
   });
 });

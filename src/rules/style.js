@@ -5,8 +5,7 @@ const getStyleRule = (options, cmless, variables) => {
   if (options.production) {
     const MiniCssExtractPlugin = require('mini-css-extract-plugin');
     loaders.push(MiniCssExtractPlugin.loader);
-  }
-  else {
+  } else {
     loaders.push('style-loader');
   }
 
