@@ -38,7 +38,9 @@ module.exports = (options) => {
         rules.push(getTypeScriptRule(options));
         break;
       default:
-        throw new Error(`Unsupported script extension for ${cmless.script}, please use .js, .jsx, .ts, .tsx`);
+        throw new Error(
+          `Unsupported script extension for ${cmless.script}, please use .js, .jsx, .ts, .tsx`
+        );
     }
   }
 
@@ -129,8 +131,7 @@ module.exports = (options) => {
 const requireSafe = (path) => {
   try {
     return require(path);
-  }
-  catch (error) {
+  } catch (error) {
     if (error.code !== 'MODULE_NOT_FOUND') {
       throw error;
     }
