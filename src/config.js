@@ -1,10 +1,10 @@
-const { join, extname } = require('path');
+const { join, extname } = require('path')
 
 module.exports = (options) => {
-  const cmless = require('./cmless')(options);
+  const cmless = require('./cmless')(options)
 
   // Values
-  const values = {};
+  const values = {}
 
   if (cmless.style) {
     switch (extname(cmless.style)) {
@@ -12,72 +12,74 @@ module.exports = (options) => {
       case '.tsx':
         // TODO: Update package when this issue is resolved:
         // https://github.com/theblacksmith/typescript-require/issues/48
-        require('typescript-require');
-        break;
+        require('typescript-require')
+        break
     }
 
-    values.style = requireSafe(join(process.cwd(), cmless.style));
+    values.style = requireSafe(join(process.cwd(), cmless.style))
   }
 
   if (cmless.pwa) {
-    values.pwa = requireSafe(join(process.cwd(), cmless.pwa));
+    values.pwa = requireSafe(join(process.cwd(), cmless.pwa))
   }
 
   // Rules
-  const rules = [];
+  const rules = []
 
   if (cmless.script) {
-    const { getScriptRule, getTypeScriptRule } = require('./rules/script');
+    const { getScriptRule, getTypeScriptRule } = require('./rules/script')
     switch (extname(cmless.script)) {
       case '.js':
       case '.jsx':
-        rules.push(getScriptRule(options));
-        break;
+        rules.push(getScriptRule(options))
+        break
       case '.ts':
       case '.tsx':
-        rules.push(getTypeScriptRule(options));
-        break;
+        rules.push(getTypeScriptRule(options))
+        break
       default:
-        throw new Error(`Unsupported script extension for ${cmless.script}, please use .js, .jsx, .ts, .tsx`);
+        throw new Error(
+          `Unsupported script extension for ${cmless.script}, please use .js, .jsx, .ts, .tsx`
+        )
     }
   }
 
   if (cmless.style) {
-    const { getStyleRule } = require('./rules/style');
-    rules.push(getStyleRule(options, cmless, values.style ? values.style.css : null));
+    const { getStyleRule } = require('./rules/style')
+    rules.push(getStyleRule(options, cmless, values.style ? values.style.css : null))
   }
 
   if (cmless.assets) {
-    const { getAssetRule } = require('./rules/asset');
-    rules.push(getAssetRule(options, cmless.assets));
+    const { getAssetRule } = require('./rules/asset')
+    rules.push(getAssetRule(options, cmless.assets))
   }
 
   // Plugins
-  const plugins = [];
+  const plugins = []
 
   // https://github.com/johnagan/clean-webpack-plugin/issues/10
   if (cmless.clean && options.production) {
-    const CleanWebpackPlugin = require('clean-webpack-plugin');
-    plugins.push(new CleanWebpackPlugin(cmless.clean, { root: process.cwd() }));
+    const CleanWebpackPlugin = require('clean-webpack-plugin')
+    plugins.push(new CleanWebpackPlugin(cmless.clean, { root: process.cwd() }))
   }
 
   if (cmless.env) {
-    const webpack = require('webpack');
-    plugins.push(new webpack.EnvironmentPlugin(cmless.env));
+    const webpack = require('webpack')
+    plugins.push(new webpack.EnvironmentPlugin(cmless.env))
   }
 
   if (cmless.style && options.production) {
-    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-    plugins.push(new MiniCssExtractPlugin());
+    const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+    plugins.push(new MiniCssExtractPlugin())
   }
 
   if (cmless.template) {
-    const HtmlWebpackPlugin = require('html-webpack-plugin');
-    plugins.push(new HtmlWebpackPlugin({ template: cmless.template, style: values.style }));
+    const HtmlWebpackPlugin = require('html-webpack-plugin')
+    plugins.push(new HtmlWebpackPlugin({ template: cmless.template, style: values.style }))
   }
 
   if (values.pwa) {
-    const PwaManifestPlugin = require('webpack-pwa-manifest');
+    const PwaManifestPlugin = require('webpack-pwa-manifest')
     plugins.push(
       new PwaManifestPlugin(
         Object.assign(
@@ -98,12 +100,12 @@ module.exports = (options) => {
           values.pwa
         )
       )
-    );
+    )
   }
 
   if (cmless.serviceWorker) {
-    const { GenerateSW } = require('workbox-webpack-plugin');
-    plugins.push(new GenerateSW(cmless.serviceWorker));
+    const { GenerateSW } = require('workbox-webpack-plugin')
+    plugins.push(new GenerateSW(cmless.serviceWorker))
   }
 
   return {
@@ -123,17 +125,16 @@ module.exports = (options) => {
     },
     module: { rules },
     plugins,
-  };
-};
+  }
+}
 
 const requireSafe = (path) => {
   try {
-    return require(path);
-  }
-  catch (error) {
+    return require(path)
+  } catch (error) {
     if (error.code !== 'MODULE_NOT_FOUND') {
-      throw error;
+      throw error
     }
-    console.error(`Module not found: '${path}'! Continuing...`);
+    console.error(`Module not found: '${path}'! Continuing...`)
   }
-};
+}
