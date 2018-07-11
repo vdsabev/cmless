@@ -8,6 +8,10 @@ module.exports = (options) => {
 
   if (cmless.style) {
     switch (extname(cmless.style)) {
+      case '.js':
+      case '.jsx':
+        require('@babel/register');
+        break;
       case '.ts':
       case '.tsx':
         // TODO: Update package when this issue is resolved:

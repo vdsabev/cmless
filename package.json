@@ -1,6 +1,6 @@
 {
   "name": "cmless",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "license": "MIT",
   "main": "./src/index.js",
   "bin": {
@@ -14,11 +14,16 @@
     "test.watch": "jest --watchAll"
   },
   "dependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.4",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-react": "^6.24.1",
+    "@babel/core": "^7.0.0-beta.52",
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.52",
+    "@babel/plugin-proposal-decorators": "^7.0.0-beta.52",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.52",
+    "@babel/plugin-syntax-jsx": "^7.0.0-beta.52",
+    "@babel/plugin-transform-modules-commonjs": "^7.0.0-beta.52",
+    "@babel/plugin-transform-react-jsx": "^7.0.0-beta.52",
+    "@babel/preset-env": "^7.0.0-beta.52",
+    "@babel/register": "^7.0.0-beta.52",
+    "babel-loader": "^8.0.0-beta.4",
     "clean-webpack-plugin": "^0.1.19",
     "connect-history-api-fallback": "^1.5.0",
     "css-loader": "^0.28.11",

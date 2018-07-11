@@ -15,18 +15,7 @@
     "label-position": true,
     "max-line-length": false,
     "member-access": false,
-    "member-ordering": [
-      true,
-      {
-        "order": [
-          "static-field",
-          "static-method",
-          "instance-field",
-          "constructor",
-          "instance-method"
-        ]
-      }
-    ],
+    "member-ordering": false,
     "no-arg": true,
     "no-bitwise": true,
     "no-console": [
@@ -82,11 +71,7 @@
     ],
     "typedef": [
       true,
-      "call-signature",
-      "parameter",
-      "property-declaration",
-      "variable-declaration",
-      "member-variable-declaration"
+      "property-declaration"
     ],
     "typedef-whitespace": [
       true,
