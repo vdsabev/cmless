@@ -1,6 +1,7 @@
 const getScriptRule = (options) => ({
   test: /\.jsx?$/,
-  loader: 'babel-loader',
+  // NOTE: Fixes `Error: Can't resolve 'babel-loader'`
+  loader: require.resolve('babel-loader'),
   exclude: [/node_modules/],
 });
 

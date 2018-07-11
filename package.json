@@ -1,6 +1,6 @@
 {
   "name": "cmless",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "license": "MIT",
   "main": "./src/index.js",
   "bin": {
@@ -9,7 +9,6 @@
   "scripts": {
     "build": "webpack -p --env.production --display-modules",
     "profile": "webpack --profile --json > ./build/profile.json && webpack-bundle-analyzer ./build/profile.json",
-    "start": "webpack-dev-server --port 3000 --history-api-fallback",
     "test": "jest",
     "test.watch": "jest --watchAll"
   },
