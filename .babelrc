@@ -16,6 +16,7 @@
     "@babel/plugin-proposal-object-rest-spread",
     "@babel/plugin-transform-modules-commonjs",
     ["@babel/plugin-transform-react-jsx", { "pragma": "h" }],
-    "@babel/plugin-syntax-jsx"
+    "@babel/plugin-syntax-jsx",
+    "@babel/plugin-syntax-dynamic-import"
   ]
 }
