@@ -10,36 +10,30 @@ module.exports = (options) => {
     switch (extname(cmless.style)) {
       case '.js':
       case '.jsx':
-        require('@babel/register');
-        break;
       case '.ts':
       case '.tsx':
-        // TODO: Update package when this issue is resolved:
-        // https://github.com/theblacksmith/typescript-require/issues/48
         require('typescript-require');
         break;
     }
 
-    values.style = requireSafe(join(process.cwd(), cmless.style));
+    values.style = requireSafely(join(process.cwd(), cmless.style));
   }
 
   if (cmless.pwa) {
-    values.pwa = requireSafe(join(process.cwd(), cmless.pwa));
+    values.pwa = requireSafely(join(process.cwd(), cmless.pwa));
   }
 
   // Rules
   const rules = [];
 
   if (cmless.script) {
-    const { getScriptRule, getTypeScriptRule } = require('./rules/script');
+    const getScriptRule = require('./rules/script');
     switch (extname(cmless.script)) {
       case '.js':
       case '.jsx':
-        rules.push(getScriptRule(options));
-        break;
       case '.ts':
       case '.tsx':
-        rules.push(getTypeScriptRule(options));
+        rules.push(getScriptRule(options));
         break;
       default:
         throw new Error(
@@ -49,12 +43,12 @@ module.exports = (options) => {
   }
 
   if (cmless.style) {
-    const { getStyleRule } = require('./rules/style');
+    const getStyleRule = require('./rules/style');
     rules.push(getStyleRule(options, cmless, values.style ? values.style.css : null));
   }
 
   if (cmless.assets) {
-    const { getAssetRule } = require('./rules/asset');
+    const getAssetRule = require('./rules/asset');
     rules.push(getAssetRule(options, cmless.assets));
   }
 
@@ -132,7 +126,7 @@ module.exports = (options) => {
   };
 };
 
-const requireSafe = (path) => {
+const requireSafely = (path) => {
   try {
     return require(path);
   } catch (error) {

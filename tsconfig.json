@@ -1,6 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "allowJs": true,
     "experimentalDecorators": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -23,7 +24,6 @@
       "./src/types"
     ],
 
-    "jsx": "react",
-    "jsxFactory": "h"
+    "jsx": "react"
   }
 }

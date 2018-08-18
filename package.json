@@ -1,6 +1,6 @@
 {
   "name": "cmless",
-  "version": "0.6.6",
+  "version": "0.7.0",
   "license": "MIT",
   "main": "./src/index.js",
   "bin": {
@@ -13,17 +13,6 @@
     "test.watch": "jest --watchAll"
   },
   "dependencies": {
-    "@babel/core": "^7.0.0-beta.52",
-    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.52",
-    "@babel/plugin-proposal-decorators": "^7.0.0-beta.52",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.52",
-    "@babel/plugin-syntax-dynamic-import": "7.0.0-beta.52",
-    "@babel/plugin-syntax-jsx": "^7.0.0-beta.52",
-    "@babel/plugin-transform-modules-commonjs": "^7.0.0-beta.52",
-    "@babel/plugin-transform-react-jsx": "^7.0.0-beta.52",
-    "@babel/preset-env": "^7.0.0-beta.52",
-    "@babel/register": "^7.0.0-beta.52",
-    "babel-loader": "^8.0.0-beta.4",
     "clean-webpack-plugin": "^0.1.19",
     "connect-history-api-fallback": "^1.5.0",
     "css-loader": "^0.28.11",
@@ -37,9 +26,9 @@
     "prettier": "^1.11.1",
     "style-loader": "^0.20.3",
     "ts-loader": "^4.1.0",
-    "typescript": "^2.8.1",
+    "typescript": "^3.0.0",
     "typescript-require": "^0.2.10",
-    "webpack": "^4.4.1",
+    "webpack": "^4.16.5",
     "webpack-pwa-manifest": "^3.6.2",
     "webpack-serve": "^0.3.1",
     "workbox-webpack-plugin": "^3.0.1"

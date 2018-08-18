@@ -1,4 +1,4 @@
-const getStyleRule = (options, cmless, variables) => {
+module.exports = (options, cmless, variables) => {
   const loaders = [];
 
   // Use Extract CSS in production, style loader in development to enable HMR for CSS files
@@ -34,5 +34,3 @@ const getStyleRule = (options, cmless, variables) => {
     use: loaders,
   };
 };
-
-exports.getStyleRule = getStyleRule;
