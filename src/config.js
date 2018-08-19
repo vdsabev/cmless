@@ -7,20 +7,11 @@ module.exports = (options) => {
   const values = {};
 
   if (cmless.style) {
-    switch (extname(cmless.style)) {
-      case '.js':
-      case '.jsx':
-      case '.ts':
-      case '.tsx':
-        require('typescript-require');
-        break;
-    }
-
-    values.style = requireSafely(join(process.cwd(), cmless.style));
+    values.style = requireOptionally(join(process.cwd(), cmless.style));
   }
 
   if (cmless.pwa) {
-    values.pwa = requireSafely(join(process.cwd(), cmless.pwa));
+    values.pwa = requireOptionally(join(process.cwd(), cmless.pwa));
   }
 
   // Rules
@@ -126,11 +117,12 @@ module.exports = (options) => {
   };
 };
 
-const requireSafely = (path) => {
+const requireTs = require('./require-ts');
+const requireOptionally = (path) => {
   try {
-    return require(path);
+    return requireTs(path);
   } catch (error) {
-    if (error.code !== 'MODULE_NOT_FOUND') {
+    if (error.code !== 'ENOENT') {
       throw error;
     }
     console.error(`Module not found: '${path}'! Continuing...`);
