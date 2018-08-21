@@ -1,6 +1,6 @@
 {
   "name": "cmless",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "license": "MIT",
   "main": "./src/index.js",
   "bin": {
@@ -73,10 +73,6 @@
       "${output}/*"
     ],
     "serviceWorker": {
-      "globDirectory": "${output}",
-      "globPatterns": [
-        "**/*.{html,js,css}"
-      ],
       "swDest": "service-worker.js"
     },
     "target": {
