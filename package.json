@@ -1,6 +1,6 @@
 {
   "name": "cmless",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "license": "MIT",
   "main": "./src/index.js",
   "bin": {
@@ -26,6 +26,7 @@
     "prettier": "^1.11.1",
     "style-loader": "^0.20.3",
     "ts-loader": "^4.1.0",
+    "ts-node": "^7.0.1",
     "typescript": "^3.0.0",
     "webpack": "^4.16.5",
     "webpack-pwa-manifest": "^3.6.2",
@@ -52,8 +53,8 @@
     "input": "src",
     "template": "${input}/index.html",
     "script": "${input}/index.js",
-    "style": "${input}/style.js",
-    "pwa": "${input}/pwa.js",
+    "style": "${input}/style",
+    "pwa": "${input}/pwa",
     "env": {},
     "assets": [
       "jpeg",
@@ -64,7 +65,8 @@
       "svg",
       "wav",
       "mp3",
-      "json"
+      "json",
+      "txt"
     ],
     "output": "build",
     "clean": [

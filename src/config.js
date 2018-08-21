@@ -1,4 +1,5 @@
 const { join, extname } = require('path');
+require('ts-node').register();
 
 module.exports = (options) => {
   const cmless = require('./cmless')(options);
@@ -117,14 +118,15 @@ module.exports = (options) => {
   };
 };
 
-const requireTs = require('./require-ts');
 const requireOptionally = (path) => {
   try {
-    return requireTs(path);
+    // NOTE: Supports both ES6 `default` export and `module.exports`
+    const script = require(path);
+    return script && script.default || script;
   } catch (error) {
-    if (error.code !== 'ENOENT') {
+    if (error.code !== 'MODULE_NOT_FOUND') {
       throw error;
     }
-    console.error(`Module not found: '${path}'! Continuing...`);
+    console.warn(`Module not found: '${path}'! Continuing...`);
   }
 };
