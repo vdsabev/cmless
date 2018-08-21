@@ -97,7 +97,23 @@ module.exports = (options) => {
 
   if (cmless.serviceWorker) {
     const { GenerateSW } = require('workbox-webpack-plugin');
-    plugins.push(new GenerateSW(cmless.serviceWorker));
+    const serviceWorkerListToRegex = (key) =>
+      cmless.serviceWorker[key]
+        ? {
+            [key]: cmless.serviceWorker[key].map((value) => new RegExp(value)),
+          }
+        : {};
+
+    plugins.push(
+      new GenerateSW(
+        Object.assign(
+          {},
+          cmless.serviceWorker,
+          serviceWorkerListToRegex('navigateFallbackBlacklist'),
+          serviceWorkerListToRegex('navigateFallbackWhitelist')
+        )
+      )
+    );
   }
 
   return {
