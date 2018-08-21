@@ -1,12 +1,15 @@
 const { join } = require('path');
 const _ = require('lodash');
 
-const cmless = (options) =>
-  _.merge(
-    {},
-    evaluateTemplateStrings(require(join(__dirname, '..', 'package.json')).cmless),
-    evaluateTemplateStrings(require(join(process.cwd(), 'package.json')).cmless)
+const requireOptionally = require('./require-optionally');
+
+const cmless = (options) => {
+  const defaultPackage = requireOptionally(join(__dirname, '..', 'package.json'));
+  const projectPackage = requireOptionally(join(process.cwd(), 'package.json'));
+  return evaluateTemplateStrings(
+    _.merge({}, defaultPackage.cmless, projectPackage ? projectPackage.cmless : {})
   );
+};
 
 const evaluateTemplateStrings = (input, values) =>
   Object.keys(input).reduce((output, key) => {

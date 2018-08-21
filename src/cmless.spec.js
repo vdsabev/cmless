@@ -1,6 +1,19 @@
-const { evaluateTemplateStrings } = require('./cmless');
+jest.mock('./require-optionally');
+const requireOptionally = require('./require-optionally');
+const cmless = require('./cmless');
+
+describe(`cmless`, () => {
+  it(`should evaluate packages with the merged values`, () => {
+    requireOptionally
+      .mockReturnValueOnce({ cmless: { a: '1', b: '${a}2', c: '${b}3' } })
+      .mockReturnValueOnce({ cmless: { a: '4' } });
+    expect(cmless()).toEqual({ a: '4', b: '42', c: '423' });
+  });
+});
 
 describe(`evaluateTemplateStrings`, () => {
+  const { evaluateTemplateStrings } = cmless;
+
   it(`should return same object if no templates`, () => {
     const input = { a: '1', b: '2', c: '3' };
     expect(evaluateTemplateStrings(input)).toEqual(input);

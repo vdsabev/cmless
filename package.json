@@ -1,6 +1,6 @@
 {
   "name": "cmless",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "license": "MIT",
   "main": "./src/index.js",
   "bin": {
@@ -50,7 +50,7 @@
   "cmless": {
     "//": "Default cmless configuration - override in your own project's package.json file",
     "port": 3000,
-    "input": "src",
+    "input": ".",
     "template": "${input}/index.html",
     "script": "${input}/index.js",
     "style": "${input}/style",
