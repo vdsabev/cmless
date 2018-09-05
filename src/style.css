@@ -24,6 +24,7 @@ html {
 body {
   background: var(--neutralLighter);
   font-size: 1.4rem;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
