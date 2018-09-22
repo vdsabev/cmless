@@ -7,19 +7,18 @@ module.exports = (options) => {
   const cmless = require('./cmless')(options);
 
   // Values
-  const values = {};
+  // Allows conditionally requiring config files if a string was passed, uses the value as is otherwise
+  const values = ['style', 'pwa'].reduce((result, key) => {
+    const value = cmless[key];
+    return Object.assign(result, {
+      [key]: typeof value === 'string' ? requireOptionally(join(process.cwd(), value)) : value,
+    });
+  }, {});
 
-  if (cmless.style) {
-    values.style = requireOptionally(join(process.cwd(), cmless.style));
-  }
-
-  if (cmless.pwa) {
-    values.pwa = requireOptionally(join(process.cwd(), cmless.pwa));
-  }
-
-  // Rules
+  // RULES
   const rules = [];
 
+  // Script
   if (cmless.script) {
     const getScriptRule = require('./rules/script');
     switch (extname(cmless.script)) {
@@ -36,40 +35,58 @@ module.exports = (options) => {
     }
   }
 
+  // Style
   if (cmless.style) {
     const getStyleRule = require('./rules/style');
     rules.push(getStyleRule(options, cmless, values.style ? values.style.css : null));
   }
 
+  // Assets
   if (cmless.assets) {
     const getAssetRule = require('./rules/asset');
     rules.push(getAssetRule(options, cmless.assets));
   }
 
-  // Plugins
+  // PLUGINS
   const plugins = [];
 
-  // https://github.com/johnagan/clean-webpack-plugin/issues/10
+  // Clean
   if (cmless.clean && options.production) {
     const CleanWebpackPlugin = require('clean-webpack-plugin');
+    // Must specify project root, see: https://github.com/johnagan/clean-webpack-plugin/issues/10
     plugins.push(new CleanWebpackPlugin(cmless.clean, { root: process.cwd() }));
   }
 
+  // Environment variables
   if (cmless.env) {
     const webpack = require('webpack');
     plugins.push(new webpack.EnvironmentPlugin(cmless.env));
   }
 
+  // Style
+  const optimization = {};
   if (cmless.style && options.production) {
     const MiniCssExtractPlugin = require('mini-css-extract-plugin');
     plugins.push(new MiniCssExtractPlugin({ filename: '[name].[hash].css' }));
+
+    // TODO: Remove this if webpack v5 supports CSS minification out of the box.
+    // Overrides webpack's default minimization options to allow for CSS minification:
+    // https://github.com/webpack-contrib/mini-css-extract-plugin#minimizing-for-production
+    const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+    const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+    optimization.minimizer = [
+      new UglifyJsPlugin({ cache: true, parallel: true, sourceMap: true }),
+      new OptimizeCSSAssetsPlugin({}),
+    ];
   }
 
+  // Template
   if (cmless.template) {
     const HtmlWebpackPlugin = require('html-webpack-plugin');
     plugins.push(new HtmlWebpackPlugin({ template: cmless.template, style: values.style }));
   }
 
+  // PWA
   if (values.pwa) {
     const PwaManifestPlugin = require('webpack-pwa-manifest');
     plugins.push(
@@ -95,6 +112,7 @@ module.exports = (options) => {
     );
   }
 
+  // Service worker
   if (cmless.serviceWorker) {
     const { GenerateSW } = require('workbox-webpack-plugin');
     const serviceWorkerListToRegex = (key) =>
@@ -116,6 +134,7 @@ module.exports = (options) => {
     );
   }
 
+  // Webpack config
   return {
     mode: options.production ? 'production' : 'development',
     devtool: options.production ? false : 'inline-source-map',
@@ -133,5 +152,6 @@ module.exports = (options) => {
     },
     module: { rules },
     plugins,
+    optimization,
   };
 };
