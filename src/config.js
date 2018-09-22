@@ -62,7 +62,7 @@ module.exports = (options) => {
 
   if (cmless.style && options.production) {
     const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-    plugins.push(new MiniCssExtractPlugin());
+    plugins.push(new MiniCssExtractPlugin({ filename: '[name].[hash].css' }));
   }
 
   if (cmless.template) {
