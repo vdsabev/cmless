@@ -11,18 +11,19 @@ export const css = {
 
   fontText: `${fonts.text}, sans-serif`,
 
-  foregroundLight: '#999999',
-  foreground: '#666666',
-  foregroundDark: '#333333',
-  foregroundDarker: '#000000',
+  neutralLightest: '#ffffff',
+  neutralLighter: '#f2f1f0',
+  neutralLight: '#f0efed',
+  neutralMain: '#dedbd9',
+  neutralDark: '#cfc7c2',
+  neutralDarker: '#9c9089',
+  neutralDarkest: '#2b2623',
 
-  neutralLighter: '#ffffff',
-  neutralLight: '#ecf0f1',
-  neutral: '#bdc3c7',
-  neutralDark: '#95a5a6',
+  primary: '#100738',
+  primaryContrast: '#ffffff',
 
-  primary: '#34495e',
   success: '#2ecc71',
+  warning: '#f1c40f',
   danger: '#e74c3c',
   info: '#3498db',
 };
