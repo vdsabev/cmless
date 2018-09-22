@@ -1,0 +1,59 @@
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  transition: all var(--transitionDuration) var(--transitionEasing);
+  transition-property: opacity, filter;
+}
+
+fieldset[disabled] {
+  opacity: 0.8;
+  filter: grayscale(100%);
+}
+
+fieldset[disabled],
+fieldset[disabled] textarea,
+fieldset[disabled] input,
+fieldset[disabled] button {
+  cursor: not-allowed;
+}
+
+fieldset.--loading,
+fieldset.--loading textarea,
+fieldset.--loading input,
+fieldset.--loading button {
+  cursor: progress;
+}
+
+textarea,
+input,
+button {
+  margin-bottom: 1rem;
+  border-radius: 0.25rem;
+  padding: 1rem 0.6rem;
+}
+
+textarea,
+input {
+  outline: 0;
+  border: 1px solid var(--neutral);
+  font-family: var(--fontText);
+  font-size: 1rem;
+
+  transition: box-shadow var(--transitionDuration) var(--transitionEasing);
+
+  &:focus {
+    box-shadow: 0 0 0.6rem rgba(0, 0, 0, 0.3);
+  }
+}
+
+textarea {
+  resize: vertical;
+  min-height: 20rem;
+  max-height: 60rem;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+}
