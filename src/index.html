@@ -11,6 +11,7 @@
     <meta content="on" http-equiv="cleartype">
 
     <base href="/">
+    <link rel="shortcut icon" type="image/png" href="favicon.png" />
 
     <% const fonts = htmlWebpackPlugin.options.style.fonts; %>
     <link href="https://fonts.googleapis.com/css?family=<%= Object.values(fonts).map((font) => font.split(/\s+/).join('+')).join('|') %>" rel="stylesheet">
@@ -22,6 +23,6 @@
       It looks like your browser has JavaScript disabled 😟
       <br>
       Please enable JavaScript to use this website!
-      </noscript>
+    </noscript>
   </body>
 </html>
