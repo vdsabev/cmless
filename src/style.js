@@ -1,15 +1,15 @@
-export const transitionDuration = 0.4;
+export const transitionDuration = 300;
 
 export const fonts = {
   text: 'PT Sans',
 };
 
 export const css = {
-  transitionDuration: `${transitionDuration}s`,
-  transitionEasing: 'cubic-bezier(0.25, 1, 0.25, 1)',
+  transitionDuration: `${transitionDuration}ms`,
+  transitionEasing: 'cubic-bezier(0.05, 0.69, 0.14, 1)',
   transitionElastic: 'cubic-bezier(0.5, 2, 0.5, 0.5)',
 
-  fontText: fonts.text,
+  fontText: `${fonts.text}, sans-serif`,
 
   foregroundLight: '#999999',
   foreground: '#666666',
