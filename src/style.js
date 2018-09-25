@@ -6,8 +6,8 @@ export const fonts = {
 
 export const css = {
   transitionDuration: `${transitionDuration}ms`,
-  transitionEasing: 'cubic-bezier(0.05, 0.69, 0.14, 1)',
-  transitionElastic: 'cubic-bezier(0.5, 2, 0.5, 0.5)',
+  transitionEasing: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+  transitionElastic: 'cubic-bezier(0.33, 3, 0.66, 0)',
 
   fontText: `${fonts.text}, sans-serif`,
 
