@@ -36,7 +36,7 @@
     "workbox-webpack-plugin": "^3.0.1"
   },
   "devDependencies": {
-    "jest": "^22.4.3"
+    "jest": "^23.6.0"
   },
   "jest": {
     "collectCoverage": true,

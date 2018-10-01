@@ -1,3 +1,6 @@
+// NOTE: Fixes `Cannot find module 'browserslist' from 'index.js'` error from `postcss-normalize-unicode`
+jest.mock('optimize-css-assets-webpack-plugin');
+
 const configFactory = require('./config');
 
 describe(`configFactory`, () => {
