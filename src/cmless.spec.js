@@ -7,7 +7,7 @@ describe(`cmless`, () => {
     requireOptionally
       .mockReturnValueOnce({ cmless: { a: '1', b: '${a}2', c: '${b}3' } })
       .mockReturnValueOnce({ cmless: { a: '4' } });
-    expect(cmless()).toEqual({ a: '4', b: '42', c: '423' });
+    expect(cmless()).toMatchObject({ a: '4', b: '42', c: '423' });
   });
 });
 

@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 module.exports = (options, cmless, variables) => {
   const loaders = [];
 
@@ -13,16 +15,27 @@ module.exports = (options, cmless, variables) => {
   loaders.push('css-loader');
 
   // cssnext loader
-  const cssnext = require('postcss-cssnext');
+  const postcssPresetEnv = require('postcss-preset-env');
   loaders.push({
     loader: 'postcss-loader',
     options: {
       plugins: [
-        cssnext({
+        // https://github.com/csstools/postcss-preset-env/issues/32
+        postcssPresetEnv({
+          stage: 2,
+          autoprefixer: { browsers: cmless.browserslist },
+          importFrom: [
+            {
+              'custom-properties': _.mapKeys(variables, (value, key) => `--${key}`),
+            },
+          ],
           features: {
-            // Source: https://jamie.build/last-2-versions
-            autoprefixer: { browsers: cmless.target.browsers },
-            customProperties: { variables },
+            'custom-properties': {
+              // NOTE: Since the custom properties aren't exported to any CSS file,
+              // we need to disable the `preserve` flag to get them to work anywhere
+              preserve: false,
+            },
+            'nesting-rules': true,
           },
         }),
       ],

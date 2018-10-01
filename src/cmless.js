@@ -5,9 +5,15 @@ const requireOptionally = require('./require-optionally');
 
 const cmless = (options) => {
   const defaultPackage = requireOptionally(join(__dirname, '..', 'package.json'));
-  const projectPackage = requireOptionally(join(process.cwd(), 'package.json'));
+  const projectPackage = requireOptionally(join(process.cwd(), 'package.json')) || {};
   return evaluateTemplateStrings(
-    _.merge({}, defaultPackage.cmless, projectPackage ? projectPackage.cmless : {})
+    _.merge(
+      {
+        browserslist: projectPackage.browserslist || defaultPackage.browserslist,
+      },
+      defaultPackage.cmless,
+      projectPackage.cmless
+    )
   );
 };
 
