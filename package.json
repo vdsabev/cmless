@@ -1,17 +1,13 @@
 {
   "private": true,
   "name": "@cmless/seed",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "MIT",
   "scripts": {
     "build": "cmless build",
     "start": "cmless start"
   },
   "devDependencies": {
-    "cmless": "0.8.0"
-  },
-  "cmless": {
-    "input": "src",
-    "serviceWorker": false
+    "cmless": "0.10.2"
   }
 }
