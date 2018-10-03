@@ -1,6 +1,6 @@
 {
   "name": "cmless",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "license": "MIT",
   "main": "./src/index.js",
   "bin": {
@@ -52,7 +52,7 @@
   "cmless": {
     "//": "Default cmless configuration - override in your own project's package.json file",
     "port": 3000,
-    "input": ".",
+    "input": "src",
     "template": "${input}/index.html",
     "script": "${input}/index.js",
     "style": "${input}/style",
@@ -79,9 +79,7 @@
     "clean": [
       "${output}/*"
     ],
-    "serviceWorker": {
-      "swDest": "service-worker.js"
-    }
+    "serviceWorker": false
   },
   "browserslist": [
     "> 0.25%",
