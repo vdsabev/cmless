@@ -1,7 +1,7 @@
 export const transitionDuration = 300;
 
 export const fonts = {
-  text: 'PT Sans',
+  text: { type: 'Google', name: 'Roboto', weights: [400, 700] },
 };
 
 export const css = {
@@ -9,7 +9,7 @@ export const css = {
   transitionEasing: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
   transitionElastic: 'cubic-bezier(0.33, 3, 0.66, 0)',
 
-  fontText: `${fonts.text}, sans-serif`,
+  fontText: `${fonts.text.name}, sans-serif`,
 
   neutralLightest: '#ffffff',
   neutralLighter: '#f2f1f0',
