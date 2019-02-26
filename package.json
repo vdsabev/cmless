@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@cmless/seed",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "license": "MIT",
   "scripts": {
     "build": "cmless build",
