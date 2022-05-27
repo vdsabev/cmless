@@ -1,7 +1,4 @@
 build
 coverage
 node_modules
-.env
-.env.*
-.netlify
-*.log
+*.md
