@@ -81,7 +81,7 @@ processors.processData = async (
     }),
   )
 
-  return { ...data }
+  return Object.assign({}, ...data); // Merges the array of objects into each other - `{ ...data }` is not the same!
 }
 
 function toRowObject(/** @type {string[]} */ columns) {
