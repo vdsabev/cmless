@@ -3,6 +3,9 @@
   publish = "build/"
   command = "npm run build"
 
+[build.environment]
+  NODE_VERSION = "14.17.6"
+
 # Disabled until preserving query parameters is implemented:
 # https://community.netlify.com/t/preserve-query-parameters-on-redirect/2226/24
 # [[redirects]]

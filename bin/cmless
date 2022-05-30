@@ -1,0 +1,45 @@
+#!/usr/bin/env node
+const { execSync } = require('child_process')
+const { join } = require('path')
+const chokidar = require('chokidar')
+const fs = require('fs-extra')
+
+const paths = ['.env', 'data']
+const globs = [...paths, '.env.*']
+const buildDirectory = 'build'
+
+const commands = {
+  build() {
+    commands.init()
+    paths.forEach((path) => fs.copySync(path, join(buildDirectory, path)))
+    execSync('npm run build', { cwd: join(process.cwd(), buildDirectory) })
+  },
+  clean() {
+    fs.removeSync(buildDirectory)
+  },
+  init() {
+    execSync(`npx degit -f https://github.com/cmless/cmless ${buildDirectory}`)
+    execSync('npm install', { cwd: join(process.cwd(), buildDirectory) })
+  },
+  start() {
+    commands.init()
+    chokidar
+      .watch(globs)
+      .on('all', (event, glob) => fs.copy(glob, join(buildDirectory, glob)))
+    execSync('npm start', { cwd: join(process.cwd(), buildDirectory) })
+  },
+}
+
+// Adapted from https://github.com/ant-tool/atool-build/blob/master/src/build.js
+const script = process.argv[2]
+const command = commands[script]
+
+if (command) {
+  command()
+} else {
+  console.error(
+    `Unknown cmless command: ${script}. Try one of the following: ${Object.keys(
+      commands,
+    ).join(' ')}`,
+  )
+}
