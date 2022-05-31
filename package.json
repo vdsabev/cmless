@@ -1,6 +1,6 @@
 {
   "name": "cmless",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A seamless build tool for dazzling websites",
   "scripts": {
     "postinstall": "npm run link",

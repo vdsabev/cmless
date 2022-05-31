@@ -49,7 +49,7 @@ export default {
     const isGoogleDriveFolder = computed(() => api.isGoogleDriveFolder(page.value.url))
     const isCustomComponent = computed(() => page.value.component != null)
     const component = computed(() =>
-      defineAsyncComponent(() => import(`../../data/components/${page.value.component}`)),
+      defineAsyncComponent(() => import(`../../data/${page.value.component}`)),
     )
 
     return {
