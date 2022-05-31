@@ -1,0 +1,27 @@
+[build]
+  functions = "api/"
+  publish = "build/"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "14.17.6"
+
+# Disabled until preserving query parameters is implemented:
+# https://community.netlify.com/t/preserve-query-parameters-on-redirect/2226/24
+# [[redirects]]
+#   from = "/api/*"
+#   to = "/.netlify/functions/:splat"
+#   status = 307
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[dev]
+  framework = "#custom"
+  command = "vue-cli-service serve"
+  targetPort = 8080
+  port = 3000
+  publish = "public"
+  autoLaunch = false
