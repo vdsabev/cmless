@@ -1,7 +1,8 @@
-build
-coverage
-node_modules
+.netlify/
+build/
+coverage/
+data/
+node_modules/
 .env
 .env.*
-.netlify
 *.log

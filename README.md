@@ -8,31 +8,18 @@
 
 <hr />
 
-# Quick start
-Want to get going without installing?
-
-## Start development server
-```
-npx cmless start
-```
-
-## Build website for production
-```
-npx cmless build
-```
-
 # Local installation
-To install the package as a development dependency of your project:
+First, install the package as a dependency:
 ```
-npm install cmless -D
+npm install cmless
 ```
 
 Then modify your `package.json` file to add the following:
 ```json
 {
   "scripts": {
-    "start": "cmless start",
-    "build": "cmless build"
+    "start": "cd node_modules/cmless && npm run start && cd ../..",
+    "build": "cd node_modules/cmless && npm run build && cd ../.."
   }
 }
 ```
