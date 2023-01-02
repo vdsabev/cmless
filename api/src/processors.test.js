@@ -1,8 +1,8 @@
-jest.mock('./adapters/google')
+jest.mock('./adapters/google');
 
-import * as google from './adapters/google'
-import { processData, processPath } from './processors'
-const home = require('../../fixtures/pages/home.json')
+const google = require('./adapters/google');
+const { processData, processPath } = require('./processors');
+const home = require('../../fixtures/pages/home.json');
 
 describe(`processPath`, () => {
   test(`home.json`, async () => {
@@ -10,7 +10,7 @@ describe(`processPath`, () => {
       home,
       'body.content[].paragraph.elements[].textRun.textStyle.link.url',
       (url) => url.replace('http:', 'https:'),
-    )
+    );
 
     expect(
       result.body.content.some(
@@ -23,9 +23,9 @@ describe(`processPath`, () => {
               element.textRun.textStyle.link.url === 'https://cmless.netlify.app/diary',
           ),
       ),
-    ).toBe(true)
-  })
-})
+    ).toBe(true);
+  });
+});
 
 describe(`processData`, () => {
   const spreadsheetValues = {
@@ -39,18 +39,18 @@ describe(`processData`, () => {
         ['Play dead', '1'],
       ],
     },
-  }
+  };
 
   test(`null datasources`, async () => {
-    expect(await processData(null)).toEqual({})
-  })
+    expect(await processData(null)).toEqual({});
+  });
 
   test(`empty datasources`, async () => {
-    expect(await processData({})).toEqual({})
-  })
+    expect(await processData({})).toEqual({});
+  });
 
   test(`valid Google Sheets URL`, async () => {
-    google.sheets.spreadsheets.values.get.mockResolvedValueOnce(spreadsheetValues)
+    google.sheets.spreadsheets.values.get.mockResolvedValueOnce(spreadsheetValues);
 
     const result = await processData({
       skills: {
@@ -63,7 +63,7 @@ describe(`processData`, () => {
           },
         },
       },
-    })
+    });
 
     expect(result).toEqual({
       skills: [
@@ -71,11 +71,11 @@ describe(`processData`, () => {
         { name: 'Lie down', level: 3 },
         { name: 'Play dead', level: 1 },
       ],
-    })
-  })
+    });
+  });
 
   test(`undefined column mapping`, async () => {
-    google.sheets.spreadsheets.values.get.mockResolvedValueOnce(spreadsheetValues)
+    google.sheets.spreadsheets.values.get.mockResolvedValueOnce(spreadsheetValues);
 
     const result = await processData({
       skills: {
@@ -84,7 +84,7 @@ describe(`processData`, () => {
           range: 'Skills!A:B',
         },
       },
-    })
+    });
 
     expect(result).toEqual({
       skills: [
@@ -92,8 +92,8 @@ describe(`processData`, () => {
         { Name: 'Lie down', Level: 3 },
         { Name: 'Play dead', Level: 1 },
       ],
-    })
-  })
+    });
+  });
 
   test(`unsupported URL`, async () => {
     try {
@@ -101,8 +101,8 @@ describe(`processData`, () => {
         skills: {
           url: 'https://google.com',
         },
-      })
-      expect(response).toBe(undefined) // Should never execute
+      });
+      expect(response).toBe(undefined); // Should never execute
     } catch (error) {
       expect(error).toEqual({
         response: {
@@ -110,8 +110,8 @@ describe(`processData`, () => {
           body: `Unsupported datasource URL: https://google.com`,
         },
         toString: expect.any(Function),
-      })
-      expect(error.toString()).toBe(error.response.body)
+      });
+      expect(error.toString()).toBe(error.response.body);
     }
-  })
-})
+  });
+});

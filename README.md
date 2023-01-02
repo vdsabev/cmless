@@ -3,25 +3,37 @@
 </p>
 
 <p align="center">
-  A seamless build tool for dazzling front end projects
+  Seamless tools for building dazzling websites
 </p>
 
 <hr />
 
-# Local installation
-First, install the package as a dependency:
-```
+# Usage
+First, install as a dependency:
+```sh
 npm install cmless
 ```
 
-Then modify your `package.json` file to add the following:
-```json
-{
-  "scripts": {
-    "start": "cd node_modules/cmless && npm run start && cd ../..",
-    "build": "cd node_modules/cmless && npm run build && cd ../.."
-  }
-}
+Then require the Lambda functions in your own Lambda function:
+
+```sh
+const { getData } = require('cmless');
+
+exports.handler = getData;
 ```
 
-You can then execute `npm start` or `npm run build` in the command line.
+You can now call this function from your local server, for example if you're running Netlify the function will be at http://localhost:4000/.netlify/functions/getData
+
+# Local development
+To start a local server using these functions, first install the dependencies:
+
+```sh
+npm install
+```
+
+Then, install the `netlify-cli` package globally:
+```sh
+npm install netlify-cli -g
+```
+
+Finally, run `npm start` and call a function, for example http://localhost:4000/api/getDocumentJSON?url=YOUR_DOCUMENT_URL

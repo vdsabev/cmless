@@ -1,48 +1,20 @@
 {
   "name": "cmless",
-  "version": "1.0.6",
-  "description": "A seamless build tool for dazzling websites",
+  "version": "2.0.0",
+  "description": "Seamless tools for building dazzling websites",
   "scripts": {
-    "postinstall": "npm run link",
     "start": "netlify dev",
-    "build": "vue-cli-service build",
     "test": "jest --watch",
-    "test.all": "jest",
-    "lint": "vue-cli-service lint --no-fix && prettier --check .",
-    "lint.fix": "vue-cli-service lint && prettier --write .",
-    "link": "node scripts/link.js",
-    "unlink": "node scripts/unlink.js"
+    "test.all": "jest"
   },
   "dependencies": {
-    "@tailwindcss/typography": "0.5.2",
-    "@vue/cli-plugin-babel": "5.0.4",
-    "@vue/cli-plugin-eslint": "5.0.4",
-    "@vue/cli-plugin-router": "5.0.4",
-    "@vue/cli-service": "5.0.4",
-    "@vue/compiler-sfc": "3.2.36",
-    "autoprefixer": "10.4.7",
-    "babel-eslint": "10.1.0",
-    "eslint": "8.16.0",
-    "eslint-plugin-vue": "9.0.1",
-    "google-auth-library": "8.0.2",
-    "googleapis": "100.0.0",
-    "lessttp": "0.2.4",
-    "netlify": "11.0.1",
-    "postcss": "8.4.14",
-    "prettier": "2.6.2",
-    "tailwindcss": "3.0.24",
-    "vue": "3.2.36",
-    "vue-cli-plugin-tailwind": "3.0.0",
-    "vue-router": "4.0.15"
+    "google-auth-library": "8.7.0",
+    "googleapis": "110.0.0",
+    "lessttp": "0.2.4"
   },
   "devDependencies": {
-    "@types/jest": "27.5.1",
-    "jest-fetch-mock": "3.0.3",
-    "jest": "28.1.0"
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+    "@types/jest": "^29.2.5",
+    "jest-fetch-mock": "^3.0.3",
+    "jest": "^29.3.1"
+  }
 }

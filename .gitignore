@@ -1,7 +1,5 @@
 .netlify/
-build/
 coverage/
-data/
 node_modules/
 .env
 .env.*
