@@ -1,7 +1,14 @@
 const { JWT } = require('google-auth-library');
 const googleapis = require('googleapis');
 
-const serviceAccount = JSON.parse(process.env.GOOGLE_API_KEY);
+let serviceAccount;
+try {
+  serviceAccount = JSON.parse(process.env.GOOGLE_API_KEY);
+} catch (error) {
+  console.error(`Invalid GOOGLE_API_KEY, set it to a valid service account in .env`);
+  process.exit(1);
+}
+
 const auth = new JWT({
   email: serviceAccount.client_email,
   key: serviceAccount.private_key,

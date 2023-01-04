@@ -8,6 +8,7 @@ exports.handler = http.function({
     query: {
       type: 'object',
       properties: {
+        baseUrl: { type: 'string' },
         url: { type: 'string' },
       },
       required: ['url'],
@@ -33,7 +34,7 @@ exports.handler = http.function({
 
       return {
         body: await processDocument(document, [
-          processLinkURLsMatchingBase,
+          processLinkURLsMatchingBase(request.query.baseUrl),
           processLinkURLsMatchingPages,
         ]),
       };
@@ -53,20 +54,23 @@ async function processDocument(document, processors) {
   return document;
 }
 
-// TODO: Use `baseUrl` or remove it
-function processLinkURLsMatchingBase(document, baseUrl = '') {
-  return processPath(
-    document,
-    'body.content[].paragraph.elements[].textRun.textStyle.link.url',
-    (urlString) => {
-      try {
-        const url = new URL(urlString);
-        return url.hostname === baseUrl ? url.pathname + url.search + url.hash : url.href;
-      } catch {
-        return urlString;
-      }
-    },
-  );
+function processLinkURLsMatchingBase(baseUrl) {
+  return function (document) {
+    return processPath(
+      document,
+      'body.content[].paragraph.elements[].textRun.textStyle.link.url',
+      (urlString) => {
+        try {
+          const url = new URL(urlString);
+          return url.hostname === baseUrl
+            ? url.pathname + url.search + url.hash
+            : url.href;
+        } catch {
+          return urlString;
+        }
+      },
+    );
+  };
 }
 
 // TODO: If the content links to https://drive.google.com/open?id= get the parents of all linked files and link to the parents'
