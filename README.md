@@ -53,10 +53,10 @@ import defineConfig from 'cmless/vite.config';
 
 export default defineConfig({
   // These are optional, with some sensible defaults
-  entry: 'src/app.tsx',
+  entry: `${process.cwd()}/src/app.tsx`,
   template: 'node_modules/cmless/index.html',
   alias: {
-    '~': 'src',
+    '~': `${process.cwd()}/src`,
   },
 
   // Only `favicon` and `title` are required

@@ -6,14 +6,14 @@ module.exports = (/** @type {import('./types.d').Settings} */ settings) => {
     plugins: [
       createHtmlPlugin({
         minify: true,
-        entry: settings.entry || 'src/app.tsx',
+        entry: settings.entry || `${process.cwd()}/src/app.tsx`,
         template: settings.template || 'node_modules/cmless/index.html',
         inject: { data: settings },
       }),
     ],
     resolve: {
       alias: settings.alias || {
-        '~': 'src',
+        '~': `${process.cwd()}/src`,
       },
     },
   });
