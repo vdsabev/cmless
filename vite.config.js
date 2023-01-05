@@ -8,7 +8,14 @@ module.exports = (/** @type {import('./types.d').Settings} */ settings) => {
         minify: true,
         entry: settings.entry || `${process.cwd()}/src/app.tsx`,
         template: settings.template || 'node_modules/cmless/index.html',
-        inject: { data: settings },
+        inject: {
+          data: {
+            ...settings,
+            // Must be defined for the template to compile
+            meta: settings.meta || {},
+            fonts: settings.fonts || {},
+          },
+        },
       }),
     ],
     resolve: {
