@@ -1,9 +1,7 @@
 {
   "name": "cmless",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Seamless tools for building dazzling websites",
-  "main": "./index.js",
-  "types": "./types.d.ts",
   "scripts": {
     "start": "netlify dev",
     "test": "jest --watch",
