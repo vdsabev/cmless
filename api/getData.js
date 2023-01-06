@@ -3,30 +3,33 @@ const { processData } = require('./src/processors');
 
 // TODO: Cache the request using HTTP headers
 exports.handler = http.function({
-  method: 'POST',
   request: {
-    body: {
+    query: {
       type: 'object',
       additionalProperties: {
         type: 'object',
-        url: { type: 'string' },
-        options: {
-          type: 'object',
-          additionalProperties: {
-            range: { type: 'string' },
-            columns: {
-              type: 'object',
-              additionalProperties: { type: 'string' },
+        properties: {
+          url: { type: 'string' },
+          options: {
+            type: 'object',
+            properties: {
+              range: { type: 'string' },
+              columns: {
+                type: 'object',
+                additionalProperties: { type: 'string' },
+              },
             },
+            additionalProperties: false,
           },
         },
+        additionalProperties: false,
       },
     },
   },
   async handler(request) {
     try {
       return {
-        body: await processData(request.body),
+        body: await processData(request.query),
       };
     } catch (error) {
       return {

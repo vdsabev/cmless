@@ -1,7 +1,7 @@
 const { defineConfig } = require('vite');
 const { createHtmlPlugin } = require('vite-plugin-html');
 
-module.exports = (/** @type {import('./types.d').Settings} */ settings) => {
+module.exports = (/** @type {import('./types').Settings} */ settings) => {
   return defineConfig({
     plugins: [
       createHtmlPlugin({

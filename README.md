@@ -29,7 +29,7 @@ const { getData } = require('cmless');
 exports.handler = getData;
 ```
 
-You can now call these functions from your local server - with Netlify the function will be at http://localhost:4000/.netlify/functions/getData
+You can now call these functions from your local server - with Netlify the function will be at http://localhost:3000/.netlify/functions/getData
 
 # Local development
 To start a local server using these functions, first install the dependencies:
@@ -43,7 +43,7 @@ Then, install the `netlify-cli` package globally:
 npm install netlify-cli -g
 ```
 
-Finally, run `npm start` and call a function, for example http://localhost:4000/api/getDocumentJSON?url=YOUR_DOCUMENT_URL_ENCODED
+Finally, run `npm start` and call a function, for example http://localhost:3000/api/getDocumentJSON?url=YOUR_DOCUMENT_URL_ENCODED
 
 # With Vite
 When using Vite as a bundler, you can create a `vite.config.js` file in your root folder and use `cmless/vite.config`. This gives you out-of-the-box design system, loading Google Fonts, defining CSS reset rules, and more!

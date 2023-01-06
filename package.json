@@ -1,18 +1,20 @@
 {
   "name": "cmless",
-  "version": "2.1.6",
+  "version": "2.2.0",
   "description": "Seamless tools for building dazzling websites",
+  "main": "./index.js",
+  "types": "./types.d.ts",
   "scripts": {
     "start": "netlify dev",
     "test": "jest --watch",
     "test.all": "jest"
   },
   "dependencies": {
-    "google-auth-library": "8.7.0",
-    "googleapis": "110.0.0",
-    "lessttp": "0.2.4",
-    "vite": "4.0.4",
-    "vite-plugin-html": "3.2.0"
+    "google-auth-library": "^8.7.0",
+    "googleapis": "^110.0.0",
+    "lessttp": "^0.3.0",
+    "vite": "^4.0.4",
+    "vite-plugin-html": "^3.2.0"
   },
   "devDependencies": {
     "@types/jest": "^29.2.5",
