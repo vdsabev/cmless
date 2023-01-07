@@ -1,7 +1,10 @@
 {
   "name": "cmless",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Seamless tools for building dazzling websites",
+  "bin": {
+    "cmless": "./cmless.js"
+  },
   "scripts": {
     "start": "netlify dev",
     "test": "jest --watch",
