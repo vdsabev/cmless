@@ -1,12 +1,13 @@
 {
   "name": "cmless",
-  "version": "2.3.1",
+  "version": "2.4.2",
   "description": "Seamless tools for building dazzling websites",
+  "main": "cmless.config.js",
   "bin": {
-    "cmless": "./cmless.js"
+    "cmless": "./cli.js"
   },
   "scripts": {
-    "start": "netlify dev",
+    "start": "npx netlify dev",
     "test": "jest --watch",
     "test.all": "jest"
   },
@@ -14,7 +15,7 @@
     "cosmiconfig": "^8.0.0",
     "google-auth-library": "^8.7.0",
     "googleapis": "^110.0.0",
-    "lessttp": "^0.3.0",
+    "lessttp": "^0.3.3",
     "vite": "^4.0.4",
     "vite-plugin-html": "^3.2.0"
   },

@@ -1,11 +1,6 @@
 [build]
   functions = "api/"
 
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/:splat"
-  status = 307
-
 [dev]
   autoLaunch = false
   port=3000

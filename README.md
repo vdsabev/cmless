@@ -14,52 +14,21 @@ First, install as a dependency:
 npm install cmless
 ```
 
-If you're using Netlify, set the functions folder in your `netlify.toml` file:
-
-```toml
-[build]
-  functions = "node_modules/cmless/api/"
-```
-
-Or if you need more flexibility - require the Lambda functions directly:
-
-```sh
-const { getData } = require('cmless');
-
-exports.handler = getData;
-```
-
-You can now call these functions from your local server - with Netlify the function will be at http://localhost:3000/.netlify/functions/getData
-
-# Local development
-To start a local server using these functions, first install the dependencies:
-
-```sh
-npm install
-```
-
-Then, install the `netlify-cli` package globally:
-```sh
-npm install netlify-cli -g
-```
-
-Finally, run `npm start` and call a function, for example http://localhost:3000/api/getDocumentJSON?url=YOUR_DOCUMENT_URL_ENCODED
-
-# With Vite
-When using Vite as a bundler, you can create a `vite.config.js` file in your root folder and use `cmless/vite.config`. This gives you out-of-the-box design system, loading Google Fonts, defining CSS reset rules, and more!
+Create a `cmless.config.js` file in your root folder and import `cmless`. Out of the box this gives you a design system, loading Google Fonts, defining CSS variables and reset rules, and more!
 
 ```js
-import defineConfig from 'cmless/vite.config';
+const defineConfig = require('cmless');
 
-export default defineConfig({
-  // These are optional, with some sensible defaults
+module.exports = defineConfig({
+  // Settings with some sensible defaults
   entry: `${process.cwd()}/src/app.tsx`,
   template: 'node_modules/cmless/index.html',
-  alias: {
-    '~': `${process.cwd()}/src`,
+  theme: {
+    // CSS variables, see `theme.js`
   },
+  reset: 'node_modules/cmless/reset.css',
 
-  // Only `favicon` and `title` are required
+  // Other settings not defined by default
   favicon:
     'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 110 110%22><text y=%22.9em%22 font-size=%2290%22>🔨</text></svg>',
   title: 'Hammer - a website about hammers',
@@ -73,3 +42,32 @@ export default defineConfig({
   },
 });
 ```
+
+`cmless` uses Vite under the hood, so `defineConfig` returns a Vite config with some plugins. I haven't tried customizing it yet but if you have such a use case I'd like to hear about it.
+
+# API lambda functions
+If you're using Netlify, set the functions folder in your `netlify.toml` file:
+
+```toml
+[build]
+  functions = "node_modules/cmless/api/"
+```
+
+Or if you need more flexibility - require the lambda functions directly:
+
+```sh
+const { getData } = require('cmless/api');
+
+exports.handler = getData;
+```
+
+You can now call these functions from your local server - with Netlify the function will be at http://localhost:3000/.netlify/functions/getData
+
+# Contribution
+To start a local server using these functions, first install the dependencies:
+
+```sh
+npm install
+```
+
+Then run `npm start` and call a function, for example http://localhost:3000/.netlify/functions/getDocumentJSON?url=YOUR_DOCUMENT_URL_ENCODED
