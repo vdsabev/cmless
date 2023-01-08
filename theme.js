@@ -293,4 +293,6 @@ module.exports = {
   'glow-3': '0 0 var(--size-3) 0 rgba(255, 255, 255, 0.2)',
   'glow-4': '0 0 var(--size-4) 0 rgba(255, 255, 255, 0.2)',
   'glow-5': '0 0 var(--size-5) 0 rgba(255, 255, 255, 0.2)',
+
+  'system-ui': `system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'`,
 };

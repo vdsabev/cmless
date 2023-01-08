@@ -6,9 +6,6 @@ const theme = require('./theme');
 
 module.exports = (/** @type {import('./types').Settings} */ settings) => {
   const fonts = settings.fonts || {};
-
-  // Destructure `system-ui` out so we can order overrides properly
-  const { ['system-ui']: systemUi, ...rest } = theme; // TODO: Test if this is necessary
   const data = {
     favicon: '',
     title: '',
@@ -18,12 +15,8 @@ module.exports = (/** @type {import('./types').Settings} */ settings) => {
       ...settings.meta,
     },
     fonts,
-    // Define `system-ui` first, override it if available.
-    // Then define the `font-` variables and override them via `theme` if available.
     theme: {
-      'system-ui':
-        systemUi ||
-        `system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'`,
+      ...theme,
       ...Object.entries(fonts).reduce(
         (fonts, [type, name]) => ({
           ...fonts,
@@ -31,7 +24,7 @@ module.exports = (/** @type {import('./types').Settings} */ settings) => {
         }),
         {},
       ),
-      ...rest,
+      ...settings.theme,
     },
     reset: fs.readFileSync(settings.reset || 'node_modules/cmless/reset.css'),
   };
@@ -48,7 +41,6 @@ module.exports = (/** @type {import('./types').Settings} */ settings) => {
     resolve: {
       alias: {
         '~': `${process.cwd()}/src`,
-        ...settings.alias,
       },
     },
   });
