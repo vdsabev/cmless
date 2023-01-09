@@ -16,17 +16,19 @@ module.exports = (/** @type {Partial<import('./types').Settings>} */ settings) =
       ...settings.meta,
     },
     fonts,
-    theme: {
-      ...theme,
-      ...Object.entries(fonts).reduce(
-        (fonts, [type, name]) => ({
-          ...fonts,
-          [`font-${type}`]: `${name}, var(--system-ui)`,
-        }),
-        {},
-      ),
-      ...settings.theme,
-    },
+    theme:
+      settings.theme === false || settings.theme === null
+        ? {}
+        : {
+            ...theme,
+            ...Object.entries(fonts).reduce(
+              (fonts, [type, name]) => ({
+                ...fonts,
+                [`font-${type}`]: `${name}, var(--system-ui)`,
+              }),
+              {},
+            ),
+          },
     reset:
       settings.reset === true || settings.reset === undefined
         ? fs.readFileSync('node_modules/cmless/reset.css').toString()

@@ -9,7 +9,7 @@ export interface Settings {
   meta: Record<MetaTagName, MetaTagContent>;
 
   fonts: Record<FontType, FontName>;
-  theme: Record<CssVariableName, CssVariableValue>;
+  theme: boolean | Record<CssVariableName, CssVariableValue>;
   reset: boolean | CssResetContents;
 
   forms: Record<FormName, Record<FormElementName, FormElementAttributes>>;

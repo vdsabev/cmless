@@ -23,8 +23,10 @@ module.exports = defineConfig({
   // Settings that already have some sensible defaults
   entry: `${process.cwd()}/src/app.tsx`,
   template: 'node_modules/cmless/index.html',
+  // Set to `false` or `null` to not use CSS variables.
+  // Otherwise will use the variables defined in `theme.js`, allowing you to override them like this:
   theme: {
-    // CSS variables, see `theme.js`
+    'system-ui': 'Comic Sans MS',
   },
   // Set to a string containing CSS to use as a style reset.
   // Set to `true` or leave undefined to use the built-in `reset.css`.
