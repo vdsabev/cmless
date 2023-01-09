@@ -4,11 +4,12 @@ const { createHtmlPlugin } = require('vite-plugin-html');
 
 const theme = require('./theme');
 
-module.exports = (/** @type {import('./types').Settings} */ settings) => {
+module.exports = (/** @type {Partial<import('./types').Settings>} */ settings) => {
   const fonts = settings.fonts || {};
-  const data = {
+  /** @type {import('./types').Settings} */ const data = {
     favicon: '',
     title: '',
+    forms: {},
     ...settings,
     meta: {
       viewport: 'width=device-width, initial-scale=1.0',
@@ -26,7 +27,7 @@ module.exports = (/** @type {import('./types').Settings} */ settings) => {
       ),
       ...settings.theme,
     },
-    reset: fs.readFileSync(settings.reset || 'node_modules/cmless/reset.css'),
+    reset: fs.readFileSync(settings.reset || 'node_modules/cmless/reset.css').toString(),
   };
 
   return defineConfig({

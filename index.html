@@ -1,49 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+  <meta charset="utf-8" //>
 
-    <% if (favicon) { %>
-    <link rel="icon" href="<%- favicon %>" />
-    <% } %>
-    <!--  -->
-    <% if (title) { %>
-    <title><%- title %></title>
-    <% } %>
-    <!--  -->
-    <% for (const [name, content] of Object.entries(meta)) { %>
-    <meta name="<%- name %>" content="<%- content %>" />
-    <% } %>
-    <!--  -->
-    <% const fontNames = Object.values(fonts); %>
-    <!--  -->
-    <% if (fontNames.length > 0) { %>
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css?family=<%- fontNames.map(font => font.replaceAll(' ', '+')).join('|') %>&display=swap"
-    />
-    <% } %>
+  <% if (favicon) { %>
+  <link rel="icon" href="<%= favicon %>" //>
+  <% } %>
 
-    <style>
-      <% const variables = Object.entries(theme); %>
-      <% if (variables.length > 0) { %>
-      :root {
-        <% for (const [name, value] of variables) { %>
-        --<%- name %>: <%- value %>;
-        <% } %>
-      }
+  <% if (title) { %>
+  <title><%= title %></title>
+  <% } %>
+
+  <% for (const [name, content] of Object.entries(meta)) { %>
+  <meta name="<%= name %>" content="<%= content %>" //>
+  <% } %>
+
+  <base href="/" //>
+
+  <% const fontNames = Object.values(fonts); %>
+  <% if (fontNames.length > 0) { %>
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css?family=<%= fontNames.map(font => font.replaceAll(' ', '+')).join('|') %>&display=swap"
+  //>
+  <% } %>
+
+  <style>
+    <% const variables = Object.entries(theme); %>
+    <% if (variables.length > 0) { %>
+    :root {
+      <% for (const [name, value] of variables) { %>
+      --<%= name %>: <%- value %>;
       <% } %>
+    }
+    <% } %>
 
-      <%- reset %>
-    </style>
-  </head>
+    <%- reset.split('\n').join('\n    ') %>
+  </style>
+</head>
 
-  <body>
-    <main></main>
-    <noscript>
-      It looks like your browser has JavaScript disabled 😟
-      <br />
-      Please enable JavaScript to use this website!
-    </noscript>
+<body>
+  <% for (const [name, fields] of Object.entries(forms)) { %>
+  <form name="<%= name %>" netlify netlify-honeypot="bot-field" hidden>
+    <% for (const [name, { tagName, ...attributes }] of Object.entries(fields)) { %>
+    <<%= tagName %> <%- Object.entries({ name, ...attributes }).map(([key, value]) => value ? `${key}="${value}"` : key).join(' ') %><%- tagName === 'input' ? ' //>' : `></${tagName}>` %>
+    <% } %>
+  </form>
+  <% } %>
+
+  <main></main>
+
+  <noscript>
+    It looks like your browser has JavaScript disabled 😟
+    <br />
+    Please enable JavaScript to use this website!
+  </noscript>
   </body>
 </html>

@@ -1,13 +1,32 @@
 export * from './api/src/types';
 
 export interface Settings {
-  entry?: string;
-  template?: string;
+  entry: string;
+  template: string;
 
   favicon: string;
   title: string;
-  meta?: Record<string, string>;
-  fonts?: Record<string, string>;
-  theme?: Record<string, string>;
-  reset?: string;
+  meta: Record<MetaTagName, MetaTagContent>;
+
+  fonts: Record<FontType, FontName>;
+  theme: Record<CssVariableName, CssVariableValue>;
+  reset: string;
+
+  forms: Record<FormName, Record<FormElementName, FormElementAttributes>>;
 }
+
+type MetaTagName = string;
+type MetaTagContent = string;
+
+type FontType = string;
+type FontName = string;
+
+type CssVariableName = string;
+type CssVariableValue = string;
+
+type FormName = string;
+type FormElementName = string;
+type FormElementAttributes = {
+  tagName: keyof HTMLElementTagNameMap;
+  [key: string]: string;
+};

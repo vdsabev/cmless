@@ -20,7 +20,7 @@ Create a `cmless.config.js` file in your root folder and import `cmless`. Out of
 const defineConfig = require('cmless');
 
 module.exports = defineConfig({
-  // Settings with some sensible defaults
+  // Settings that already have some sensible defaults
   entry: `${process.cwd()}/src/app.tsx`,
   template: 'node_modules/cmless/index.html',
   theme: {
@@ -28,22 +28,45 @@ module.exports = defineConfig({
   },
   reset: 'node_modules/cmless/reset.css',
 
-  // Other settings not defined by default
+  // Other settings - not defined by default
   favicon:
     'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 110 110%22><text y=%22.9em%22 font-size=%2290%22>🔨</text></svg>',
   title: 'Hammer - a website about hammers',
   meta: {
     author: 'MC Hammer',
-    description: 'Stop, collaborate and listen!',
+    description: 'Stop, collaborate, and listen!',
   },
   fonts: {
     title: 'Montserrat',
     text: 'Inter',
   },
+
+  // Optional built-in support for Netlify forms: https://docs.netlify.com/forms/setup
+  forms: {
+    contact: {
+      text: { tagName: 'textarea' },
+      email: { tagName: 'input', type: 'email' },
+    },
+  },
 });
 ```
 
-`cmless` uses Vite under the hood, so `defineConfig` returns a Vite config with some plugins. I haven't tried customizing it yet but if you have such a use case I'd like to hear about it.
+# Plugins and customizing config
+`cmless` uses Vite under the hood, so `defineConfig` returns a Vite config with some plugins pre-configured. To add more plugins or otherwise customize config, for example adding Vue support, try the following:
+
+```js
+const vue = require('@vitejs/plugin-vue')
+const defineConfig = require('cmless')
+
+const cmless = defineConfig({
+  entry: 'src/main.js',
+})
+
+module.exports = {
+  ...cmless,
+  plugins: [...cmless.plugins, vue()],
+}
+```
 
 # API lambda functions
 If you're using Netlify, set the functions folder in your `netlify.toml` file:
