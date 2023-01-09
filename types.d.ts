@@ -10,7 +10,7 @@ export interface Settings {
 
   fonts: Record<FontType, FontName>;
   theme: Record<CssVariableName, CssVariableValue>;
-  reset: string;
+  reset: boolean | CssResetContents;
 
   forms: Record<FormName, Record<FormElementName, FormElementAttributes>>;
 }
@@ -23,6 +23,7 @@ type FontName = string;
 
 type CssVariableName = string;
 type CssVariableValue = string;
+type CssResetContents = string;
 
 type FormName = string;
 type FormElementName = string;
