@@ -1,6 +1,6 @@
 {
   "name": "cmless",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "Seamless tools for building dazzling websites",
   "main": "cmless.config.js",
   "bin": {

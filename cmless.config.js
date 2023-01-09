@@ -27,7 +27,7 @@ module.exports = (/** @type {Partial<import('./types').Settings>} */ settings) =
       ),
       ...settings.theme,
     },
-    reset: fs.readFileSync(settings.reset || 'node_modules/cmless/reset.css').toString(),
+    reset: settings.reset ?? fs.readFileSync('node_modules/cmless/reset.css').toString(),
   };
 
   return defineConfig({

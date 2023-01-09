@@ -26,7 +26,7 @@ module.exports = defineConfig({
   theme: {
     // CSS variables, see `theme.js`
   },
-  reset: 'node_modules/cmless/reset.css',
+  reset: 'The contents of a CSS style reset - see `reset.css`',
 
   // Other settings - not defined by default
   favicon:
