@@ -6,7 +6,7 @@ interface Http {
   delete(url: string, options?: RequestInit): Promise<any>;
 }
 
-declare module 'cmless/http' {
+declare module 'cmless/client/http' {
   const http: Http;
   export default http;
 }
