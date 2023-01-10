@@ -1,4 +1,4 @@
-export * from './api/src/types';
+export * from './server/src/types';
 
 export interface Settings {
   entry: string;

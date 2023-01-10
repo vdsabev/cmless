@@ -21,17 +21,17 @@ const defineConfig = require('cmless');
 
 module.exports = defineConfig({
   // Settings that already have some sensible defaults
-  entry: `${process.cwd()}/src/app.tsx`,
-  template: 'node_modules/cmless/index.html',
+  entry: 'src/app.tsx',
+  template: 'node_modules/cmless/client/index.html',
   // Set to `false` or `null` to not use CSS variables.
-  // Otherwise will use the variables defined in `theme.js`, allowing you to override them like this:
+  // Otherwise will use the variables defined in `client/theme.js`, allowing you to override them like this:
   theme: {
     'system-ui': 'Comic Sans MS',
   },
   // Set to a string containing CSS to use as a style reset.
-  // Set to `true` or leave undefined to use the built-in `reset.css`.
+  // Set to `true` or leave undefined to use the built-in `client/reset.css`.
   // Set to `false`, `null`, or an empty string to not use a style reset.
-  reset: fs.readFileSync('node_modules/cmless/reset.css').toString(),
+  reset: fs.readFileSync('node_modules/cmless/client/reset.css').toString(),
 
   // Other settings - not defined by default
   favicon:
@@ -78,13 +78,13 @@ If you're using Netlify, set the functions folder in your `netlify.toml` file:
 
 ```toml
 [build]
-  functions = "node_modules/cmless/api/"
+  functions = "node_modules/cmless/server/"
 ```
 
 Or if you need more flexibility - require the lambda functions directly:
 
 ```sh
-const { getData } = require('cmless/api');
+const { getData } = require('cmless/server');
 
 exports.handler = getData;
 ```
