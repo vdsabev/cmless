@@ -34,9 +34,14 @@ module.exports = defineConfig({
   reset: fs.readFileSync('node_modules/cmless/client/reset.css').toString(),
 
   // Other settings - not defined by default
-  favicon:
-    'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 110 110%22><text y=%22.9em%22 font-size=%2290%22>🔨</text></svg>',
   title: 'Hammer - a website about hammers',
+  link: [
+    {
+      rel: 'icon',
+      type: 'image/svg+xml',
+      href: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 110 110%22><text y=%22.9em%22 font-size=%2290%22>🔨</text></svg>',
+    },
+  ],
   meta: {
     author: 'MC Hammer',
     description: 'Stop, collaborate, and listen!',

@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" //>
 
-  <% if (favicon) { %>
-  <link rel="icon" href="<%= favicon %>" //>
-  <% } %>
-
   <% if (title) { %>
   <title><%= title %></title>
+  <% } %>
+
+  <% for (const attributes of link) { %>
+  <link <%- Object.entries(attributes).map(([key, value]) => `${key}="${value}"`).join(' ') %> //>
   <% } %>
 
   <% for (const [name, content] of Object.entries(meta)) { %>

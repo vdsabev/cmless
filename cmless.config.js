@@ -8,10 +8,12 @@ const theme = require('./client/theme');
 module.exports = (/** @type {Partial<import('./types').Settings>} */ settings) => {
   const fonts = settings.fonts || {};
   /** @type {import('./types').Settings} */ const data = {
-    favicon: '',
     title: '',
     forms: {},
     ...settings,
+    link:
+      settings.link ||
+      (settings.favicon ? [{ rel: 'icon', href: settings.favicon }] : []),
     meta: {
       viewport: 'width=device-width, initial-scale=1.0',
       ...settings.meta,

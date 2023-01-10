@@ -4,7 +4,9 @@ export interface Settings {
   entry: string;
   template: string;
 
+  /** @deprecated To be removed in cmless@4.0.0, use `link` instead */
   favicon: string;
+  link: Array<{ rel: string; href: string; [key]: string }>;
   title: string;
   meta: Record<MetaTagName, MetaTagContent>;
 
