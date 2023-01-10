@@ -7,8 +7,7 @@ const server = require('child_process').spawn(
   path.join(require.resolve('vite'), '..', 'bin', 'vite.js'),
   [
     '--config',
-    cmless.filepath || path.join(__dirname, 'cmless.config.js'),
-    ,
+    cmless.filepath || 'node_modules/cmless/cmless.config.js',
     ...process.argv.slice(2),
   ],
 );

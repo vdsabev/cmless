@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 
 const { defineConfig } = require('vite');
 const { createHtmlPlugin } = require('vite-plugin-html');
@@ -33,7 +32,7 @@ module.exports = (/** @type {Partial<import('./types').Settings>} */ settings) =
           },
     reset:
       settings.reset === true || settings.reset === undefined
-        ? fs.readFileSync(path.join(__dirname, 'client', 'reset.css')).toString()
+        ? fs.readFileSync('node_modules/cmless/client/reset.css').toString()
         : settings.reset || '',
   };
 
@@ -42,7 +41,7 @@ module.exports = (/** @type {Partial<import('./types').Settings>} */ settings) =
       createHtmlPlugin({
         minify: true,
         entry: settings.entry || `${process.cwd()}/src/app.tsx`,
-        template: settings.template || path.join(__dirname, 'client', 'index.html'),
+        template: settings.template || 'node_modules/cmless/client/index.html',
         inject: { data },
       }),
     ],
