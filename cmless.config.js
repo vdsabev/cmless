@@ -7,6 +7,7 @@ const theme = require('./client/theme');
 
 module.exports = (/** @type {Partial<import('./types').Settings>} */ settings) => {
   const fonts = settings.fonts || {};
+  const fontNameDelimiters = /[:&]/; // Google Font names end after `:wght@400` or `&text=ABC`
   /** @type {import('./types').Settings} */ const data = {
     title: '',
     forms: {},
@@ -27,7 +28,7 @@ module.exports = (/** @type {Partial<import('./types').Settings>} */ settings) =
             ...Object.entries(fonts).reduce(
               (fonts, [type, name]) => ({
                 ...fonts,
-                [`font-${type}`]: `${name}, var(--system-ui)`,
+                [`font-${type}`]: `${name.split(fontNameDelimiters)[0]}, var(--system-ui)`,
               }),
               {},
             ),

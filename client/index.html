@@ -19,9 +19,12 @@
 
   <% const fontNames = Object.values(fonts); %>
   <% if (fontNames.length > 0) { %>
+  <!-- https://sia.codes/posts/making-google-fonts-faster/ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" //>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin //>
   <link
     rel="stylesheet"
-    href="https://fonts.googleapis.com/css?family=<%= fontNames.map(font => font.replaceAll(' ', '+')).join('|') %>&display=swap"
+    href="https://fonts.googleapis.com/css2?<%- fontNames.map(font => `family=${font.replaceAll(' ', '+')}`).join('&') %>&display=swap"
   //>
   <% } %>
 
