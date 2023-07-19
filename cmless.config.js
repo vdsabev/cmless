@@ -32,6 +32,7 @@ module.exports = (/** @type {Partial<import('./types').Settings>} */ settings) =
               }),
               {},
             ),
+            ...settings.theme,
           },
     reset:
       settings.reset === true || settings.reset === undefined
