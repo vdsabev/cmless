@@ -13,8 +13,8 @@ Just create/edit issues, apply labels, and your site rebuilds automatically.
 - Images uploaded in GitHub issues work automatically (hosted by GitHub)
 - Three publishing states via labels:
   - `status: draft` — not published
-  - `status: unlisted` — published at direct URL only (hidden from list)
-  - `status: published` — fully visible + listed
+  - `status: unlisted` — published at its direct URL (e.g. `/my-post/`) but hidden from the post list
+  - `status: published` — fully visible + listed at the root of the site (e.g. `/my-post/`)
 - Rebuilds on issue open / edit / label changes
 - Fully works with the `gh` CLI
 - Clean professional default theme
@@ -35,7 +35,7 @@ Just create/edit issues, apply labels, and your site rebuilds automatically.
    ```
 
 5. Push or create an issue to trigger the first build.
-6. Your site will be live at `https://<your-username>.github.io` (or the project URL).
+6. Your site will be live at `https://<your-username>.github.io` (or the project URL). Posts appear at `/<slug>/` (e.g. `/hello-world/`).
 
 ## ✍️ Writing Posts
 
@@ -93,10 +93,10 @@ Editing the issue body + re-applying the status label always updates the site.
 | Label                | Visible in list? | Accessible by URL? | Notes                     |
 |----------------------|------------------|--------------------|---------------------------|
 | `status: draft`      | No               | No                 | Default / work in progress |
-| `status: unlisted`   | No               | Yes                | Good for links you share privately |
-| `status: published`  | Yes              | Yes                | Normal public posts       |
+| `status: unlisted`   | No               | Yes                | Good for private share links (e.g. `/my-post/`) |
+| `status: published`  | Yes              | Yes                | Listed + accessible at `/<slug>/` |
 
-Only issues with `status: unlisted` **or** `status: published` are turned into pages.
+Only issues with `status: unlisted` **or** `status: published` become pages at `/<slug>/` (under your site's base path).
 
 ## 🛠️ Local Development
 
@@ -121,15 +121,16 @@ The dev server will show published posts.
 
 ### Site URL
 
-Edit `astro.config.mjs`:
+The site and base path are **automatically detected** from your repository:
 
-```js
-export default defineConfig({
-  site: 'https://your-username.github.io',
-  // If this is a project site (not username.github.io), also set:
-  // base: '/your-repo-name',
-});
-```
+- If your repo is named `yourname.github.io` → served at the root (`https://yourname.github.io`)
+- Otherwise (project site) → served under `/your-repo-name` (`https://yourname.github.io/your-repo-name/`)
+
+This works both in GitHub Actions and locally (it reads your git remote).
+
+You normally don't need to touch `site` or `base` in `astro.config.mjs`.
+
+(Advanced: you can still override by setting the `GITHUB_REPOSITORY` env var or editing the detection logic.)
 
 ### Changing the blog title
 
@@ -149,6 +150,7 @@ Nothing is committed for individual posts — they are generated at build time.
 
 ## 📝 Tips
 
+- Post URLs are at the root of your site: `https://.../<slug>/` (no `/posts/` prefix).
 - Put a `slug:` in frontmatter if you ever rename an issue title and want to keep the old URL.
 - Close issues whenever you want — labels still work.
 - You can have hundreds of issues; only the ones with status labels become posts.

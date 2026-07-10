@@ -41,7 +41,7 @@ const publishedPosts = Object.entries(modules)
 				{
 					publishedPosts.map((post) => (
 						<li>
-							<h2><a href={`/posts/${post.slug}`}>{post.title}</a></h2>
+							<h2><a href={`${import.meta.env.BASE_URL}${post.slug}/`}>{post.title}</a></h2>
 							<time>{post.date}</time>
 							{post.description && <p>{post.description}</p>}
 						</li>

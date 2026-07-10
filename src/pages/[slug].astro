@@ -1,8 +1,8 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import Layout from '../layouts/Layout.astro';
 
 export function getStaticPaths() {
-	const modules = import.meta.glob('../../content/blog/*.md', { eager: true });
+	const modules = import.meta.glob('../content/blog/*.md', { eager: true });
 	return Object.entries(modules).map(([filePath, mod]) => {
 		const slug = filePath.split('/').pop()!.replace(/\.md$/, '');
 		const frontmatter = (mod as any).frontmatter || {};
@@ -40,5 +40,5 @@ const image = frontmatter.image;
 		<Content />
 	</article>
 
-	<p style="margin-top: 3rem;"><a href="/">← All posts</a></p>
+	<p style="margin-top: 3rem;"><a href={import.meta.env.BASE_URL}>← All posts</a></p>
 </Layout>

@@ -25,7 +25,7 @@ assignees: ''
 > Then apply one of these labels:
 >
 > - `status: draft` — not published (default)
-> - `status: unlisted` — published but hidden from the post list (direct URL only)
+> - `status: unlisted` — published at its direct URL (e.g. `/my-post/`) but hidden from the list
 > - `status: published` — fully live and appears in sidebar / posts list
 >
 > Edit the issue + re-apply the status label to update the site.
