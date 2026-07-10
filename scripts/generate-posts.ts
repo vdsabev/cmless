@@ -10,7 +10,11 @@
  * Local usage:
  *   GH_TOKEN=ghp_yourpat bun run generate-posts
  *
- * In GitHub Actions the GITHUB_TOKEN is used automatically via gh CLI.
+ * In GitHub Actions:
+ *   env:
+ *     GH_TOKEN: ${{ github.token }}
+ *   (The default GITHUB_TOKEN has the necessary permissions when
+ *    the workflow has `issues: read`.)
  */
 
 import { execSync } from 'child_process';
@@ -55,6 +59,15 @@ function parseFrontmatter(rawBody: string): { fm: Record<string, string>; conten
 function main() {
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';
 
+  if (!token) {
+    console.error('❌ No GH_TOKEN (or GITHUB_TOKEN) found.');
+    console.error('In GitHub Actions, set:');
+    console.error('  env:');
+    console.error('    GH_TOKEN: ${{ github.token }}');
+    console.error('For local: GH_TOKEN=... bun run generate-posts');
+    process.exit(1);
+  }
+
   console.log('Fetching issues using gh CLI...');
 
   // --state all so we can publish from closed issues too if desired
@@ -70,7 +83,7 @@ function main() {
     });
   } catch (err) {
     console.error('❌ Failed to list issues with gh.');
-    console.error('Make sure the GitHub CLI (gh) is installed and you have access to this repo.');
+    console.error('Make sure the GitHub CLI (gh) is installed and the token has issues:read permission.');
     console.error('For local runs: export GH_TOKEN=...');
     console.error(err);
     process.exit(1);
