@@ -1,0 +1,53 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Load all generated posts at build time (simple + reliable)
+const modules = import.meta.glob('../content/blog/*.md', { eager: true });
+
+type PostModule = {
+  frontmatter: {
+    title: string;
+    date: string;
+    description?: string;
+    status?: 'published' | 'unlisted';
+  };
+  url?: string;
+};
+
+const publishedPosts = Object.entries(modules)
+  .map(([path, mod]) => {
+    const m = mod as PostModule;
+    const slug = path.split('/').pop()!.replace(/\.md$/, '');
+    return {
+      slug,
+      title: m.frontmatter.title,
+      date: m.frontmatter.date,
+      description: m.frontmatter.description,
+      status: m.frontmatter.status || 'published',
+    };
+  })
+  .filter((p) => p.status === 'published')
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+---
+
+<Layout title="Posts" siteTitle="My Blog" description="A blog powered by GitHub Issues and Astro.">
+	<h1>Posts</h1>
+
+	{
+		publishedPosts.length === 0 ? (
+			<p>No published posts yet. Create a GitHub Issue and apply the <code>status: published</code> label.</p>
+		) : (
+			<ul class="post-list">
+				{
+					publishedPosts.map((post) => (
+						<li>
+							<h2><a href={`/posts/${post.slug}`}>{post.title}</a></h2>
+							<time>{post.date}</time>
+							{post.description && <p>{post.description}</p>}
+						</li>
+					))
+				}
+			</ul>
+		)
+	}
+</Layout>

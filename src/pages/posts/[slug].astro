@@ -1,0 +1,44 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+export function getStaticPaths() {
+	const modules = import.meta.glob('../../content/blog/*.md', { eager: true });
+	return Object.entries(modules).map(([filePath, mod]) => {
+		const slug = filePath.split('/').pop()!.replace(/\.md$/, '');
+		const frontmatter = (mod as any).frontmatter || {};
+		return {
+			params: { slug },
+			props: { mod, frontmatter, slug },
+		};
+	});
+}
+
+const { mod, frontmatter, slug } = Astro.props;
+const { Content } = mod as any;
+
+const isUnlisted = frontmatter.status === 'unlisted';
+const title = frontmatter.title || slug;
+const date = frontmatter.date || '';
+const description = frontmatter.description;
+const image = frontmatter.image;
+---
+
+<Layout title={title} description={description} image={image} siteTitle="My Blog">
+	<article>
+		<h1>{title}</h1>
+		<div class="meta">
+			<time>{date}</time>
+			{isUnlisted && <span> · Unlisted</span>}
+		</div>
+
+		{isUnlisted && (
+			<div class="unlisted-notice">
+				This post is <strong>unlisted</strong>. It is not shown on the posts page but is accessible via direct link.
+			</div>
+		)}
+
+		<Content />
+	</article>
+
+	<p style="margin-top: 3rem;"><a href="/">← All posts</a></p>
+</Layout>

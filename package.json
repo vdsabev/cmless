@@ -1,0 +1,18 @@
+{
+  "name": "cmless",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "bun run generate-posts && astro dev",
+    "build": "bun run generate-posts && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "generate-posts": "bun scripts/generate-posts.ts"
+  },
+  "dependencies": {
+    "astro": "^7.0.7"
+  }
+}

@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: cmless Documentation
+    url: https://github.com/vdsabev/cmless
+    about: Read the README for full instructions on using GitHub Issues as your CMS.
