@@ -147,6 +147,7 @@ No manual edits needed in `Layout.astro` or pages.
 - The homepage shows a clean list of published posts (no "Posts" heading — the nav link suffices).
 - Spacing between posts uses a comfortable gap.
 - Titles are semibold and prominent; dates and descriptions are smaller and muted.
+- Styles are defined in `src/styles/global.css` (as global rules) so they correctly apply to the list rendered via slots in pages.
 
 ## 🔄 How It Works
 
