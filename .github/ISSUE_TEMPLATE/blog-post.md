@@ -16,11 +16,17 @@ assignees: ''
 > ---
 > title: My Post Title
 > date: 2026-07-10
-> description: Short summary for the list and meta tags.
-> slug: my-custom-url-slug   # optional, defaults to title slug
-> image: https://...         # optional cover / og image
+> description: Short summary.
+> slug: my-custom-url-slug   # optional
+> image: https://...         # optional
+> author: Name               # auto from GitHub issue user
+> authorUrl: https://...
+> authorAvatar: https://...
+> tags: tech, dev            # or use `tag: tech` labels
 > ---
 > ```
+>
+> Author info, avatar and profile link come from the GitHub user who created the issue. Labels starting with `tag: ` become tags.
 >
 > Then apply one of these labels:
 >

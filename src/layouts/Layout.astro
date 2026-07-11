@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import site from '../generated/site.json';
 
 interface Props {
 	title?: string;
@@ -13,6 +14,8 @@ const {
 	image,
 	siteTitle = 'My Blog',
 } = Astro.props as Props;
+
+const owner = (site as any).owner;
 ---
 
 <!doctype html>
@@ -38,7 +41,12 @@ const {
 			<slot />
 		</main>
 		<footer>
-			<p>Powered by <a href="https://github.com/vdsabev/cmless">cmless</a> — GitHub Issues + Astro on GitHub Pages.</p>
+			<p>
+				Powered by <a href="https://github.com/vdsabev/cmless">cmless</a>.
+				{owner?.login && (
+					<> · by <img class="author-avatar" src={owner.avatarUrl} alt="" /> <a href={`https://github.com/${owner.login}`} target="_blank">@{owner.login}</a></>
+				)}
+			</p>
 		</footer>
 	</body>
 </html>

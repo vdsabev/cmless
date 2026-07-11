@@ -11,6 +11,10 @@ type PostModule = {
     date: string;
     description?: string;
     status?: 'published' | 'unlisted';
+    author?: string;
+    authorUrl?: string;
+    authorAvatar?: string;
+    tags?: string[] | string;
   };
   url?: string;
 };
@@ -25,6 +29,7 @@ const publishedPosts = Object.entries(modules)
       date: m.frontmatter.date,
       description: m.frontmatter.description,
       status: m.frontmatter.status || 'published',
+      author: m.frontmatter.author,
     };
   })
   .filter((p) => p.status === 'published')
@@ -42,6 +47,7 @@ const publishedPosts = Object.entries(modules)
 						<li>
 							<h2><a href={`${import.meta.env.BASE_URL}${post.slug}/`}>{post.title}</a></h2>
 							<time>{post.date}</time>
+							{post.author && <span> · {post.author}</span>}
 							{post.description && <p>{post.description}</p>}
 						</li>
 					))

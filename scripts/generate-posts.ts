@@ -3,18 +3,17 @@
  * Generates blog posts from GitHub Issues for cmless.
  *
  * - Fetches issues labeled "status: published" or "status: unlisted"
+ * - Reads author (login, name) from issue; avatar + profile from login
+ * - tag: labels + tags frontmatter become tags
  * - Optional frontmatter at top of issue body (--- ... ---)
  * - Writes Markdown files to src/content/blog/
- * - Completely external images (drag & drop in GitHub Issues works)
  *
  * Local usage:
- *   GH_TOKEN=ghp_yourpat bun run generate-posts
+ *   GH_TOKEN=... bun run generate-posts
  *
  * In GitHub Actions:
  *   env:
  *     GH_TOKEN: ${{ github.token }}
- *   (The default GITHUB_TOKEN has the necessary permissions when
- *    the workflow has `issues: read`.)
  */
 
 import { execSync } from 'child_process';
@@ -72,8 +71,7 @@ function main() {
   console.log('Fetching issues using gh CLI...');
 
   // --state all so we can publish from closed issues too if desired
-  // Limit high to get everything reasonable for a blog
-  const ghCmd = `gh issue list --state all --limit 200 --json number,title,body,labels,createdAt,url`;
+  const ghCmd = `gh issue list --state all --limit 200 --json number,title,body,labels,createdAt,url,author`;
 
   let output: string;
   try {
@@ -98,11 +96,11 @@ function main() {
     process.exit(1);
   }
 
-  // Fetch site title from the GitHub repository's description
-  // (e.g. "Vlad Sabev's blog" or "cmless - use GitHub as a blog")
+  // Fetch site title + repo owner login (for site credit + avatar)
   let siteTitle = 'My Blog';
+  let ownerLogin = '';
   try {
-    const repoOutput = execSync('gh repo view --json description', {
+    const repoOutput = execSync('gh repo view --json description,owner', {
       encoding: 'utf8',
       env: { ...process.env, GH_TOKEN: token },
       stdio: ['pipe', 'pipe', 'ignore'],
@@ -112,10 +110,12 @@ function main() {
       const desc = repo.description.trim();
       if (desc) siteTitle = desc;
     }
+    ownerLogin = repo.owner?.login || '';
   } catch (err) {
-    console.warn('⚠️  Could not fetch repository description, using default site title.');
+    console.warn('⚠️  Could not fetch repo info, using defaults.');
   }
   console.log(`Using site title: ${siteTitle}`);
+  const ownerAvatar = ownerLogin ? `https://github.com/${ownerLogin}.png` : '';
 
   const posts: any[] = [];
 
@@ -140,6 +140,21 @@ function main() {
     const description = fm.description || content.split(/\n\n+/)[0]?.slice(0, 180).trim() || '';
     const image = fm.image || '';
 
+    // Author from GitHub issue author (issue author's login)
+    const ghAuthor = issue.author || {};
+    const author = (fm.author || ghAuthor.name || ghAuthor.login || '').trim();
+    const authorUrl = (fm.authorUrl || (ghAuthor.login ? `https://github.com/${ghAuthor.login}` : '')).trim();
+    const authorAvatar = (fm.authorAvatar || (ghAuthor.login ? `https://github.com/${ghAuthor.login}.png` : '')).trim();
+
+    // Tags: tag: prefixed labels, or tags frontmatter (comma only)
+    const tagLabels = labelNames
+      .filter((l) => /^tag:/i.test(l))
+      .map((l) => l.replace(/^tag:\s*/i, '').trim())
+      .filter(Boolean);
+    const tags = fm.tags
+      ? fm.tags.split(/,\s*/).map((t: string) => t.trim()).filter(Boolean)
+      : tagLabels;
+
     posts.push({
       slug,
       title,
@@ -149,6 +164,10 @@ function main() {
       status,
       content,
       number: issue.number,
+      author,
+      authorUrl,
+      authorAvatar,
+      tags,
     });
   }
 
@@ -162,11 +181,11 @@ function main() {
   }
   mkdirSync(CONTENT_DIR, { recursive: true });
 
-  // Write site metadata (site title from repo description)
+  // Write site metadata (title + repo owner for credit/avatar)
   mkdirSync(GENERATED_DIR, { recursive: true });
   writeFileSync(
     join(GENERATED_DIR, 'site.json'),
-    JSON.stringify({ siteTitle }, null, 2) + '\n',
+    JSON.stringify({ siteTitle, owner: { login: ownerLogin, avatarUrl: ownerAvatar } }, null, 2) + '\n',
     'utf8'
   );
   console.log(`✓ generated/site.json (siteTitle: ${siteTitle})`);
@@ -179,6 +198,10 @@ function main() {
     ];
     if (p.description) lines.push(`description: ${JSON.stringify(p.description)}`);
     if (p.image) lines.push(`image: ${p.image}`);
+    if (p.author) lines.push(`author: ${JSON.stringify(p.author)}`);
+    if (p.authorUrl) lines.push(`authorUrl: ${JSON.stringify(p.authorUrl)}`);
+    if (p.authorAvatar) lines.push(`authorAvatar: ${JSON.stringify(p.authorAvatar)}`);
+    if (p.tags && p.tags.length) lines.push(`tags: ${JSON.stringify(p.tags)}`);
 
     const md = `---\n${lines.join('\n')}\n---\n\n${p.content}\n`;
     const outPath = join(CONTENT_DIR, `${p.slug}.md`);

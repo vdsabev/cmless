@@ -45,6 +45,8 @@ gh issue create --title "Hello" --body '---
 title: Hello
 date: 2026-07-10
 description: Short blurb.
+author: Name
+tags: tech
 ---
 Content here.'
 
@@ -69,7 +71,11 @@ npm run dev
 ```
 
 ## ⚙️ Configuration
-**Site title** is taken from the GitHub repository description. Edit the description on your repo to change it.
+**Site title** is taken from the GitHub repository description.
+
+**Author / avatar / profile:** auto from the GitHub issue author (or override with `author`, `authorUrl`, `authorAvatar`).
+
+**Tags:** from `tag: foo` labels or `tags: a, b` frontmatter.
 
 **Custom domain:** Place a `CNAME` file in `public/` and set up DNS.
 

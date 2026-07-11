@@ -22,15 +22,25 @@ const title = frontmatter.title || slug;
 const date = frontmatter.date || '';
 const description = frontmatter.description;
 const image = frontmatter.image;
+
+const author = frontmatter.author;
+const authorUrl = frontmatter.authorUrl;
+const authorAvatar = frontmatter.authorAvatar;
+const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : (frontmatter.tags ? String(frontmatter.tags).split(/,\s*/) : []);
 ---
 
 <Layout title={title} description={description} image={image} siteTitle={site.siteTitle}>
 	<article>
 		<h1>{title}</h1>
 		<div class="meta">
+			{authorAvatar && <img class="author-avatar" src={authorAvatar} alt="" />}
+			{author ? (authorUrl ? <a href={authorUrl} target="_blank" rel="noopener">{author}</a> : <span>{author}</span>) : null}
 			<time>{date}</time>
 			{isUnlisted && <span> · Unlisted</span>}
 		</div>
+		{tags.length > 0 && (
+			<div class="tags">{tags.map((t: string) => <span class="tag">{t}</span>)}</div>
+		)}
 
 		{isUnlisted && (
 			<div class="unlisted-notice">

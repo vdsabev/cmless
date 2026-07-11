@@ -141,6 +141,33 @@ article img {
   color: var(--muted);
   font-size: 0.95rem;
   margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.author-avatar {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  vertical-align: middle;
+}
+
+.tags {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin: 0.25rem 0 1rem;
+}
+
+.tag {
+  font-size: 0.75rem;
+  background: #f0f0f0;
+  padding: 0 0.35rem;
+  border-radius: 2px;
+  color: #444;
 }
 
 .unlisted-notice {
