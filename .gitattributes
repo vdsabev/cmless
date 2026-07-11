@@ -1,0 +1,6 @@
+# When users create a blog from this template and customize their README.md
+# this attribute tells future merges from `cmless` to keep the user's version.
+#
+# Add similar lines for any other files you customize in your blog.
+
+README.md merge=ours
