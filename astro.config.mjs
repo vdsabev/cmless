@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import { execSync } from 'child_process';
+import tailwindcss from '@tailwindcss/vite';
 
 /**
  * Automatically determine site + base for GitHub Pages.
@@ -55,6 +56,9 @@ export default defineConfig({
   base,
   output: 'static',
   trailingSlash: 'always',
+  vite: {
+    plugins: [tailwindcss()],
+  },
   // No manual configuration needed for GitHub Pages URLs.
   // See README for details.
 });

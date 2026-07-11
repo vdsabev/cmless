@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@plugin '@tailwindcss/typography';
+
+/* Base styles that apply site-wide.
+   Ensures images never overflow their containers (e.g. in prose-rendered Markdown). */
+@layer base {
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
