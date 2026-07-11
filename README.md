@@ -1,7 +1,9 @@
-# cmless - seamless GitHub blog
-- Use GitHub issues to write posts
-- Drag-and-drop or paste an image in the issue body to upload it to GitHub
-- Blog automatically rebuilds when an issue is created or updated
+# cmless
+Seamless blogging with GitHub issues.
+
+- Open GitHub issues in your repo to write posts
+- Drag-and-drop or paste images in the issue to upload it to GitHub
+- Blog post automatically rebuild when its issue is created or updated
 - Manually manage post publishing by applying labels: `state: draft`, `state: unlisted`, `state: published`
 - Set metadata via Frontmatter
 
@@ -10,9 +12,8 @@
 2. Naming the repo `<your-username>.github.io` hosts it at `https://<your-username>.github.io`, naming it `<your-repo>` hosts it at `https://<your-username>.github.io/<your-repo>`
 3. In repo **Settings → Pages** set **Source** to **GitHub Actions**.
 4. Create or edit an issue to trigger the first build.
-5. **Recommended:** to prevent random people from writing posts on your blog, limit issue creation to collaborators only in **Settings → General**.
 
-Labels are provided by the "Blog post" issue template. Or create them with the `gh` CLI:
+The labels are provided by the "Blog post" issue template. Or create them with the `gh` CLI:
 
 ```sh
 gh label create "status: draft"    --color "d73a4a" --description "Not published"
@@ -27,7 +28,11 @@ gh label create "status: published" --color "0e8a16" --description "Published an
 | `status: unlisted`   | No                  | Yes                      | Private links / previews                 |
 | `status: published`  | Yes                 | Yes                      | Public posts                             |
 
-If you want, close issues when you're done with them - publishing is controlled by the labels.
+> [!NOTE]
+> Publishing is only controlled by the status labels which are limited to contributors by default, but if you want to prevent random people from opening issues in your blog repo - limit issue creation to collaborators only in **Settings → General**.
+
+> [!TIP]
+> When you're done writing and editing a post you can close its respective issue.
 
 ## ✍️ Writing Posts
 ### On GitHub
@@ -60,7 +65,7 @@ gh issue edit 42 --body 'New markdown...'
 
 Re-applying the status label (or just editing a published/unlisted issue) triggers a rebuild.
 
-> [!NOTE]
+> [!WARNING]
 > You cannot upload images through the `gh` CLI.
 
 ## 🛠️ Local Development
