@@ -103,6 +103,32 @@ No need to change `astro.config.mjs` in most cases.
 
 A GitHub Actions workflow runs `scripts/generate-posts.ts` (via `gh`) on issue events and pushes. It turns qualifying issues into Markdown files in `src/content/blog/`. Astro builds a static site that GitHub Pages serves. Nothing about individual posts is stored in the repository.
 
+## ⬆️ Syncing updates from cmless
+
+Template clones start with unrelated history.
+
+```sh
+# once
+git remote add cmless https://github.com/vdsabev/cmless.git
+git fetch cmless
+git merge cmless/master --allow-unrelated-histories
+
+# thereafter
+git fetch cmless && git merge cmless/master
+```
+
+For conflicts on engine files: `git checkout --theirs <file>`. Check branch via `git branch -r` (`master` today).
+
+### Custom README
+
+Replace cmless's template-oriented README in your blog repo. Protect it from merges:
+
+```text
+README.md merge=ours
+```
+
+(in `.gitattributes`)
+
 ## 📄 License
 
 MIT — use it for anything.
