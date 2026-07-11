@@ -1,28 +1,17 @@
-# cmless
-
-**A clean, instant blog template.**  
-Use **GitHub Issues as your CMS** + **Astro** + **GitHub Pages**.
-
-No database. No admin UI. No commits for content.  
-Just create or edit issues, apply labels, and your site rebuilds automatically.
-
-## ✨ Features
-
-- Post title and full Markdown body (with images) come directly from GitHub Issues
-- Drag-and-drop images in issues are hosted by GitHub automatically
-- Three publishing states via labels
-- Rebuilds on any issue edit or label change
-- Excellent `gh` CLI support
-- Clean professional theme; zero sample posts
+# cmless - seamless GitHub blog
+- Uses GitHub issue title and body for each post
+- Drag-and-drop images in issues are automatically hosted by GitHub
+- Rebuilds blog on any issue create or update
+- Manually manage post publishing by applying labels: `state: draft`, `state: unlisted`, `state: published`
+- Set metadata via Frontmatter
 
 ## 🚀 Get Started
+1. Click **"Use this template"** → create a new repository
+2. Naming the repo `<your-username>.github.io` hosts it at `https://<your-username>.github.io`, naming it `<your-repo>` hosts it at `https://<your-username>.github.io/<your-repo>`
+3. In repo **Settings → Pages** set **Source** to **GitHub Actions**.
+4. Create or edit an issue to trigger the first build.
 
-1. Click **"Use this template"** → create a new repository (name it `user.github.io` for a root site, or anything else).
-2. In repo **Settings → Pages**, set Source to **GitHub Actions**.
-3. Create or edit an issue to trigger the first build.
-4. Your site will be live at `https://<user>.github.io` (or `.../repo-name/` for project sites).
-
-Labels are provided by the "Blog post" issue template. If needed, create them with:
+Labels are provided by the "Blog post" issue template. Or create them with:
 
 ```sh
 gh label create "status: draft"    --color "d73a4a" --description "Not published"
@@ -31,29 +20,25 @@ gh label create "status: published" --color "0e8a16" --description "Published an
 ```
 
 ## 🏷️ Publishing States
+| Label                | Listed on homepage? | Reachable by direct URL? | Best for                                 |
+|----------------------|---------------------|--------------------------|------------------------------------------|
+| `status: draft`      | No                  | No                       | Work in progress, only visible on GitHub |
+| `status: unlisted`   | No                  | Yes                      | Private links / previews                 |
+| `status: published`  | Yes                 | Yes                      | Public posts                             |
 
-| Label                | Listed on homepage? | Reachable by direct URL? | Best for                     |
-|----------------------|---------------------|--------------------------|------------------------------|
-| `status: draft`      | No                  | No                       | Work in progress             |
-| `status: unlisted`   | No                  | Yes                      | Private links / previews     |
-| `status: published`  | Yes                 | Yes                      | Public posts                 |
-
-Only `unlisted` and `published` issues generate pages at `/<slug>/`. Close issues freely; the labels control everything.
+If you want, close issues when you're done with them - publishing is controlled by the labels.
 
 ## ✍️ Writing Posts
-
 ### On GitHub
-
 1. **Issues → New issue**.
-2. Choose the **"Blog post"** template (recommended) or start blank.
-3. Title = post title. Body = Markdown (drag images straight in).
+2. Choose the **"Blog post"** template or start blank.
+3. Title = post title. Body = Markdown (drag and drop images straight in, or link external images by URL).
 4. Apply `status: published` (or `unlisted`).
 5. Site updates in ~1 minute.
 
-The template documents frontmatter options (`title`, `date`, `description`, `slug`).
+The template documents Frontmatter options.
 
 ### With the gh CLI
-
 ```sh
 # Draft
 gh issue create --title "Hello" --body '---
@@ -72,8 +57,10 @@ gh issue edit 42 --body 'New markdown...'
 
 Re-applying the status label (or just editing a published/unlisted issue) triggers a rebuild.
 
-## 🛠️ Local Development
+> [!NOTE]
+> You cannot upload images through the `gh` CLI.
 
+## 🛠️ Local Development
 ```sh
 git clone https://.../your-repo.git && cd your-repo
 npm install
@@ -82,55 +69,35 @@ npm run dev
 ```
 
 ## ⚙️ Configuration
-
-**URLs** are auto-detected:
-- `name.github.io` repo → `https://name.github.io/`
-- Everything else → `https://name.github.io/name/`
-
-No need to change `astro.config.mjs` in most cases.
-
 **Site title** is taken from the GitHub repository description. Edit the description on your repo to change it.
 
 **Custom domain:** Place a `CNAME` file in `public/` and set up DNS.
 
-## 📝 Tips
-
-- Use `slug: my-custom-slug` in frontmatter to keep a stable URL when you rename an issue.
-- Hundreds of issues are fine — only labeled ones become posts.
-- Post paths are flat: `https://.../my-post/` (no `/posts/` segment).
-
 ## 🔄 How It Works
-
 A GitHub Actions workflow runs `scripts/generate-posts.ts` (via `gh`) on issue events and pushes. It turns qualifying issues into Markdown files in `src/content/blog/`. Astro builds a static site that GitHub Pages serves. Nothing about individual posts is stored in the repository.
 
 ## ⬆️ Syncing updates from cmless
-
-Template clones start with unrelated history.
+Template clones have their own history. To sync:
 
 ```sh
-# once
+# first time
 git remote add cmless https://github.com/vdsabev/cmless.git
-git fetch cmless
-git merge cmless/master --allow-unrelated-histories
+git fetch cmless && git merge cmless/master --allow-unrelated-histories
 
 # thereafter
 git fetch cmless && git merge cmless/master
 ```
 
-For conflicts on engine files: `git checkout --theirs <file>`. Check branch via `git branch -r` (`master` today).
+For conflicts on engine files: `git checkout --theirs <file>`.
 
 ### Custom README
-
-Replace cmless's template-oriented README in your blog repo. Protect it from merges:
+You can replace cmless's template-oriented README in your own blog repo. To protect it from merges, add this to `.gitattributes`:
 
 ```text
 README.md merge=ours
 ```
 
-(in `.gitattributes`)
-
 ## 📄 License
-
 MIT — use it for anything.
 
 ---
