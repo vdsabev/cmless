@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import site from '../generated/site.json';
 
 export function getStaticPaths() {
 	const modules = import.meta.glob('../content/blog/*.md', { eager: true });
@@ -23,7 +24,7 @@ const description = frontmatter.description;
 const image = frontmatter.image;
 ---
 
-<Layout title={title} description={description} image={image} siteTitle="My Blog">
+<Layout title={title} description={description} image={image} siteTitle={site.siteTitle}>
 	<article>
 		<h1>{title}</h1>
 		<div class="meta">

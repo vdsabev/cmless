@@ -132,17 +132,27 @@ You normally don't need to touch `site` or `base` in `astro.config.mjs`.
 
 (Advanced: you can still override by setting the `GITHUB_REPOSITORY` env var or editing the detection logic.)
 
-### Changing the blog title
+### Site title
 
-In `src/layouts/Layout.astro`, change the default `siteTitle`.
+The site title (shown in the header) is **automatically read from your GitHub repository's description**.
 
-Or pass it from pages.
+- Edit the description on your repo (e.g. "Vlad Sabev's blog" or "cmless - use GitHub as a blog").
+- `scripts/generate-posts.ts` fetches it via `gh repo view` and writes `src/generated/site.json`.
+- Falls back to "My Blog" if no description is set.
+
+No manual edits needed in `Layout.astro` or pages.
+
+### Post list
+
+- The homepage shows a clean list of published posts (no "Posts" heading — the nav link suffices).
+- Spacing between posts uses a comfortable gap.
+- Titles are semibold and prominent; dates and descriptions are smaller and muted.
 
 ## 🔄 How It Works
 
 - `.github/workflows/deploy.yml` runs on pushes and issue events.
-- `scripts/generate-posts.ts` uses the `gh` CLI to fetch labeled issues.
-- It writes fresh Markdown files into `src/content/blog/`.
+- `scripts/generate-posts.ts` uses the `gh` CLI to fetch labeled issues **and the repository description**.
+- It writes Markdown posts to `src/content/blog/` and site metadata (`siteTitle`) to `src/generated/site.json`.
 - Astro builds a static site.
 - GitHub Pages serves the `dist/` folder.
 

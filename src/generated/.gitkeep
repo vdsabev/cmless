@@ -1,0 +1,1 @@
+# Keeps the generated/ directory in git (site.json is generated at build time and gitignored)

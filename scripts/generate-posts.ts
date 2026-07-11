@@ -22,6 +22,7 @@ import { writeFileSync, mkdirSync, rmSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 
 const CONTENT_DIR = 'src/content/blog';
+const GENERATED_DIR = 'src/generated';
 
 function slugify(str: string): string {
   return str
@@ -97,6 +98,25 @@ function main() {
     process.exit(1);
   }
 
+  // Fetch site title from the GitHub repository's description
+  // (e.g. "Vlad Sabev's blog" or "cmless - use GitHub as a blog")
+  let siteTitle = 'My Blog';
+  try {
+    const repoOutput = execSync('gh repo view --json description', {
+      encoding: 'utf8',
+      env: { ...process.env, GH_TOKEN: token },
+      stdio: ['pipe', 'pipe', 'ignore'],
+    });
+    const repo = JSON.parse(repoOutput);
+    if (repo.description && typeof repo.description === 'string') {
+      const desc = repo.description.trim();
+      if (desc) siteTitle = desc;
+    }
+  } catch (err) {
+    console.warn('⚠️  Could not fetch repository description, using default site title.');
+  }
+  console.log(`Using site title: ${siteTitle}`);
+
   const posts: any[] = [];
 
   for (const issue of issues) {
@@ -141,6 +161,15 @@ function main() {
     }
   }
   mkdirSync(CONTENT_DIR, { recursive: true });
+
+  // Write site metadata (site title from repo description)
+  mkdirSync(GENERATED_DIR, { recursive: true });
+  writeFileSync(
+    join(GENERATED_DIR, 'site.json'),
+    JSON.stringify({ siteTitle }, null, 2) + '\n',
+    'utf8'
+  );
+  console.log(`✓ generated/site.json (siteTitle: ${siteTitle})`);
 
   for (const p of posts) {
     const lines = [

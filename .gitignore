@@ -27,3 +27,7 @@ pnpm-debug.log*
 src/content/blog/*.md
 !src/content/blog/.gitkeep
 
+# Generated site metadata (title from repo description)
+src/generated/site.json
+!src/generated/.gitkeep
+

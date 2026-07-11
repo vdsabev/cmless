@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import site from '../generated/site.json';
 
 // Load all generated posts at build time (simple + reliable)
 const modules = import.meta.glob('../content/blog/*.md', { eager: true });
@@ -30,9 +31,7 @@ const publishedPosts = Object.entries(modules)
   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 ---
 
-<Layout title="Posts" siteTitle="My Blog" description="A blog powered by GitHub Issues and Astro.">
-	<h1>Posts</h1>
-
+<Layout title="Posts" siteTitle={site.siteTitle} description="A blog powered by GitHub Issues and Astro.">
 	{
 		publishedPosts.length === 0 ? (
 			<p>No published posts yet. Create a GitHub Issue and apply the <code>status: published</code> label.</p>
