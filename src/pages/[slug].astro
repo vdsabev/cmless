@@ -32,18 +32,18 @@ const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : (frontmatter.t
 <Layout title={title} description={description} image={image} siteTitle={site.siteTitle}>
 	<article>
 		<h1>{title}</h1>
-		<div class="meta">
-			{authorAvatar && <img class="author-avatar" src={authorAvatar} alt="" />}
+		<div class="text-slate-500 text-sm mb-6 flex items-center gap-2 flex-wrap">
+			{authorAvatar && <img class="w-5 h-5 rounded-full object-cover" src={authorAvatar} alt="" />}
 			{author ? (authorUrl ? <a href={authorUrl} target="_blank" rel="noopener">{author}</a> : <span>{author}</span>) : null}
 			<time>{date}</time>
 			{isUnlisted && <span> · Unlisted</span>}
 		</div>
 		{tags.length > 0 && (
-			<div class="tags">{tags.map((t: string) => <span class="tag">{t}</span>)}</div>
+			<div class="flex gap-1 flex-wrap my-1 mb-4">{tags.map((t: string) => <span class="text-xs bg-slate-100 px-1.5 rounded text-slate-600">{t}</span>)}</div>
 		)}
 
 		{isUnlisted && (
-			<div class="unlisted-notice">
+			<div class="bg-amber-50 border-l-4 border-amber-500 py-2 px-4 text-sm mb-6">
 				This post is <strong>unlisted</strong>. It is not shown on the posts page but is accessible via direct link.
 			</div>
 		)}

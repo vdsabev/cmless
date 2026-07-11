@@ -32,7 +32,7 @@ const owner = (site as any).owner;
 	</head>
 	<body>
 		<header>
-			<a href={import.meta.env.BASE_URL} class="site-title">{siteTitle}</a>
+			<a href={import.meta.env.BASE_URL} class="text-2xl font-semibold m-0 no-underline text-inherit">{siteTitle}</a>
 			<nav>
 				<a href={import.meta.env.BASE_URL}>Posts</a>
 			</nav>
@@ -42,19 +42,11 @@ const owner = (site as any).owner;
 		</main>
 		<footer>
 			<p>
-				Powered by <a href="https://github.com/vdsabev/cmless">cmless</a>.
+				Powered by <a href="https://github.com/vdsabev/cmless">cmless</a>
 				{owner?.login && (
-					<> · by <img class="author-avatar" src={owner.avatarUrl} alt="" /> <a href={`https://github.com/${owner.login}`} target="_blank">@{owner.login}</a></>
+					<> · by <img class="w-5 h-5 rounded-full object-cover inline-block align-middle" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" /> <a href={`https://github.com/${owner.login}`} target="_blank">@{owner.login}</a></>
 				)}
 			</p>
 		</footer>
 	</body>
 </html>
-
-<script>
-	// No client JS needed for static blog
-</script>
-
-<style>
-	/* Extra global styles if needed */
-</style>
