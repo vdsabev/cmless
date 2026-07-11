@@ -1,7 +1,7 @@
 # cmless - seamless GitHub blog
-- Uses GitHub issue title and body for each post
-- Drag-and-drop images in issues are automatically hosted by GitHub
-- Rebuilds blog on any issue create or update
+- Use GitHub issues to write posts
+- Drag-and-drop or paste an image in the issue body to upload it to GitHub
+- Blog automatically rebuilds when an issue is created or updated
 - Manually manage post publishing by applying labels: `state: draft`, `state: unlisted`, `state: published`
 - Set metadata via Frontmatter
 
@@ -10,8 +10,9 @@
 2. Naming the repo `<your-username>.github.io` hosts it at `https://<your-username>.github.io`, naming it `<your-repo>` hosts it at `https://<your-username>.github.io/<your-repo>`
 3. In repo **Settings → Pages** set **Source** to **GitHub Actions**.
 4. Create or edit an issue to trigger the first build.
+5. **Recommended:** to prevent random people from writing posts on your blog, limit issue creation to collaborators only in **Settings → General**.
 
-Labels are provided by the "Blog post" issue template. Or create them with:
+Labels are provided by the "Blog post" issue template. Or create them with the `gh` CLI:
 
 ```sh
 gh label create "status: draft"    --color "d73a4a" --description "Not published"
