@@ -36,12 +36,12 @@ const isUserSite = repoName?.endsWith('.github.io');
 	<body class="flex flex-col max-w-[720px] min-h-dvh mx-auto px-4 py-8">
 		<header class="flex justify-between items-baseline gap-2 border-b border-b-slate-200 mb-8 pb-4">
 			<a href={import.meta.env.BASE_URL} class="text-2xl font-semibold no-underline text-inherit">
-				{isUserSite && owner?.avatarUrl && <img class="w-8 h-8 rounded-full object-cover inline-block align-middle mr-2" src={owner.avatarUrl} alt={`@{owner.login}'s avatar`} />}
+				{isUserSite && owner?.avatarUrl && <img class="w-8 h-8 inset-shadow rounded-full object-cover inline-block align-middle mr-2" src={owner.avatarUrl} alt={`@{owner.login}'s avatar`} />}
 				{siteTitle}
 			</a>
 
 			<nav>
-				<a href={import.meta.env.BASE_URL} class="ms-4 text-slate-500 no-underline hover:text-blue-600">Posts</a>
+				<a href={import.meta.env.BASE_URL} class="text-slate-500 no-underline hover:text-blue-700">Posts</a>
 			</nav>
 		</header>
 
@@ -50,15 +50,13 @@ const isUserSite = repoName?.endsWith('.github.io');
 		</main>
 
 		<footer class="flex justify-between items-baseline gap-2 border-t border-t-slate-200 mt-8 pt-4 text-xs text-slate-500">
-			<p>
-				powered by <a href="https://github.com/vdsabev/cmless">cmless</a>
-			</p>
+			<p>powered by <a href="https://github.com/vdsabev/cmless">cmless</a></p>
 
 			{owner?.login && (
 				<p>
 					created by{' '}
 					<a href={`https://github.com/${owner.login}`} rel="author" target="_blank">
-						<img class="inline-block align-middle w-5 h-5 rounded-full object-cover mx-0.5 mb-1" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" />
+						<img class="inline-block align-middle w-4 h-4 inset-shadow rounded-full object-cover mx-0.5 mb-1" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" />
 						@{owner.login}
 					</a>
 				</p>

@@ -32,7 +32,7 @@ const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : (frontmatter.t
 <Layout title={title} description={description} image={image} siteTitle={site.siteTitle}>
 	<article>
 		<div class="flex flex-wrap items-center gap-1 mb-2 text-sm text-slate-500">
-			{authorAvatar && <img class="w-6 h-6 rounded-full object-cover" src={authorAvatar} alt={`${author}'s avatar`} />}
+			{authorAvatar && <img class="w-6 h-6 inset-shadow rounded-full object-cover" src={authorAvatar} alt={`${author}'s avatar`} />}
 			{author ? (authorUrl ? <a href={authorUrl} rel="author" target="_blank">{author}</a> : <span>{author}</span>) : null}
 			·
 			<time>{date}</time>
