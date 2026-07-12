@@ -22,11 +22,11 @@ assignees: ''
 > author: Name               # auto from GitHub issue user
 > authorUrl: https://...
 > authorAvatar: https://...
-> tags: tech, dev            # or use `tag: tech` labels
+> tags: tech, dev
 > ---
 > ```
 >
-> Author info, avatar and profile link come from the GitHub user who created the issue. Labels starting with `tag: ` become tags.
+> Author info, avatar and profile link come from the GitHub user who created the issue.
 >
 > Then apply one of these labels:
 >

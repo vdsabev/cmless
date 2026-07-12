@@ -81,7 +81,7 @@ npm run dev
 
 **Author / avatar / profile:** auto from the GitHub issue author (or override with `author`, `authorUrl`, `authorAvatar`).
 
-**Tags:** from `tag: foo` labels or `tags: a, b` frontmatter.
+**Tags:** from `tags: a, b` frontmatter.
 
 **Custom domain:** Place a `CNAME` file in `public/` and set up DNS.
 

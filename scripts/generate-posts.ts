@@ -4,7 +4,7 @@
  *
  * - Fetches issues labeled "status: published" or "status: unlisted"
  * - Reads author (login, name) from issue; avatar + profile from login
- * - tag: labels + tags frontmatter become tags
+ * - Tags from frontmatter (comma separated or list)
  * - Optional frontmatter at top of issue body (--- ... ---)
  * - Writes Markdown files to src/content/blog/
  *
@@ -146,14 +146,10 @@ function main() {
     const authorUrl = (fm.authorUrl || (ghAuthor.login ? `https://github.com/${ghAuthor.login}` : '')).trim();
     const authorAvatar = (fm.authorAvatar || (ghAuthor.login ? `https://github.com/${ghAuthor.login}.png` : '')).trim();
 
-    // Tags: tag: prefixed labels, or tags frontmatter (comma only)
-    const tagLabels = labelNames
-      .filter((l) => /^tag:/i.test(l))
-      .map((l) => l.replace(/^tag:\s*/i, '').trim())
-      .filter(Boolean);
+    // Tags from frontmatter only (comma separated)
     const tags = fm.tags
       ? fm.tags.split(/,\s*/).map((t: string) => t.trim()).filter(Boolean)
-      : tagLabels;
+      : [];
 
     posts.push({
       slug,
