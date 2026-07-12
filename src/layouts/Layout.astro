@@ -16,8 +16,6 @@ const {
 } = Astro.props as Props;
 
 const owner = (site as any).owner;
-const repoName = (site as any).repoName as string | undefined;
-const isUserSite = repoName?.endsWith('.github.io');
 ---
 
 <!doctype html>
@@ -36,7 +34,6 @@ const isUserSite = repoName?.endsWith('.github.io');
 	<body class="flex flex-col max-w-[720px] min-h-dvh mx-auto px-4 py-8">
 		<header class="flex justify-between items-baseline gap-2 border-b border-b-slate-200 mb-8 pb-4">
 			<a href={import.meta.env.BASE_URL} class="text-2xl font-semibold no-underline text-inherit">
-				{isUserSite && owner?.avatarUrl && <img class="w-8 h-8 inset-shadow rounded-full object-cover inline-block align-middle mr-2" src={owner.avatarUrl} alt={`@{owner.login}'s avatar`} />}
 				{siteTitle}
 			</a>
 

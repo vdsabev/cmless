@@ -91,7 +91,6 @@ function main() {
   // Fetch site title + repo owner login (for site credit + avatar)
   let siteTitle = 'My Blog';
   let ownerLogin = '';
-  let repoName = '';
   try {
     const repoOutput = execSync('gh repo view --json description,owner,name', {
       encoding: 'utf8',
@@ -104,7 +103,6 @@ function main() {
       if (desc) siteTitle = desc;
     }
     ownerLogin = repo.owner?.login || '';
-    repoName = repo.name || '';
   } catch (err) {
     console.warn('⚠️  Could not fetch repo info, using defaults.');
   }
@@ -152,7 +150,11 @@ function main() {
       description,
       image,
       status,
-      content,
+      content: content.replace(
+        /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})[^)]*\)/g,
+        (_, alt, id) =>
+          `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%"><iframe src="https://www.youtube.com/embed/${id}" title="${alt.replace(/"/g, '&quot;')}" style="position:absolute;top:0;left:0;width:100%;height:100%" frameborder="0" allowfullscreen></iframe></div>`
+      ),
       number: issue.number,
       author,
       authorUrl,
@@ -175,7 +177,7 @@ function main() {
   mkdirSync(GENERATED_DIR, { recursive: true });
   writeFileSync(
     join(GENERATED_DIR, 'site.json'),
-    JSON.stringify({ siteTitle, owner: { login: ownerLogin, avatarUrl: ownerAvatar }, repoName }, null, 2) + '\n',
+    JSON.stringify({ siteTitle, owner: { login: ownerLogin, avatarUrl: ownerAvatar } }, null, 2) + '\n',
     'utf8'
   );
   console.log(`✓ generated/site.json (siteTitle: ${siteTitle})`);
