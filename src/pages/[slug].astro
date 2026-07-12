@@ -31,15 +31,23 @@ const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : (frontmatter.t
 
 <Layout title={title} description={description} image={image} siteTitle={site.siteTitle}>
 	<article>
-		<h1>{title}</h1>
-		<div class="text-slate-500 text-sm mb-6 flex items-center gap-2 flex-wrap">
-			{authorAvatar && <img class="w-5 h-5 rounded-full object-cover" src={authorAvatar} alt="" />}
-			{author ? (authorUrl ? <a href={authorUrl} target="_blank" rel="noopener">{author}</a> : <span>{author}</span>) : null}
+		<div class="flex flex-wrap items-center gap-1 mb-2 text-sm text-slate-500">
+			{authorAvatar && <img class="w-6 h-6 rounded-full object-cover" src={authorAvatar} alt={`${author}'s avatar`} />}
+			{author ? (authorUrl ? <a href={authorUrl} rel="author" target="_blank">{author}</a> : <span>{author}</span>) : null}
+			·
 			<time>{date}</time>
 			{isUnlisted && <span> · Unlisted</span>}
 		</div>
+
+		<hgroup>
+			<h1 class="text-3xl">{title}</h1>
+			{description && <p class="mt-1 text-slate-500">{description}</p>}
+		</hgroup>
+
 		{tags.length > 0 && (
-			<div class="flex gap-1 flex-wrap my-1 mb-4">{tags.map((t: string) => <span class="text-xs bg-slate-100 px-1.5 rounded text-slate-600">{t}</span>)}</div>
+			<ul class="flex flex-wrap gap-1 mt-2 mb-4 text-xs text-slate-900">
+				{tags.map((tag: string) => <li class="rounded bg-slate-200 px-1.5">{tag}</li>)}
+			</ul>
 		)}
 
 		{isUnlisted && (
@@ -53,5 +61,5 @@ const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : (frontmatter.t
 		</div>
 	</article>
 
-	<p style="margin-top: 3rem;"><a href={import.meta.env.BASE_URL}>← All posts</a></p>
+	<p class="mt-12"><a href={import.meta.env.BASE_URL}>← All posts</a></p>
 </Layout>

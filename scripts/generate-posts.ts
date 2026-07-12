@@ -9,7 +9,8 @@
  * - Writes Markdown files to src/content/blog/
  *
  * Local usage:
- *   GH_TOKEN=... bun run generate-posts
+ *   bun run generate-posts        (uses gh auth)
+ *   GH_TOKEN=... bun run generate-posts  (explicit token)
  *
  * In GitHub Actions:
  *   env:
@@ -58,15 +59,7 @@ function parseFrontmatter(rawBody: string): { fm: Record<string, string>; conten
 
 function main() {
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';
-
-  if (!token) {
-    console.error('❌ No GH_TOKEN (or GITHUB_TOKEN) found.');
-    console.error('In GitHub Actions, set:');
-    console.error('  env:');
-    console.error('    GH_TOKEN: ${{ github.token }}');
-    console.error('For local: GH_TOKEN=... bun run generate-posts');
-    process.exit(1);
-  }
+  const env = token ? { ...process.env, GH_TOKEN: token } : process.env;
 
   console.log('Fetching issues using gh CLI...');
 
@@ -77,13 +70,12 @@ function main() {
   try {
     output = execSync(ghCmd, {
       encoding: 'utf8',
-      env: { ...process.env, GH_TOKEN: token },
+      env,
       stdio: ['pipe', 'pipe', 'inherit'],
     });
   } catch (err) {
     console.error('❌ Failed to list issues with gh.');
-    console.error('Make sure the GitHub CLI (gh) is installed and the token has issues:read permission.');
-    console.error('For local runs: export GH_TOKEN=...');
+    console.error('Make sure the GitHub CLI (gh) is installed and you are logged in (gh auth status).');
     console.error(err);
     process.exit(1);
   }
@@ -99,10 +91,11 @@ function main() {
   // Fetch site title + repo owner login (for site credit + avatar)
   let siteTitle = 'My Blog';
   let ownerLogin = '';
+  let repoName = '';
   try {
-    const repoOutput = execSync('gh repo view --json description,owner', {
+    const repoOutput = execSync('gh repo view --json description,owner,name', {
       encoding: 'utf8',
-      env: { ...process.env, GH_TOKEN: token },
+      env,
       stdio: ['pipe', 'pipe', 'ignore'],
     });
     const repo = JSON.parse(repoOutput);
@@ -111,6 +104,7 @@ function main() {
       if (desc) siteTitle = desc;
     }
     ownerLogin = repo.owner?.login || '';
+    repoName = repo.name || '';
   } catch (err) {
     console.warn('⚠️  Could not fetch repo info, using defaults.');
   }
@@ -181,7 +175,7 @@ function main() {
   mkdirSync(GENERATED_DIR, { recursive: true });
   writeFileSync(
     join(GENERATED_DIR, 'site.json'),
-    JSON.stringify({ siteTitle, owner: { login: ownerLogin, avatarUrl: ownerAvatar } }, null, 2) + '\n',
+    JSON.stringify({ siteTitle, owner: { login: ownerLogin, avatarUrl: ownerAvatar }, repoName }, null, 2) + '\n',
     'utf8'
   );
   console.log(`✓ generated/site.json (siteTitle: ${siteTitle})`);

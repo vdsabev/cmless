@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@plugin '@tailwindcss/typography';
+@plugin "@tailwindcss/typography";
 
 /* Base styles that apply site-wide.
    Ensures images never overflow their containers (e.g. in prose-rendered Markdown). */
@@ -10,80 +10,8 @@
   }
 }
 
-/* Site layout and typography (non-Tailwind).
-   These must be global (not scoped) so they apply to slotted content
-   from pages like the post list in index.astro. */
-:root {
-  --max-width: 720px;
-  --text: #111;
-  --muted: #555;
-  --bg: #fff;
-  --accent: #0066cc;
+@layer base {
+  a {
+    @apply text-blue-600;
+  }
 }
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  line-height: 1.7;
-  color: var(--text);
-  background: var(--bg);
-}
-
-body {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 2rem 1rem;
-}
-
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 2rem;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 1rem;
-}
-
-nav a {
-  color: var(--muted);
-  text-decoration: none;
-  margin-left: 1rem;
-}
-
-nav a:hover {
-  color: var(--accent);
-}
-
-main {
-  margin-bottom: 4rem;
-}
-
-footer {
-  font-size: 0.875rem;
-  color: var(--muted);
-  border-top: 1px solid #eee;
-  padding-top: 1rem;
-  margin-top: 4rem;
-}
-
-a {
-  color: var(--accent);
-}
-
-article h1 {
-  font-size: 2rem;
-  margin-top: 0;
-}
-
-article img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 4px;
-}
-

@@ -16,10 +16,12 @@ const {
 } = Astro.props as Props;
 
 const owner = (site as any).owner;
+const repoName = (site as any).repoName as string | undefined;
+const isUserSite = repoName?.endsWith('.github.io');
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="bg-white p-0 text-slate-900 font-sans leading-relaxed">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -30,23 +32,37 @@ const owner = (site as any).owner;
 		{description && <meta name="description" content={description} />}
 		{image && <meta property="og:image" content={image} />}
 	</head>
-	<body>
-		<header>
-			<a href={import.meta.env.BASE_URL} class="text-2xl font-semibold m-0 no-underline text-inherit">{siteTitle}</a>
+
+	<body class="flex flex-col max-w-[720px] min-h-dvh mx-auto px-4 py-8">
+		<header class="flex justify-between items-baseline gap-2 border-b border-b-slate-200 mb-8 pb-4">
+			<a href={import.meta.env.BASE_URL} class="text-2xl font-semibold no-underline text-inherit">
+				{isUserSite && owner?.avatarUrl && <img class="w-8 h-8 rounded-full object-cover inline-block align-middle mr-2" src={owner.avatarUrl} alt={`@{owner.login}'s avatar`} />}
+				{siteTitle}
+			</a>
+
 			<nav>
-				<a href={import.meta.env.BASE_URL}>Posts</a>
+				<a href={import.meta.env.BASE_URL} class="ms-4 text-slate-500 no-underline hover:text-blue-600">Posts</a>
 			</nav>
 		</header>
-		<main>
+
+		<main class="flex-1">
 			<slot />
 		</main>
-		<footer>
+
+		<footer class="flex justify-between items-baseline gap-2 border-t border-t-slate-200 mt-8 pt-4 text-xs text-slate-500">
 			<p>
-				Powered by <a href="https://github.com/vdsabev/cmless">cmless</a>
-				{owner?.login && (
-					<> · by <img class="w-5 h-5 rounded-full object-cover inline-block align-middle" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" /> <a href={`https://github.com/${owner.login}`} target="_blank">@{owner.login}</a></>
-				)}
+				powered by <a href="https://github.com/vdsabev/cmless">cmless</a>
 			</p>
+
+			{owner?.login && (
+				<p>
+					created by{' '}
+					<a href={`https://github.com/${owner.login}`} rel="author" target="_blank">
+						<img class="inline-block align-middle w-5 h-5 rounded-full object-cover mx-0.5 mb-1" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" />
+						@{owner.login}
+					</a>
+				</p>
+			)}
 		</footer>
 	</body>
 </html>

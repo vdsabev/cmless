@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import site from '../generated/site.json';
 
 // Load all generated posts at build time (simple + reliable)
-const modules = import.meta.glob('../content/blog/*.md', { eager: true });
+const modules: Record<string, PostModule> = import.meta.glob('../content/blog/*.md', { eager: true });
 
 type PostModule = {
   frontmatter: {
@@ -20,19 +20,20 @@ type PostModule = {
 };
 
 const publishedPosts = Object.entries(modules)
-  .map(([path, mod]) => {
-    const m = mod as PostModule;
+  .map(([path, post]) => {
     const slug = path.split('/').pop()!.replace(/\.md$/, '');
     return {
       slug,
-      title: m.frontmatter.title,
-      date: m.frontmatter.date,
-      description: m.frontmatter.description,
-      status: m.frontmatter.status || 'published',
-      author: m.frontmatter.author,
+      title: post.frontmatter.title,
+      date: post.frontmatter.date,
+      description: post.frontmatter.description,
+      status: post.frontmatter.status || 'published',
+      author: post.frontmatter.author,
+      authorUrl: post.frontmatter.authorUrl,
+      authorAvatar: post.frontmatter.authorAvatar,
     };
   })
-  .filter((p) => p.status === 'published')
+  .filter((post) => post.status === 'published')
   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 ---
 
@@ -41,14 +42,24 @@ const publishedPosts = Object.entries(modules)
 		publishedPosts.length === 0 ? (
 			<p>No published posts yet. Create a GitHub Issue and apply the <code>status: published</code> label.</p>
 		) : (
-			<ul class="list-none p-0 m-0 flex flex-col gap-8">
+			<ul class="flex flex-col gap-8">
 				{
 					publishedPosts.map((post) => (
-						<li class="m-0">
-							<h2 class="m-0 mb-0.5 text-lg font-semibold leading-tight"><a href={`${import.meta.env.BASE_URL}${post.slug}/`} class="no-underline hover:underline">{post.title}</a></h2>
-							<time class="text-sm font-normal text-slate-500">{post.date}</time>
-							{post.author && <span class="text-sm text-slate-500"> · {post.author}</span>}
-							{post.description && <p class="mt-1.5 text-base font-normal text-slate-500 leading-normal">{post.description}</p>}
+						<li>
+              <hgroup>
+							  <h2 class="text-xl font-semibold leading-tight">
+                  <a href={`${import.meta.env.BASE_URL}${post.slug}/`} class="no-underline hover:underline">{post.title}</a>
+                </h2>
+
+                {post.description && <p class="mt-1 text-sm text-slate-500 leading-normal">{post.description}</p>}
+              </hgroup>
+
+          		<div class="flex flex-wrap items-center gap-1 mt-1 text-xs text-slate-500">
+                {post.authorAvatar && <img class="w-4 h-4 rounded-full object-cover" src={post.authorAvatar} alt={`${post.author}'s avatar`} />}
+                {post.author ? (post.authorUrl ? <a href={post.authorUrl} rel="author" target="_blank">{post.author}</a> : <span>{post.author}</span>) : null}
+                ·
+                <time>{post.date}</time>
+              </div>
 						</li>
 					))
 				}

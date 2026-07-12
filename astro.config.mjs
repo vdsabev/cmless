@@ -56,10 +56,10 @@ export default defineConfig({
   base,
   output: 'static',
   trailingSlash: 'always',
+  server: { host: true, allowedHosts: true },
   vite: {
     plugins: [tailwindcss()],
   },
   // No manual configuration needed for GitHub Pages URLs.
   // See README for details.
 });
-
