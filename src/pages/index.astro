@@ -55,7 +55,7 @@ const publishedPosts = Object.entries(modules)
               </hgroup>
 
           		<div class="flex flex-wrap items-center gap-1 mt-1 text-xs text-slate-500">
-                {post.authorAvatar && <img class="w-4 h-4 inset-shadow rounded-full object-cover" src={post.authorAvatar} alt={`${post.author}'s avatar`} />}
+                {post.authorAvatar && <img class="w-4 h-4 inset-shadow rounded-full object-cover bg-slate-100" src={post.authorAvatar} alt={`${post.author}'s avatar`} />}
                 {post.author ? (post.authorUrl ? <a href={post.authorUrl} rel="author" target="_blank">{post.author}</a> : <span>{post.author}</span>) : null}
                 ·
                 <time>{post.date}</time>

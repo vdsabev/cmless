@@ -143,6 +143,9 @@ function main() {
       ? fm.tags.split(/,\s*/).map((t: string) => t.trim()).filter(Boolean)
       : [];
 
+    const navigation = fm.navigation || '';
+    const navigationIndex = fm.navigationIndex ? parseInt(fm.navigationIndex, 10) : 0;
+
     posts.push({
       slug,
       title,
@@ -150,6 +153,8 @@ function main() {
       description,
       image,
       status,
+      navigation,
+      navigationIndex,
       content: content.replace(
         /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})[^)]*\)/g,
         (_, alt, id) =>
@@ -182,6 +187,21 @@ function main() {
   );
   console.log(`✓ generated/site.json (siteTitle: ${siteTitle})`);
 
+  // Build navigation links
+  const headerNav = posts
+    .filter((p: any) => p.navigation === 'header')
+    .map((p: any) => ({ title: p.title, slug: p.slug, navigationIndex: p.navigationIndex }));
+  const footerNav = posts
+    .filter((p: any) => p.navigation === 'footer')
+    .map((p: any) => ({ title: p.title, slug: p.slug, navigationIndex: p.navigationIndex }));
+
+  writeFileSync(
+    join(GENERATED_DIR, 'navigation.json'),
+    JSON.stringify({ header: headerNav, footer: footerNav }, null, 2) + '\n',
+    'utf8'
+  );
+  console.log(`✓ generated/navigation.json (header: ${headerNav.length}, footer: ${footerNav.length})`);
+
   for (const p of posts) {
     const lines = [
       `title: ${JSON.stringify(p.title)}`,
@@ -194,6 +214,8 @@ function main() {
     if (p.authorUrl) lines.push(`authorUrl: ${JSON.stringify(p.authorUrl)}`);
     if (p.authorAvatar) lines.push(`authorAvatar: ${JSON.stringify(p.authorAvatar)}`);
     if (p.tags && p.tags.length) lines.push(`tags: ${JSON.stringify(p.tags)}`);
+    if (p.navigation) lines.push(`navigation: ${p.navigation}`);
+    lines.push(`navigationIndex: ${p.navigationIndex}`);
 
     const md = `---\n${lines.join('\n')}\n---\n\n${p.content}\n`;
     const outPath = join(CONTENT_DIR, `${p.slug}.md`);

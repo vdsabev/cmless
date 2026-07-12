@@ -29,5 +29,9 @@ src/content/blog/*.md
 
 # Generated site metadata (title from repo description)
 src/generated/site.json
+
+# Generated navigation links
+src/generated/navigation.json
+
 !src/generated/.gitkeep
 

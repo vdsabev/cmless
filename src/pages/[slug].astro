@@ -17,7 +17,7 @@ export function getStaticPaths() {
 const { mod, frontmatter, slug } = Astro.props;
 const { Content } = mod as any;
 
-const isUnlisted = frontmatter.status === 'unlisted';
+const isPage = !!frontmatter.navigation;
 const title = frontmatter.title || slug;
 const date = frontmatter.date || '';
 const description = frontmatter.description;
@@ -30,36 +30,33 @@ const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : (frontmatter.t
 ---
 
 <Layout title={title} description={description} image={image} siteTitle={site.siteTitle}>
-	<article>
-		<div class="flex flex-wrap items-center gap-1 mb-2 text-sm text-slate-500">
-			{authorAvatar && <img class="w-6 h-6 inset-shadow rounded-full object-cover" src={authorAvatar} alt={`${author}'s avatar`} />}
-			{author ? (authorUrl ? <a href={authorUrl} rel="author" target="_blank">{author}</a> : <span>{author}</span>) : null}
-			·
-			<time>{date}</time>
-			{isUnlisted && <span> · Unlisted</span>}
-		</div>
-
-		<hgroup>
-			<h1 class="text-3xl">{title}</h1>
-			{description && <p class="mt-1 text-slate-500">{description}</p>}
-		</hgroup>
-
-		{tags.length > 0 && (
-			<ul class="flex flex-wrap gap-1 mt-2 mb-4 text-xs text-slate-900">
-				{tags.map((tag: string) => <li class="rounded bg-slate-200 px-1.5">{tag}</li>)}
-			</ul>
-		)}
-
-		{isUnlisted && (
-			<div class="bg-amber-50 border-l-4 border-amber-500 py-2 px-4 text-sm mb-6">
-				This post is <strong>unlisted</strong>. It is not shown on the posts page but is accessible via direct link.
-			</div>
-		)}
-
+	{isPage ? (
 		<div class="prose max-w-none">
 			<Content />
 		</div>
-	</article>
+	) : (
+		<article>
+			<div class="flex flex-wrap items-center gap-1 mb-2 text-sm text-slate-500">
+			{authorAvatar && <img class="w-6 h-6 inset-shadow rounded-full object-cover bg-slate-100" src={authorAvatar} alt={`${author}'s avatar`} />}
+				{author ? (authorUrl ? <a href={authorUrl} rel="author" target="_blank">{author}</a> : <span>{author}</span>) : null}
+				·
+				<time>{date}</time>
+			</div>
 
-	<p class="mt-12"><a href={import.meta.env.BASE_URL}>← All posts</a></p>
+			<hgroup>
+				<h1 class="text-3xl">{title}</h1>
+				{description && <p class="mt-1 text-slate-500">{description}</p>}
+			</hgroup>
+
+			{tags.length > 0 && (
+				<ul class="flex flex-wrap gap-1 mt-2 mb-4 text-xs text-slate-900">
+					{tags.map((tag: string) => <li class="rounded bg-slate-200 px-1.5">{tag}</li>)}
+				</ul>
+			)}
+
+			<div class="prose max-w-none">
+				<Content />
+			</div>
+		</article>
+	)}
 </Layout>

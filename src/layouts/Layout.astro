@@ -1,6 +1,13 @@
 ---
 import '../styles/global.css';
 import site from '../generated/site.json';
+import nav from '../generated/navigation.json';
+
+interface NavItem {
+	title: string;
+	slug: string;
+	navigationIndex: number;
+}
 
 interface Props {
 	title?: string;
@@ -16,6 +23,14 @@ const {
 } = Astro.props as Props;
 
 const owner = (site as any).owner;
+const BASE_URL = import.meta.env.BASE_URL;
+
+const rawHeader: NavItem[] = (nav as any).header || [];
+const beforePosts = rawHeader.filter((n) => n.navigationIndex < 0).sort((a, b) => a.navigationIndex - b.navigationIndex);
+const afterPosts = rawHeader.filter((n) => n.navigationIndex >= 0).sort((a, b) => a.navigationIndex - b.navigationIndex);
+const headerNav: NavItem[] = [...beforePosts, { title: 'Posts', slug: '', navigationIndex: 0 }, ...afterPosts];
+
+const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.navigationIndex - b.navigationIndex);
 ---
 
 <!doctype html>
@@ -37,8 +52,10 @@ const owner = (site as any).owner;
 				{siteTitle}
 			</a>
 
-			<nav>
-				<a href={import.meta.env.BASE_URL} class="text-slate-500 no-underline hover:text-blue-700">Posts</a>
+			<nav class="flex items-baseline gap-3">
+				{headerNav.map((item) => (
+					<a href={`${BASE_URL}${item.slug}${item.slug ? '/' : ''}`} class="text-slate-500 no-underline hover:text-blue-700 whitespace-nowrap">{item.title}</a>
+				))}
 			</nav>
 		</header>
 
@@ -47,13 +64,23 @@ const owner = (site as any).owner;
 		</main>
 
 		<footer class="flex justify-between items-baseline gap-2 border-t border-t-slate-200 mt-8 pt-4 text-xs text-slate-500">
-			<p>powered by <a href="https://github.com/vdsabev/cmless">cmless</a></p>
+			<div class="flex items-baseline gap-2">
+				{footerNav.length > 0 && (
+					<nav class="flex items-baseline gap-2">
+						{footerNav.map((item) => (
+							<a href={`${BASE_URL}${item.slug}/`} class="text-slate-500 no-underline hover:text-blue-700">{item.title}</a>
+						))}
+						<span class="text-slate-300">·</span>
+					</nav>
+				)}
+				<p>powered by <a href="https://github.com/vdsabev/cmless">cmless</a></p>
+			</div>
 
 			{owner?.login && (
 				<p>
 					created by{' '}
 					<a href={`https://github.com/${owner.login}`} rel="author" target="_blank">
-						<img class="inline-block align-middle w-4 h-4 inset-shadow rounded-full object-cover mx-0.5 mb-1" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" />
+						<img class="inline-block align-middle w-4 h-4 inset-shadow rounded-full object-cover mx-0.5 bg-slate-100 mb-1" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" />
 						@{owner.login}
 					</a>
 				</p>
