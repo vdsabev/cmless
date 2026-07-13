@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Author from '../components/Author.astro';
 import Tags from '../components/Tags.astro';
 import site from '../generated/site.json';
 
@@ -13,9 +12,6 @@ type PostModule = {
     date: string;
     description?: string;
     status?: 'published' | 'unlisted';
-    author?: string;
-    authorUrl?: string;
-    authorAvatar?: string;
     tags?: string[] | string;
   };
   url?: string;
@@ -30,9 +26,6 @@ const publishedPosts = Object.entries(modules)
       date: post.frontmatter.date,
       description: post.frontmatter.description,
       status: post.frontmatter.status || 'published',
-      author: post.frontmatter.author,
-      authorUrl: post.frontmatter.authorUrl,
-      authorAvatar: post.frontmatter.authorAvatar,
       tags: Array.isArray(post.frontmatter.tags) ? post.frontmatter.tags : (post.frontmatter.tags ? String(post.frontmatter.tags).split(/,\s*/) : []),
     };
   })
@@ -56,8 +49,6 @@ const publishedPosts = Object.entries(modules)
 
                 {post.description && <p class="mt-1 text-sm text-slate-500 leading-normal">{post.description}</p>}
               </hgroup>
-
-              <Author class="mt-1" name={post.author} url={post.authorUrl} avatar={post.authorAvatar} date={post.date} size="sm" />
 
               <Tags class="mt-2" tags={post.tags} />
 						</li>
