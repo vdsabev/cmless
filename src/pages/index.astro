@@ -57,9 +57,9 @@ const publishedPosts = Object.entries(modules)
                 {post.description && <p class="mt-1 text-sm text-slate-500 leading-normal">{post.description}</p>}
               </hgroup>
 
-              <Author name={post.author} url={post.authorUrl} avatar={post.authorAvatar} date={post.date} size="sm" />
+              <Author class="mt-1" name={post.author} url={post.authorUrl} avatar={post.authorAvatar} date={post.date} size="sm" />
 
-              <Tags tags={post.tags} />
+              <Tags class="mt-2" tags={post.tags} />
 						</li>
 					))
 				}

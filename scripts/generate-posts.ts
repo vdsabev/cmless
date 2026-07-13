@@ -42,18 +42,36 @@ function parseFrontmatter(rawBody: string): { fm: Record<string, string>; conten
   const content = match[2].trimStart();
 
   const fm: Record<string, string> = {};
-  for (const line of yamlBlock.split(/\r?\n/)) {
+  const lines = yamlBlock.split(/\r?\n/);
+  let currentKey = '';
+  let currentList: string[] = [];
+  for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) continue;
+    const listMatch = trimmed.match(/^-\s+(.*)$/);
+    if (listMatch && currentKey) {
+      currentList.push(listMatch[1].trim());
+      continue;
+    }
+    if (currentKey && currentList.length) {
+      fm[currentKey] = currentList.join(', ');
+      currentList = [];
+    }
     const m = trimmed.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
     if (m) {
+      currentKey = m[1];
       let val = m[2].trim();
-      // Strip surrounding quotes
       if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
         val = val.slice(1, -1);
       }
-      fm[m[1]] = val;
+      if (val) {
+        fm[currentKey] = val;
+      }
+      currentList = [];
     }
+  }
+  if (currentKey && currentList.length) {
+    fm[currentKey] = currentList.join(', ');
   }
   return { fm, content };
 }
@@ -139,7 +157,7 @@ function main() {
     const authorUrl = (fm.authorUrl || (ghAuthor.login ? `https://github.com/${ghAuthor.login}` : '')).trim();
     const authorAvatar = (fm.authorAvatar || (ghAuthor.login ? `https://github.com/${ghAuthor.login}.png` : '')).trim();
 
-    // Tags from frontmatter only (comma separated)
+    // Tags from frontmatter (comma separated or YAML list)
     const tags = fm.tags
       ? fm.tags.split(/,\s*/).map((t: string) => t.trim()).filter(Boolean)
       : [];

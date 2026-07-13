@@ -45,7 +45,7 @@ const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : (frontmatter.t
 				{description && <p class="mt-1 text-slate-500">{description}</p>}
 			</hgroup>
 
-			<Tags tags={tags} />
+			<Tags class="mt-1 mb-4" tags={tags} />
 
 			<div class="prose max-w-none">
 				<Content />
