@@ -15,3 +15,10 @@
     @apply text-blue-700;
   }
 }
+
+@layer components {
+  .prose blockquote p:first-of-type::before,
+  .prose blockquote p:last-of-type::after {
+    content: none;
+  }
+}
