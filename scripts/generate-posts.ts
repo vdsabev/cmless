@@ -156,16 +156,25 @@ function main() {
       navigation,
       navigationIndex,
       content: content
+        // Embed X/Twitter posts
         .replace(
           /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(\w+)\/status\/(\d+)[^)]*\)/g,
           (_, _alt, screenName, tweetId) =>
             `<blockquote class="twitter-tweet" data-media-max-width="560"><a href="https://twitter.com/${screenName}/status/${tweetId}"></a></blockquote><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>`
         )
+        // Embed CodePen pens
         .replace(
           /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?codepen\.io\/(\w+)\/pen\/([a-zA-Z0-9_-]+)[^)]*\)/g,
           (_, alt, user, slug) =>
             `<iframe height="450" style="width:100%;" scrolling="no" title="${alt.replace(/"/g, '&quot;')}" src="https://codepen.io/${user}/embed/${slug}?default-tab=html%2Cresult" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true"></iframe>`
         )
+        // Embed GitHub Gists
+        .replace(
+          /!\[([^\]]*)\]\s*\(https?:\/\/gist\.github\.com\/(\w+)\/([a-f0-9]+)[^)]*\)/g,
+          (_, _alt, user, gistId) =>
+            `<script src="https://gist.github.com/${user}/${gistId}.js"></script>`
+        )
+        // Embed YouTube videos
         .replace(
           /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})[^)]*\)/g,
           (_, alt, id) =>
