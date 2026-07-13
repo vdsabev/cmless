@@ -38,8 +38,10 @@ const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.nav
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
-		<link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} />
+		{owner?.avatarUrl
+			? <link rel="icon" type="image/png" href={owner.avatarUrl} />
+			: <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+		}
 		<meta name="generator" content={Astro.generator} />
 		<title>{siteTitle} | {title}</title>
 		{description && <meta name="description" content={description} />}
