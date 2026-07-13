@@ -1,0 +1,9 @@
+---
+const { tags } = Astro.props as { tags: string[] };
+---
+
+{tags.length > 0 && (
+  <ul class="flex flex-wrap gap-1 text-xs text-slate-900">
+    {tags.map((tag: string) => <li class="rounded bg-slate-200 px-1.5">{tag}</li>)}
+  </ul>
+)}

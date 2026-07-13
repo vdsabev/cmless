@@ -1,5 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Author from '../components/Author.astro';
+import Tags from '../components/Tags.astro';
 import site from '../generated/site.json';
 
 export function getStaticPaths() {
@@ -36,23 +38,14 @@ const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : (frontmatter.t
 		</div>
 	) : (
 		<article>
-			<div class="flex flex-wrap items-center gap-1 mb-2 text-sm text-slate-500">
-			{authorAvatar && <img class="w-6 h-6 inset-shadow rounded-full object-cover bg-slate-100" src={authorAvatar} alt={`${author}'s avatar`} />}
-				{author ? (authorUrl ? <a href={authorUrl} rel="author" target="_blank">{author}</a> : <span>{author}</span>) : null}
-				·
-				<time>{date}</time>
-			</div>
+			<div class="mb-2"><Author name={author} url={authorUrl} avatar={authorAvatar} date={date} size="md" /></div>
 
 			<hgroup>
 				<h1 class="text-3xl">{title}</h1>
 				{description && <p class="mt-1 text-slate-500">{description}</p>}
 			</hgroup>
 
-			{tags.length > 0 && (
-				<ul class="flex flex-wrap gap-1 mt-2 mb-4 text-xs text-slate-900">
-					{tags.map((tag: string) => <li class="rounded bg-slate-200 px-1.5">{tag}</li>)}
-				</ul>
-			)}
+			<Tags tags={tags} />
 
 			<div class="prose max-w-none">
 				<Content />

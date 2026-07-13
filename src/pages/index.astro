@@ -1,5 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Author from '../components/Author.astro';
+import Tags from '../components/Tags.astro';
 import site from '../generated/site.json';
 
 // Load all generated posts at build time (simple + reliable)
@@ -31,6 +33,7 @@ const publishedPosts = Object.entries(modules)
       author: post.frontmatter.author,
       authorUrl: post.frontmatter.authorUrl,
       authorAvatar: post.frontmatter.authorAvatar,
+      tags: Array.isArray(post.frontmatter.tags) ? post.frontmatter.tags : (post.frontmatter.tags ? String(post.frontmatter.tags).split(/,\s*/) : []),
     };
   })
   .filter((post) => post.status === 'published')
@@ -54,12 +57,9 @@ const publishedPosts = Object.entries(modules)
                 {post.description && <p class="mt-1 text-sm text-slate-500 leading-normal">{post.description}</p>}
               </hgroup>
 
-          		<div class="flex flex-wrap items-center gap-1 mt-1 text-xs text-slate-500">
-                {post.authorAvatar && <img class="w-4 h-4 inset-shadow rounded-full object-cover bg-slate-100" src={post.authorAvatar} alt={`${post.author}'s avatar`} />}
-                {post.author ? (post.authorUrl ? <a href={post.authorUrl} rel="author" target="_blank">{post.author}</a> : <span>{post.author}</span>) : null}
-                ·
-                <time>{post.date}</time>
-              </div>
+              <Author name={post.author} url={post.authorUrl} avatar={post.authorAvatar} date={post.date} size="sm" />
+
+              <Tags tags={post.tags} />
 						</li>
 					))
 				}

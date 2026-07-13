@@ -1,0 +1,21 @@
+---
+export type Props = {
+  name?: string;
+  url?: string;
+  avatar?: string;
+  date?: string;
+  size?: 'sm' | 'md';
+};
+
+const { name, url, avatar, date, size = 'sm' } = Astro.props as Props;
+
+const avatarSize = size === 'md' ? 'w-6 h-6' : 'w-4 h-4';
+const textSize = size === 'md' ? 'text-sm' : 'text-xs';
+---
+
+<div class={`flex flex-wrap items-center gap-1 ${textSize} text-slate-500`}>
+  {avatar && <img class={`${avatarSize} inset-shadow rounded-full object-cover bg-slate-100`} src={avatar} alt={`${name}'s avatar`} />}
+  {name ? (url ? <a href={url} rel="author" target="_blank">{name}</a> : <span>{name}</span>) : null}
+  ·
+  {date && <time>{date}</time>}
+</div>
