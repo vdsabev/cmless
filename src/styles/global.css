@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@utility prose {
+  /* Disable adding quote marks to block-quotes: https://github.com/tailwindlabs/tailwindcss-typography/issues/66 */
+  blockquote {
+    p:first-of-type::before,
+    p:last-of-type::after {
+      content: none;
+    }
+  }
+}
+
 /* Base styles that apply site-wide.
    Ensures images never overflow their containers (e.g. in prose-rendered Markdown). */
 @layer base {
@@ -13,12 +23,5 @@
 @layer base {
   a {
     @apply text-blue-700;
-  }
-}
-
-@layer components {
-  .prose blockquote p:first-of-type::before,
-  .prose blockquote p:last-of-type::after {
-    content: none;
   }
 }
