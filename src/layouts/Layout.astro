@@ -47,8 +47,14 @@ const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.nav
 		}
 		<meta name="generator" content={Astro.generator} />
 		<title>{siteTitle} | {title}</title>
+		<meta property="og:title" content={`${siteTitle} | ${title}`} />
+		<meta property="og:site_name" content={siteTitle} />
+		<meta name="twitter:card" content="summary_large_image" />
 		{description && <meta name="description" content={description} />}
+		{description && <meta property="og:description" content={description} />}
+		{description && <meta name="twitter:description" content={description} />}
 		{resolvedImage && <meta property="og:image" content={resolvedImage} />}
+		{resolvedImage && <meta name="twitter:image" content={resolvedImage} />}
 	</head>
 
 	<body class="flex flex-col max-w-2xl min-h-dvh mx-auto px-4 py-8">
