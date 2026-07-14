@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "bun generate && astro dev",
     "build": "bun generate && astro build",
-    "generate": "bun scripts/generate-posts.ts",
+    "generate": "bun scripts/generate.ts",
     "astro": "astro"
   },
   "dependencies": {

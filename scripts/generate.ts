@@ -9,8 +9,9 @@
  * - Writes Markdown files to src/content/blog/
  *
  * Local usage:
- *   bun run generate-posts        (uses gh auth)
- *   GH_TOKEN=... bun run generate-posts  (explicit token)
+ *   bun generate              # (uses gh auth)
+ *   GH_TOKEN=... bun generate # (explicit token)
+ *   GH_REPO=... bun generate  # (explicit repo)
  *
  * In GitHub Actions:
  *   env:

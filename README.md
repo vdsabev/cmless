@@ -90,7 +90,7 @@ GH_REPO=<username>/<repo> npm run dev # run another cmless-based repo as a blog
 **Custom domain:** Place a `CNAME` file in `public/` and set up DNS.
 
 ## 🔄 How It Works
-A GitHub Actions workflow runs `scripts/generate-posts.ts` (via `gh`) on issue events and pushes. It turns qualifying issues into Markdown files in `src/content/blog/`. Astro builds a static site that GitHub Pages serves. Nothing about individual posts is stored in the repository.
+A GitHub Actions workflow runs `scripts/generate.ts` (via `gh`) on issue events and pushes. It turns qualifying issues into Markdown files in `src/content/blog/`. Astro builds a static site that GitHub Pages serves. Nothing about individual posts is stored in the repository.
 
 ## ⬆️ Syncing updates from cmless
 Template clones have their own history. To sync:

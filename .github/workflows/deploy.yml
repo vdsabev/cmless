@@ -35,10 +35,10 @@ jobs:
       - name: Generate posts from GitHub Issues
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bun run generate-posts
+        run: bun generate
 
       - name: Build with Astro
-        run: bun run astro build
+        run: bun astro build
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
