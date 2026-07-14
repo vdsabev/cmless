@@ -74,7 +74,8 @@ Re-applying the status label (or just editing a published/unlisted issue) trigge
 git clone https://.../your-repo.git
 cd your-repo
 npm install # or bun, etc.
-npm run dev
+npm run dev # run the current folder's repo as a blog
+GH_REPO=<username>/<repo> npm run dev # run another cmless-based repo as a blog
 ```
 
 ## ⚙️ Configuration

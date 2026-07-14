@@ -23,6 +23,8 @@ const {
 	siteTitle = 'My Blog',
 } = Astro.props as Props;
 
+const resolvedImage = image || (site as any).socialPreviewUrl || '';
+
 const owner = (site as any).owner;
 const BASE_URL = import.meta.env.BASE_URL;
 
@@ -46,7 +48,7 @@ const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.nav
 		<meta name="generator" content={Astro.generator} />
 		<title>{siteTitle} | {title}</title>
 		{description && <meta name="description" content={description} />}
-		{image && <meta property="og:image" content={image} />}
+		{resolvedImage && <meta property="og:image" content={resolvedImage} />}
 	</head>
 
 	<body class="flex flex-col max-w-2xl min-h-dvh mx-auto px-4 py-8">

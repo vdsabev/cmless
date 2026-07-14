@@ -33,15 +33,16 @@ function slugify(str: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-function parseFrontmatter(rawBody: string): { fm: Record<string, string>; content: string } {
+function parseFrontmatter(rawBody: string): { frontmatter: Record<string, string>; content: string } {
   const match = rawBody.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);
   if (!match) {
-    return { fm: {}, content: rawBody.trim() };
+    return { frontmatter: {}, content: rawBody.trim() };
   }
+
   const yamlBlock = match[1];
   const content = match[2].trimStart();
 
-  const fm: Record<string, string> = {};
+  const frontmatter: Record<string, string> = {};
   const lines = yamlBlock.split(/\r?\n/);
   let currentKey = '';
   let currentList: string[] = [];
@@ -54,26 +55,26 @@ function parseFrontmatter(rawBody: string): { fm: Record<string, string>; conten
       continue;
     }
     if (currentKey && currentList.length) {
-      fm[currentKey] = currentList.join(', ');
+      frontmatter[currentKey] = currentList.join(', ');
       currentList = [];
     }
-    const m = trimmed.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-    if (m) {
-      currentKey = m[1];
-      let val = m[2].trim();
-      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-        val = val.slice(1, -1);
+    const matches = trimmed.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (matches) {
+      currentKey = matches[1];
+      let value = matches[2].trim();
+      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
       }
-      if (val) {
-        fm[currentKey] = val;
+      if (value) {
+        frontmatter[currentKey] = value;
       }
       currentList = [];
     }
   }
   if (currentKey && currentList.length) {
-    fm[currentKey] = currentList.join(', ');
+    frontmatter[currentKey] = currentList.join(', ');
   }
-  return { fm, content };
+  return { frontmatter: frontmatter, content };
 }
 
 function main() {
@@ -83,19 +84,19 @@ function main() {
   console.log('Fetching issues using gh CLI...');
 
   // --state all so we can publish from closed issues too if desired
-  const ghCmd = `gh issue list --state all --limit 200 --json number,title,body,labels,createdAt,url,author`;
+  const getGitHubIssues = `gh issue list --state all --limit 200 --json number,title,body,labels,createdAt,url,author`;
 
   let output: string;
   try {
-    output = execSync(ghCmd, {
+    output = execSync(getGitHubIssues, {
       encoding: 'utf8',
       env,
       stdio: ['pipe', 'pipe', 'inherit'],
     });
-  } catch (err) {
+  } catch (error) {
     console.error('❌ Failed to list issues with gh.');
     console.error('Make sure the GitHub CLI (gh) is installed and you are logged in (gh auth status).');
-    console.error(err);
+    console.error(error);
     process.exit(1);
   }
 
@@ -110,8 +111,9 @@ function main() {
   // Fetch site title + repo owner login (for site credit + avatar)
   let siteTitle = 'My Blog';
   let ownerLogin = '';
+  let socialPreviewUrl = '';
   try {
-    const repoOutput = execSync('gh repo view --json description,owner,name', {
+    const repoOutput = execSync('gh repo view --json description,owner,name,openGraphImageUrl', {
       encoding: 'utf8',
       env,
       stdio: ['pipe', 'pipe', 'ignore'],
@@ -119,9 +121,12 @@ function main() {
     const repo = JSON.parse(repoOutput);
     if (repo.description && typeof repo.description === 'string') {
       const desc = repo.description.trim();
-      if (desc) siteTitle = desc;
+      if (desc) {
+        siteTitle = desc;
+      }
     }
     ownerLogin = repo.owner?.login || '';
+    socialPreviewUrl = repo.openGraphImageUrl || '';
   } catch (err) {
     console.warn('⚠️  Could not fetch repo info, using defaults.');
   }
@@ -131,68 +136,76 @@ function main() {
   const posts: any[] = [];
 
   for (const issue of issues) {
-    const labelNames: string[] = (issue.labels || []).map((l: any) =>
-      typeof l === 'string' ? l : l.name
-    );
-
-    const isPublished = labelNames.some((l) => /^status:\s*published$/i.test(l) || l === 'status:published');
-    const isUnlisted = labelNames.some((l) => /^status:\s*unlisted$/i.test(l) || l === 'status:unlisted');
+    const labelNames: string[] = (issue.labels || []).map((label: any) => typeof label === 'string' ? label : label.name);
+    const isPublished = labelNames.some((label) => /^status:\s*published$/i.test(label) || label === 'status:published');
+    const isUnlisted = labelNames.some((label) => /^status:\s*unlisted$/i.test(label) || label === 'status:unlisted');
 
     if (!isPublished && !isUnlisted) continue;
 
     const status = isPublished ? 'published' : 'unlisted';
 
-    const { fm, content } = parseFrontmatter(issue.body || '');
+    // Frontmatter
+    const { frontmatter, content } = parseFrontmatter(issue.body || '');
 
-    const title = (fm.title || issue.title || `Issue #${issue.number}`).trim();
-    let slug = (fm.slug || slugify(title) || `issue-${issue.number}`).trim();
-
-    const date = (fm.date || (issue.createdAt ? issue.createdAt.split('T')[0] : '')).trim();
-    const description = fm.description || content.split(/\n\n+/)[0]?.slice(0, 180).trim() || '';
-    let image = fm.image;
+    const title = (frontmatter.title || issue.title || `Issue #${issue.number}`).trim();
+    const slug = (frontmatter.slug || slugify(title) || `issue-${issue.number}`).trim();
+    const date = (frontmatter.date || (issue.createdAt ? issue.createdAt.split('T')[0] : '')).trim();
+    const description = frontmatter.description || content.split(/\n\n+/)[0]?.slice(0, 180).trim() || '';
+    
+    // Image
+    let image = frontmatter.image;
     if (!image) {
       const firstLine = content.split('\n')[0]?.trim() || '';
-      const imgMatch = firstLine.match(/^<img\s[^>]*src=(["'])([^"']+)\1[^>]*\/?\s*>$/i);
-      if (imgMatch) {
-        image = imgMatch[2];
+      const imgTagMatch = firstLine.match(/^<img\s[^>]*src=(["'])([^"']+)\1[^>]*\/?\s*>$/i);
+      if (imgTagMatch) {
+        image = imgTagMatch[2];
       }
+    }
+    if (!image) {
+      image = socialPreviewUrl;
     }
 
     // Author from GitHub issue author (issue author's login)
-    const ghAuthor = issue.author || {};
-    const author = (fm.author || ghAuthor.name || ghAuthor.login || '').trim();
-    const authorUrl = (fm.authorUrl || (ghAuthor.login ? `https://github.com/${ghAuthor.login}` : '')).trim();
-    const authorAvatar = (fm.authorAvatar || (ghAuthor.login ? `https://github.com/${ghAuthor.login}.png` : '')).trim();
+    const githubAuthor = issue.author || {};
+    const author = (frontmatter.author || githubAuthor.name || githubAuthor.login || '').trim();
+    const authorUrl = (frontmatter.authorUrl || (githubAuthor.login ? `https://github.com/${githubAuthor.login}` : '')).trim();
+    const authorAvatar = (frontmatter.authorAvatar || (githubAuthor.login ? `https://github.com/${githubAuthor.login}.png` : '')).trim();
 
     // Tags from frontmatter (comma separated or YAML list)
-    const tags = fm.tags
-      ? fm.tags.split(/,\s*/).map((t: string) => t.trim()).filter(Boolean)
+    const tags = frontmatter.tags
+      ? frontmatter.tags.split(/,\s*/).map((tag: string) => tag.trim()).filter(Boolean)
       : [];
 
-    const navigation = fm.navigation || '';
-    const navigationIndex = fm.navigationIndex ? parseInt(fm.navigationIndex, 10) : 0;
+    // Navigation - insert link to page in header or footer; index sorts the link relative to other links 
+    const navigation = frontmatter.navigation || '';
+    const navigationIndex = frontmatter.navigationIndex ? parseInt(frontmatter.navigationIndex, 10) : 0;
 
     posts.push({
-      slug,
+      status,
+      number: issue.number,
       title,
+      slug,
       date,
       description,
       image,
-      status,
+      tags,
+      author,
+      authorUrl,
+      authorAvatar,
       navigation,
       navigationIndex,
       content: content
+        // Embed YouTube videos
+        .replace(
+          /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})[^)]*\)/g,
+          (_, alt, id) =>
+            `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%"><iframe src="https://www.youtube.com/embed/${id}" title="${alt.replace(/"/g, '&quot;')}" style="position:absolute;top:0;left:0;width:100%;height:100%" frameborder="0" allowfullscreen></iframe></div>`
+        )
         // Embed X/Twitter posts
         .replace(
           /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(\w+)\/status\/(\d+)[^)]*\)/g,
           (_, _alt, screenName, tweetId) =>
             `<blockquote class="twitter-tweet" data-media-max-width="560"><a href="https://twitter.com/${screenName}/status/${tweetId}"></a></blockquote><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>`
-        )
-        // Embed CodePen pens
-        .replace(
-          /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?codepen\.io\/(\w+)\/pen\/([a-zA-Z0-9_-]+)[^)]*\)/g,
-          (_, alt, user, slug) =>
-            `<iframe height="450" style="width:100%;" scrolling="no" title="${alt.replace(/"/g, '&quot;')}" src="https://codepen.io/${user}/embed/${slug}?default-tab=html%2Cresult" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true"></iframe>`
         )
         // Embed Instagram posts/reels
         .replace(
@@ -206,17 +219,12 @@ function main() {
           (_, _alt, user, gistId) =>
             `<script src="https://gist.github.com/${user}/${gistId}.js"></script>`
         )
-        // Embed YouTube videos
+        // Embed CodePen pens
         .replace(
-          /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})[^)]*\)/g,
-          (_, alt, id) =>
-            `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%"><iframe src="https://www.youtube.com/embed/${id}" title="${alt.replace(/"/g, '&quot;')}" style="position:absolute;top:0;left:0;width:100%;height:100%" frameborder="0" allowfullscreen></iframe></div>`
+          /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?codepen\.io\/(\w+)\/pen\/([a-zA-Z0-9_-]+)[^)]*\)/g,
+          (_, alt, user, slug) =>
+            `<iframe height="450" style="width:100%;" scrolling="no" title="${alt.replace(/"/g, '&quot;')}" src="https://codepen.io/${user}/embed/${slug}?default-tab=html%2Cresult" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true"></iframe>`
         ),
-      number: issue.number,
-      author,
-      authorUrl,
-      authorAvatar,
-      tags,
     });
   }
 
@@ -234,45 +242,56 @@ function main() {
   mkdirSync(GENERATED_DIR, { recursive: true });
   writeFileSync(
     join(GENERATED_DIR, 'site.json'),
-    JSON.stringify({ siteTitle, owner: { login: ownerLogin, avatarUrl: ownerAvatar } }, null, 2) + '\n',
+    JSON.stringify({ siteTitle, owner: { login: ownerLogin, avatarUrl: ownerAvatar }, socialPreviewUrl }, null, 2) + '\n',
     'utf8'
   );
   console.log(`✓ generated/site.json (siteTitle: ${siteTitle})`);
 
   // Build navigation links
-  const headerNav = posts
-    .filter((p: any) => p.navigation === 'header')
-    .map((p: any) => ({ title: p.title, slug: p.slug, navigationIndex: p.navigationIndex }));
-  const footerNav = posts
-    .filter((p: any) => p.navigation === 'footer')
-    .map((p: any) => ({ title: p.title, slug: p.slug, navigationIndex: p.navigationIndex }));
+  const headerNavLinks = posts
+    .filter((post: any) => post.navigation === 'header')
+    .map((post: any) => ({ title: post.title, slug: post.slug, navigationIndex: post.navigationIndex }));
+  const footerNavLinks = posts
+    .filter((post: any) => post.navigation === 'footer')
+    .map((post: any) => ({ title: post.title, slug: post.slug, navigationIndex: post.navigationIndex }));
 
   writeFileSync(
     join(GENERATED_DIR, 'navigation.json'),
-    JSON.stringify({ header: headerNav, footer: footerNav }, null, 2) + '\n',
+    JSON.stringify({ header: headerNavLinks, footer: footerNavLinks }, null, 2) + '\n',
     'utf8'
   );
-  console.log(`✓ generated/navigation.json (header: ${headerNav.length}, footer: ${footerNav.length})`);
+  console.log(`✓ generated/navigation.json (header: ${headerNavLinks.length}, footer: ${footerNavLinks.length})`);
 
-  for (const p of posts) {
-    const lines = [
-      `title: ${JSON.stringify(p.title)}`,
-      `date: "${p.date}"`,
-      `status: ${p.status}`,
+  for (const post of posts) {
+    const lines = [];
+    const fields = [
+      'status',
+      'title',
+      'date',
+      'description',
+      'image',
+      'author',
+      'authorUrl',
+      'authorAvatar',
+      'tags',
+      'navigation',
+      'navigationIndex',
     ];
-    if (p.description) lines.push(`description: ${JSON.stringify(p.description)}`);
-    if (p.image) lines.push(`image: ${p.image}`);
-    if (p.author) lines.push(`author: ${JSON.stringify(p.author)}`);
-    if (p.authorUrl) lines.push(`authorUrl: ${JSON.stringify(p.authorUrl)}`);
-    if (p.authorAvatar) lines.push(`authorAvatar: ${JSON.stringify(p.authorAvatar)}`);
-    if (p.tags && p.tags.length) lines.push(`tags: ${JSON.stringify(p.tags)}`);
-    if (p.navigation) lines.push(`navigation: ${p.navigation}`);
-    lines.push(`navigationIndex: ${p.navigationIndex}`);
+    for (const field of fields) {
+      const value = post[field];
+      if (
+        value != null &&
+        !(typeof value === 'string' && value.trim() === '') &&
+        !(Array.isArray(value) && value.length === 0)
+      ) {
+        lines.push(`${field}: ${JSON.stringify(value)}`);
+      }
+    }
 
-    const md = `---\n${lines.join('\n')}\n---\n\n${p.content}\n`;
-    const outPath = join(CONTENT_DIR, `${p.slug}.md`);
-    writeFileSync(outPath, md, 'utf8');
-    console.log(`✓ ${p.slug}.md  (issue #${p.number}, ${p.status})`);
+    const markdown = `---\n${lines.join('\n')}\n---\n\n${post.content}\n`;
+    const outPath = join(CONTENT_DIR, `${post.slug}.md`);
+    writeFileSync(outPath, markdown, 'utf8');
+    console.log(`✓ ${post.slug}.md  (issue #${post.number}, ${post.status})`);
   }
 
   console.log(`\nGenerated ${posts.length} post(s).`);

@@ -6,11 +6,10 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "bun run generate-posts && astro dev",
-    "build": "bun run generate-posts && astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "generate-posts": "bun scripts/generate-posts.ts"
+    "dev": "bun generate && astro dev",
+    "build": "bun generate && astro build",
+    "generate": "bun scripts/generate-posts.ts",
+    "astro": "astro"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
