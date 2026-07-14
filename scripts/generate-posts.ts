@@ -194,6 +194,12 @@ function main() {
           (_, alt, user, slug) =>
             `<iframe height="450" style="width:100%;" scrolling="no" title="${alt.replace(/"/g, '&quot;')}" src="https://codepen.io/${user}/embed/${slug}?default-tab=html%2Cresult" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true"></iframe>`
         )
+        // Embed Instagram posts/reels
+        .replace(
+          /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)[^)]*\)/g,
+          (_, alt, type, shortcode) =>
+            `<blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/${type}/${shortcode}/" style="background:#FFF;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15);margin:1px;max-width:540px;min-width:326px;padding:0;width:calc(100% - 2px)"></blockquote><script async src="//www.instagram.com/embed.js"></script>`
+        )
         // Embed GitHub Gists
         .replace(
           /!\[([^\]]*)\]\s*\(https?:\/\/gist\.github\.com\/(\w+)\/([a-f0-9]+)[^)]*\)/g,
