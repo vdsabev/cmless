@@ -2,10 +2,11 @@
 Seamless blogging with GitHub issues.
 
 - Open GitHub issues in your repo to write posts
-- Drag-and-drop or paste images in the issue to upload it to GitHub
-- Blog post automatically rebuild when its issue is created or updated
+- Drag-and-drop or paste images in the issue to upload them to GitHub
+- Blog post automatically rebuilds when its issue is created or updated
 - Manually manage post publishing by applying labels: `state: draft`, `state: unlisted`, `state: published`
 - Set metadata via Frontmatter
+- Add a link to a page in the header or footer
 
 ## 🚀 Get Started
 1. Click **"Use this template"** → create a new repository
@@ -25,7 +26,7 @@ gh label create "status: published" --color "0e8a16" --description "Published an
 | Label                | Listed on homepage? | Reachable by direct URL? | Best for                                 |
 |----------------------|---------------------|--------------------------|------------------------------------------|
 | `status: draft`      | No                  | No                       | Work in progress, only visible on GitHub |
-| `status: unlisted`   | No                  | Yes                      | Private links / previews                 |
+| `status: unlisted`   | No                  | Yes                      | Private links / previews / pages         |
 | `status: published`  | Yes                 | Yes                      | Public posts                             |
 
 > [!NOTE]
@@ -70,9 +71,9 @@ Re-applying the status label (or just editing a published/unlisted issue) trigge
 
 ## 🛠️ Local Development
 ```sh
-git clone https://.../your-repo.git && cd your-repo
-npm install
-GH_TOKEN=... npm run generate-posts   # optional
+git clone https://.../your-repo.git
+cd your-repo
+npm install # or bun, etc.
 npm run dev
 ```
 

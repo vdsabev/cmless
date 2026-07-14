@@ -1,0 +1,5 @@
+---
+const { class: className, ...props } = Astro.props as { class?: string; [key: string]: unknown };
+---
+
+<a class={`text-slate-500 no-underline hover:text-blue-700 ${className}`} {...props}><slot /></a>

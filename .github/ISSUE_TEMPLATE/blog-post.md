@@ -14,14 +14,16 @@ assignees: ''
 >
 > ```yaml
 > ---
-> title: My Post Title
-> date: 2026-07-10
-> description: Short summary.
-> slug: my-custom-url-slug   # optional
+> title: "My Post Title"
+> date: "2026-07-10"
+> description: "Short summary for SEO."
+> slug: my-custom-url-slug   # optional - stable if the title changes
 > image: https://...         # optional
-> author: Name               # auto from GitHub issue user
+> author: Name               # optional - automatic from the GitHub issue user
 > authorUrl: https://...
 > authorAvatar: https://...
+> navigation: header         # or footer - show a link to the page in the navigation
+> navigationIndex: 1         # show the link in a specific order after Posts; use a negative index to show before Posts
 > tags: tech, dev
 > ---
 > ```
@@ -31,7 +33,7 @@ assignees: ''
 > Then apply one of these labels:
 >
 > - `status: draft` — not published (default)
-> - `status: unlisted` — published at its direct URL (e.g. `/my-post/`) but hidden from the list
+> - `status: unlisted` — published at its direct URL (e.g. `/about/`) but hidden from the list of posts
 > - `status: published` — fully live and appears in sidebar / posts list
 >
 > Edit the issue + re-apply the status label to update the site.

@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import NavLink from '../components/NavLink.astro';
 import site from '../generated/site.json';
 import nav from '../generated/navigation.json';
 
@@ -56,7 +57,7 @@ const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.nav
 
 			<nav class="flex items-baseline gap-3">
 				{headerNav.map((item) => (
-					<a href={`${BASE_URL}${item.slug}${item.slug ? '/' : ''}`} class="text-slate-500 no-underline hover:text-blue-700 whitespace-nowrap">{item.title}</a>
+					<NavLink href={`${BASE_URL}${item.slug}${item.slug ? '/' : ''}`} class="whitespace-nowrap">{item.title}</NavLink>
 				))}
 			</nav>
 		</header>
@@ -65,28 +66,31 @@ const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.nav
 			<slot />
 		</main>
 
-		<footer class="flex justify-between items-baseline gap-2 border-t border-t-slate-200 mt-8 pt-4 text-xs text-slate-500">
-			<div class="flex items-baseline gap-2">
-				{footerNav.length > 0 && (
-					<nav class="flex items-baseline gap-2">
-						{footerNav.map((item) => (
-							<a href={`${BASE_URL}${item.slug}/`} class="text-slate-500 no-underline hover:text-blue-700">{item.title}</a>
-						))}
-						<span class="text-slate-300">·</span>
-					</nav>
-				)}
-				<p>powered by <a href="https://github.com/vdsabev/cmless">cmless</a></p>
-			</div>
-
+		<footer class="flex flex-wrap justify-center items-baseline gap-1 border-t border-t-slate-200 mt-8 pt-4 text-xs text-slate-500">
 			{owner?.login && (
-				<p>
-					created by{' '}
-					<a href={`https://github.com/${owner.login}`} rel="author" target="_blank">
-						<img class="inline-block align-middle w-4 h-4 inset-shadow rounded-full object-cover mx-0.5 bg-slate-100 mb-1" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" />
-						@{owner.login}
-					</a>
-				</p>
+				<>
+					<p>
+						created by{' '}
+						<a href={`https://github.com/${owner.login}`} rel="author" target="_blank">
+							<img class="inline-block align-middle w-4 h-4 inset-shadow rounded-full object-cover mx-0.5 bg-slate-100 mb-1" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" />
+							@{owner.login}
+						</a>
+					</p>
+					<span class="text-slate-300">·</span>
+				</>
 			)}
+
+			<p>powered by <a href="https://github.com/vdsabev/cmless">cmless</a></p>
+			<span class="text-slate-300">·</span>
+
+			<NavLink href={`${BASE_URL}rss.xml`}>rss</NavLink>
+
+			{footerNav.map((item) => (
+				<>
+					<span class="text-slate-300">·</span>
+					<NavLink href={`${BASE_URL}${item.slug}/`}>{item.title}</NavLink>
+				</>
+			))}
 		</footer>
 	</body>
 </html>
