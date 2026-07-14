@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@utility corner-* {
+  corner-shape: --value('bevel', 'notch', 'round', 'scoop', 'square', 'squircle');
+}
+
 @utility prose {
   /* Disable adding quote marks to block-quotes: https://github.com/tailwindlabs/tailwindcss-typography/issues/66 */
   blockquote {
@@ -8,6 +12,11 @@
     p:last-of-type::after {
       content: none;
     }
+  }
+
+  img,
+  pre {
+    @apply corner-squircle rounded-xl;
   }
 }
 

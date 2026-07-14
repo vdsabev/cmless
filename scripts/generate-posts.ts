@@ -149,7 +149,14 @@ function main() {
 
     const date = (fm.date || (issue.createdAt ? issue.createdAt.split('T')[0] : '')).trim();
     const description = fm.description || content.split(/\n\n+/)[0]?.slice(0, 180).trim() || '';
-    const image = fm.image || '';
+    let image = fm.image;
+    if (!image) {
+      const firstLine = content.split('\n')[0]?.trim() || '';
+      const imgMatch = firstLine.match(/^<img\s[^>]*src=(["'])([^"']+)\1[^>]*\/?\s*>$/i);
+      if (imgMatch) {
+        image = imgMatch[2];
+      }
+    }
 
     // Author from GitHub issue author (issue author's login)
     const ghAuthor = issue.author || {};

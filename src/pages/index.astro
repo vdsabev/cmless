@@ -11,6 +11,7 @@ type PostModule = {
     title: string;
     date: string;
     description?: string;
+    image?: string;
     status?: 'published' | 'unlisted';
     tags?: string[] | string;
   };
@@ -25,6 +26,7 @@ const publishedPosts = Object.entries(modules)
       title: post.frontmatter.title,
       date: post.frontmatter.date,
       description: post.frontmatter.description,
+      image: post.frontmatter.image,
       status: post.frontmatter.status || 'published',
       tags: Array.isArray(post.frontmatter.tags) ? post.frontmatter.tags : (post.frontmatter.tags ? String(post.frontmatter.tags).split(/,\s*/) : []),
     };
@@ -41,16 +43,21 @@ const publishedPosts = Object.entries(modules)
 			<ul class="flex flex-col gap-8">
 				{
 					publishedPosts.map((post) => (
-						<li>
-              <hgroup>
-							  <h2 class="text-xl font-semibold leading-tight">
-                  <a href={`${import.meta.env.BASE_URL}${post.slug}/`} class="no-underline hover:underline">{post.title}</a>
-                </h2>
+						<li class="flex flex-col sm:flex-row sm:gap-4 max-sm:bg-white max-sm:shadow-md max-sm:border max-sm:border-slate-200 max-sm:corner-squircle max-sm:rounded-2xl">
+              <div class="w-full sm:w-48 sm:shrink-0">
+                {post.image && <img src={post.image} alt="" loading="lazy" class="w-full aspect-[16/9] object-cover max-sm:corner-squircle max-sm:rounded-t-2xl sm:corner-squircle sm:rounded-xl" />}
+              </div>
+              <div class="sm:flex-1 sm:min-w-0 p-4 sm:p-0">
+                <hgroup>
+                  <h2 class="text-xl font-semibold leading-tight">
+                    <a href={`${import.meta.env.BASE_URL}${post.slug}/`} class="no-underline hover:underline">{post.title}</a>
+                  </h2>
 
-                {post.description && <p class="mt-1 text-sm text-slate-500 leading-normal">{post.description}</p>}
-              </hgroup>
+                  {post.description && <p class="mt-1 text-sm text-slate-500 leading-normal">{post.description}</p>}
+                </hgroup>
 
-              <Tags class="mt-2" tags={post.tags} />
+                <Tags class="mt-2" tags={post.tags} />
+              </div>
 						</li>
 					))
 				}
