@@ -1,9 +1,23 @@
 ---
 const { class: className, tags, ...props } = Astro.props as { class?: string; tags: string[] };
+
+const hashColors = ['text-yellow-500', 'text-lime-500', 'text-blue-500', 'text-red-500'] as const;
+
+function tagHashColor(tag: string): (typeof hashColors)[number] {
+  let hash = 0;
+  for (let i = 0; i < tag.length; i++) {
+    hash = (hash * 31 + tag.charCodeAt(i)) | 0;
+  }
+  return hashColors[Math.abs(hash) % hashColors.length];
+}
 ---
 
 {tags.sort().length > 0 && (
-  <ul class={`flex flex-wrap gap-1 text-xs text-slate-900 ${className}`} {...props}>
-    {tags.map((tag: string) => <li class="corner-squircle rounded-md bg-slate-200 px-1.5">{tag}</li>)}
+  <ul class={`flex flex-wrap gap-2 text-xs text-slate-700 ${className}`} {...props}>
+    {tags.map((tag: string) => (
+      <li>
+        <span class={tagHashColor(tag)}>#</span>{tag}
+      </li>
+    ))}
   </ul>
 )}
