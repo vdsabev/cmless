@@ -5,10 +5,20 @@ export type Props = {
   url?: string;
   avatar?: string;
   date?: string;
+  readingTime?: any;
   size?: 'sm' | 'md';
 };
 
-const { class: className, name, url, avatar, date, size = 'sm', ...props } = Astro.props as Props;
+const {
+  class: className,
+  name,
+  url,
+  avatar,
+  date,
+  readingTime,
+  size = 'sm',
+  ...props
+} = Astro.props as Props;
 
 const avatarSize = size === 'md' ? 'w-6 h-6' : 'w-4 h-4';
 const textSize = size === 'md' ? 'text-sm' : 'text-xs';
@@ -16,7 +26,7 @@ const textSize = size === 'md' ? 'text-sm' : 'text-xs';
 
 <div class={`flex flex-wrap items-center gap-1 ${textSize} text-slate-500 ${className}`} {...props}>
   {avatar && <img class={`${avatarSize} inset-shadow corner-squircle rounded-full object-cover bg-slate-100`} src={avatar} alt={`${name}'s avatar`} />}
-  {name ? (url ? <a href={url} rel="author" target="_blank">{name}</a> : <span>{name}</span>) : null}
-  ·
-  {date && <time>{date}</time>}
+  {name && (url ? <a href={url} rel="author" target="_blank">{name}</a> : <span>{name}</span>)}
+  {date && <>·<time>{date}</time></>}
+  {readingTime && <>·<span>{readingTime} min read</span></>}
 </div>

@@ -17,7 +17,7 @@ export function getStaticPaths() {
 }
 
 const { mod, frontmatter, slug } = Astro.props;
-const { Content } = mod as any;
+const { Content, rawContent } = mod as any;
 
 const isPage = !!frontmatter.navigation;
 const title = frontmatter.title || slug;
@@ -29,6 +29,25 @@ const author = frontmatter.author;
 const authorUrl = frontmatter.authorUrl;
 const authorAvatar = frontmatter.authorAvatar;
 const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : (frontmatter.tags ? String(frontmatter.tags).split(/,\s*/) : []);
+
+/** Approximate minutes to read, ~200 words per minute. */
+function getReadingTimeInMinutes(markdown: string): number {
+	const text = markdown
+		.replace(/```[\s\S]*?```/g, ' ') // fenced code blocks
+		.replace(/`[^`]*`/g, ' ') // inline code
+		.replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // images
+		.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // links → label text
+		.replace(/<\/?[^>]+>/g, ' ') // HTML tags
+		.replace(/[#>*_~|]+/g, ' ') // markdown punctuation
+		.replace(/\s+/g, ' ')
+		.trim();
+	const words = text ? text.split(' ').length : 0;
+	return Math.max(1, Math.ceil(words / 200));
+}
+
+const readingTime = !isPage && typeof rawContent === 'function'
+	? getReadingTimeInMinutes(rawContent())
+	: null;
 ---
 
 <Layout title={title} description={description} image={image} siteTitle={site.siteTitle}>
@@ -38,7 +57,9 @@ const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : (frontmatter.t
 		</div>
 	) : (
 		<article>
-			<div class="mb-2"><Author name={author} url={authorUrl} avatar={authorAvatar} date={date} size="md" /></div>
+			<div class="mb-2">
+				<Author name={author} url={authorUrl} avatar={authorAvatar} date={date} readingTime={readingTime} size="md" />
+			</div>
 
 			<hgroup>
 				<h1 class="text-3xl">{title}</h1>
