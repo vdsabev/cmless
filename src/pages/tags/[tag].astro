@@ -1,0 +1,94 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { firstImageAlt } from '../../lib/images';
+import { tagHashColor } from '../../lib/tags';
+import site from '../../generated/site.json';
+
+type PostModule = {
+	frontmatter: {
+		title: string;
+		date: string;
+		description?: string;
+		image?: string;
+		imageAlt?: string;
+		status?: 'published' | 'unlisted';
+		tags?: string[] | string;
+	};
+	rawContent?: () => string;
+};
+
+type PublishedPost = {
+	slug: string;
+	title: string;
+	date: string;
+	description?: string;
+	image?: string;
+	imageAlt?: string;
+	tags: string[];
+};
+
+export function getStaticPaths() {
+	const modules: Record<string, PostModule> = import.meta.glob('../../content/blog/*.md', { eager: true });
+
+	const publishedPosts: PublishedPost[] = Object.entries(modules)
+		.map(([path, post]) => {
+			const slug = path.split('/').pop()!.replace(/\.md$/, '');
+			const body = typeof post.rawContent === 'function' ? post.rawContent() : '';
+			return {
+				slug,
+				title: post.frontmatter.title,
+				date: post.frontmatter.date,
+				description: post.frontmatter.description,
+				image: post.frontmatter.image,
+				imageAlt: post.frontmatter.imageAlt || firstImageAlt(body),
+				status: post.frontmatter.status || 'published',
+				tags: Array.isArray(post.frontmatter.tags)
+					? post.frontmatter.tags
+					: post.frontmatter.tags
+						? String(post.frontmatter.tags).split(/,\s*/)
+						: [],
+			};
+		})
+		.filter((post) => post.status === 'published')
+		.map(({ status: _, ...post }) => post)
+		.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+	const tags = [...new Set(publishedPosts.flatMap((post) => post.tags))];
+
+	return tags.map((tag) => ({
+		params: { tag },
+		props: {
+			tag,
+			posts: publishedPosts.filter((post) => post.tags.includes(tag)),
+		},
+	}));
+}
+
+const { tag, posts } = Astro.props as { tag: string; posts: PublishedPost[] };
+---
+
+<Layout title={`#${tag}`} siteTitle={site.siteTitle} description={`Posts tagged ${tag}.`}>
+	<h1 class="text-2xl font-semibold mb-8">
+		<span class={tagHashColor(tag)}>#</span>{tag}
+	</h1>
+
+	{
+		posts.length === 0 ? (
+			<p>No published posts with this tag.</p>
+		) : (
+			<ul class="flex flex-col gap-8">
+				{posts.map((post) => (
+					<PostCard
+						slug={post.slug}
+						title={post.title}
+						description={post.description}
+						image={post.image}
+						imageAlt={post.imageAlt}
+						tags={post.tags}
+					/>
+				))}
+			</ul>
+		)
+	}
+</Layout>

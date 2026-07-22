@@ -5,6 +5,7 @@
  * - Fetches issues labeled "status: published" or "status: unlisted"
  * - Reads author (login, name) from issue; avatar + profile from login
  * - Tags from frontmatter (comma separated or list)
+ * - image / imageAlt from frontmatter or first content image
  * - Optional frontmatter at top of issue body (--- ... ---)
  * - Writes Markdown files to src/content/blog/
  *
@@ -32,6 +33,27 @@ function slugify(str: string): string {
     .replace(/'/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+/** First HTML or Markdown image in content: { src, alt }. */
+function firstImage(content: string): { src?: string; alt?: string } {
+  const htmlTag = content.match(/<img\b[^>]*>/i)?.[0];
+  if (htmlTag) {
+    return {
+      src: htmlTag.match(/\bsrc\s*=\s*(["'])([\s\S]*?)\1/i)?.[2]?.trim(),
+      alt: htmlTag.match(/\balt\s*=\s*(["'])([\s\S]*?)\1/i)?.[2]?.trim(),
+    };
+  }
+
+  const mdMatch = content.match(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/);
+  if (mdMatch) {
+    return {
+      alt: mdMatch[1].trim() || undefined,
+      src: mdMatch[2].trim(),
+    };
+  }
+
+  return {};
 }
 
 function parseFrontmatter(rawBody: string): { frontmatter: Record<string, string>; content: string } {
@@ -153,18 +175,10 @@ function main() {
     const date = (frontmatter.date || (issue.createdAt ? issue.createdAt.split('T')[0] : '')).trim();
     const description = frontmatter.description || content.split(/\n\n+/)[0]?.slice(0, 180).trim() || '';
     
-    // Image
-    let image = frontmatter.image;
-    if (!image) {
-      const firstLine = content.split('\n')[0]?.trim() || '';
-      const imgTagMatch = firstLine.match(/^<img\s[^>]*src=(["'])([^"']+)\1[^>]*\/?\s*>$/i);
-      if (imgTagMatch) {
-        image = imgTagMatch[2];
-      }
-    }
-    if (!image) {
-      image = socialPreviewUrl;
-    }
+    // Image + alt (frontmatter wins; else first content image; else repo social preview)
+    const inferredImage = firstImage(content);
+    const image = frontmatter.image || inferredImage.src || socialPreviewUrl;
+    const imageAlt = frontmatter.imageAlt || inferredImage.alt || '';
 
     // Author from GitHub issue author (issue author's login)
     const githubAuthor = issue.author || {};
@@ -189,6 +203,7 @@ function main() {
       date,
       description,
       image,
+      imageAlt,
       tags,
       author,
       authorUrl,
@@ -271,6 +286,7 @@ function main() {
       'date',
       'description',
       'image',
+      'imageAlt',
       'author',
       'authorUrl',
       'authorAvatar',

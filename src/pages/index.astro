@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Tags from '../components/Tags.astro';
+import PostCard from '../components/PostCard.astro';
+import { firstImageAlt } from '../lib/images';
 import site from '../generated/site.json';
 
 // Load all generated posts at build time (simple + reliable)
@@ -12,21 +13,25 @@ type PostModule = {
     date: string;
     description?: string;
     image?: string;
+    imageAlt?: string;
     status?: 'published' | 'unlisted';
     tags?: string[] | string;
   };
+  rawContent?: () => string;
   url?: string;
 };
 
 const publishedPosts = Object.entries(modules)
   .map(([path, post]) => {
     const slug = path.split('/').pop()!.replace(/\.md$/, '');
+    const body = typeof post.rawContent === 'function' ? post.rawContent() : '';
     return {
       slug,
       title: post.frontmatter.title,
       date: post.frontmatter.date,
       description: post.frontmatter.description,
       image: post.frontmatter.image,
+      imageAlt: post.frontmatter.imageAlt || firstImageAlt(body),
       status: post.frontmatter.status || 'published',
       tags: Array.isArray(post.frontmatter.tags) ? post.frontmatter.tags : (post.frontmatter.tags ? String(post.frontmatter.tags).split(/,\s*/) : []),
     };
@@ -43,22 +48,14 @@ const publishedPosts = Object.entries(modules)
 			<ul class="flex flex-col gap-8">
 				{
 					publishedPosts.map((post) => (
-						<li class="flex flex-col sm:flex-row sm:gap-4 max-sm:bg-white max-sm:shadow-md max-sm:border max-sm:border-slate-200 max-sm:corner-squircle max-sm:rounded-2xl">
-              <div class="w-full sm:w-48 sm:shrink-0">
-                {post.image && <img src={post.image} alt="" loading="lazy" class="w-full aspect-[1200/630] object-cover max-sm:corner-squircle max-sm:rounded-t-2xl sm:corner-squircle sm:rounded-xl" />}
-              </div>
-              <div class="sm:flex-1 sm:min-w-0 p-4 sm:p-0">
-                <hgroup>
-                  <h2 class="text-xl font-semibold leading-tight">
-                    <a href={`${import.meta.env.BASE_URL}${post.slug}/`} class="no-underline hover:underline">{post.title}</a>
-                  </h2>
-
-                  {post.description && <p class="mt-1 text-sm text-slate-500 leading-normal">{post.description}</p>}
-                </hgroup>
-
-                <Tags class="mt-2" tags={post.tags} />
-              </div>
-						</li>
+						<PostCard
+							slug={post.slug}
+							title={post.title}
+							description={post.description}
+							image={post.image}
+							imageAlt={post.imageAlt}
+							tags={post.tags}
+						/>
 					))
 				}
 			</ul>
