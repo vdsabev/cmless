@@ -82,6 +82,7 @@ const { tag, posts } = Astro.props as { tag: string; posts: PublishedPost[] };
 					<PostCard
 						slug={post.slug}
 						title={post.title}
+						date={post.date}
 						description={post.description}
 						image={post.image}
 						imageAlt={post.imageAlt}

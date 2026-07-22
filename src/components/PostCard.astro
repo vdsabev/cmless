@@ -1,9 +1,10 @@
 ---
 import Tags from './Tags.astro';
 
-const { slug, title, description, image, imageAlt, tags } = Astro.props as {
+const { slug, title, date, description, image, imageAlt, tags } = Astro.props as {
 	slug: string;
 	title: string;
+	date?: string;
 	description?: string;
 	image?: string;
 	imageAlt?: string;
@@ -22,7 +23,10 @@ const { slug, title, description, image, imageAlt, tags } = Astro.props as {
 				<a href={`${import.meta.env.BASE_URL}${slug}/`} class="no-underline hover:underline">{title}</a>
 			</h2>
 
-			{description && <p class="mt-1 text-sm text-slate-500 leading-normal">{description}</p>}
+			{(date || description) && <p class="mt-1 text-sm text-slate-500 leading-normal">
+				{date && <><time>{date}</time><br></>}
+				{description}
+			</p>}
 		</hgroup>
 
 		<Tags class="mt-2" tags={tags} />
