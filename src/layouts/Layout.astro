@@ -55,20 +55,29 @@ const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.nav
 		{description && <meta name="twitter:description" content={description} />}
 		{resolvedImage && <meta property="og:image" content={resolvedImage} />}
 		{resolvedImage && <meta name="twitter:image" content={resolvedImage} />}
+		<link rel="stylesheet" href={`${BASE_URL}pagefind/pagefind-component-ui.css`} />
+		<script src={`${BASE_URL}pagefind/pagefind-component-ui.js`} type="module"></script>
 	</head>
 
 	<body class="flex flex-col max-w-2xl min-h-dvh mx-auto px-4 py-8">
-		<header class="flex justify-between items-baseline gap-2 border-b border-b-slate-200 mb-8 pb-4">
+		<header class="flex justify-between items-center gap-2 border-b border-b-slate-200 mb-8 pb-4">
 			<a href={import.meta.env.BASE_URL} class="text-2xl font-semibold no-underline text-inherit">
 				{siteTitle}
 			</a>
 
-			<nav class="flex items-baseline gap-3">
+			<nav class="flex items-center gap-3">
 				{headerNav.map((item) => (
 					<NavLink href={`${BASE_URL}${item.slug}${item.slug ? '/' : ''}`} class="whitespace-nowrap">{item.title}</NavLink>
 				))}
+				<pagefind-modal-trigger compact placeholder="Search" shortcut="mod+k"></pagefind-modal-trigger>
 			</nav>
 		</header>
+
+		<pagefind-config
+			bundle-path={`${BASE_URL}pagefind/`}
+			base-url={BASE_URL}
+		></pagefind-config>
+		<pagefind-modal reset-on-close></pagefind-modal>
 
 		<main class="flex-1">
 			<slot />

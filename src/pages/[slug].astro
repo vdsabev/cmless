@@ -89,32 +89,50 @@ if (series) {
 
 <Layout title={title} description={description} image={image} siteTitle={site.siteTitle}>
 	{isPage ? (
-		<div class="prose max-w-none">
+		<div class="prose max-w-none" data-pagefind-body>
+			{description && (
+				<span class="sr-only" data-pagefind-meta="description">{description}</span>
+			)}
+			{tags.map((tag: string) => (
+				<span class="sr-only" data-pagefind-filter="tag">{tag}</span>
+			))}
 			<Content />
 		</div>
 	) : (
 		<article>
-			<div class="mb-2">
+			<div class="mb-2" data-pagefind-ignore>
 				<Author name={author} url={authorUrl} avatar={authorAvatar} date={date} readingTime={readingTime} size="md" />
 			</div>
 
-			<hgroup>
-				<h1 class="text-3xl">{title}</h1>
-				{description && <p class="mt-1 text-slate-500">{description}</p>}
-			</hgroup>
+			<div data-pagefind-body>
+				<hgroup>
+					<h1 class="text-3xl" data-pagefind-meta="title">{title}</h1>
+					{description && (
+						<p class="mt-1 text-slate-500" data-pagefind-meta="description">{description}</p>
+					)}
+				</hgroup>
 
-			<Tags class="mt-1 mb-4" tags={tags} />
+				{tags.length > 0 && (
+					<div class="mt-1 mb-4">
+						{/* Tag labels are visible via Tags; also filterable in Pagefind */}
+						{tags.map((tag: string) => (
+							<span class="sr-only" data-pagefind-filter="tag">{tag}</span>
+						))}
+						<Tags tags={tags} />
+					</div>
+				)}
 
-			{series && seriesPosts.length > 0 && (
-				<SeriesNavList name={series} posts={seriesPosts} currentSlug={slug} />
-			)}
+				{series && seriesPosts.length > 0 && (
+					<SeriesNavList name={series} posts={seriesPosts} currentSlug={slug} data-pagefind-ignore />
+				)}
 
-			<div class="prose max-w-none">
-				<Content />
+				<div class="prose max-w-none">
+					<Content />
+				</div>
 			</div>
 
 			{series && seriesPosts.length > 0 && (
-				<SeriesNavPager name={series} prev={seriesPrev} next={seriesNext} />
+				<SeriesNavPager name={series} prev={seriesPrev} next={seriesNext} data-pagefind-ignore />
 			)}
 		</article>
 	)}

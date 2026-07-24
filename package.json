@@ -7,13 +7,15 @@
   },
   "scripts": {
     "dev": "bun generate && astro dev",
-    "build": "bun generate && astro build",
+    "build": "bun generate && astro build && bun run pagefind",
+    "pagefind": "rm -rf dist/pagefind public/pagefind && pagefind --site dist && cp -r dist/pagefind public/pagefind",
     "generate": "bun scripts/generate.ts",
     "astro": "astro"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
-    "astro": "7.1.3"
+    "astro": "^7.1.3",
+    "pagefind": "^1.5.2"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.20",

@@ -34,3 +34,19 @@
     @apply text-blue-700;
   }
 }
+
+/* Pagefind Component UI — align with site palette (slate + blue) */
+:root {
+  --pf-text: #0f172a; /* slate-900 */
+  --pf-text-secondary: #64748b; /* slate-500 */
+  --pf-text-muted: #94a3b8; /* slate-400 */
+  --pf-background: #ffffff;
+  --pf-border: #e2e8f0; /* slate-200 */
+  --pf-border-focus: #94a3b8;
+  --pf-hover: #f8fafc; /* slate-50 */
+  --pf-mark: #0f172a;
+  --pf-outline-focus: #1d4ed8; /* blue-700 */
+  --pf-font: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+  --pf-border-radius: 0.5rem;
+}

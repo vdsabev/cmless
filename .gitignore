@@ -1,6 +1,9 @@
 # build output
 dist/
 
+# Pagefind index (generated; synced into public/ for `bun dev`)
+public/pagefind/
+
 # generated types
 .astro/
 

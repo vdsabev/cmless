@@ -7,6 +7,7 @@ Seamless blogging with GitHub issues.
 - Manually manage post publishing by applying labels: `state: draft`, `state: unlisted`, `state: published`
 - Set metadata via Frontmatter
 - Add a link to a page in the header or footer
+- Full-text client-side search (Pagefind) — titles, content, tags, and descriptions
 
 ## 🚀 Get Started
 1. Click **"Use this template"** → create a new repository
@@ -77,6 +78,9 @@ npm install # or bun, etc.
 npm run dev # run the current folder's repo as a blog
 GH_REPO=<username>/<repo> npm run dev # run another cmless-based repo as a blog
 ```
+
+## 🔍 Search
+[Pagefind](https://pagefind.app/) indexes published posts and navigation pages (title, description, tags, body). Build writes the index into `dist/pagefind/` and copies it to gitignored `public/pagefind/` so `dev` can serve it; re-run `build` (or `pagefind` if `dist/` is current) after content changes. Assets and result links follow Astro’s `base` for project-site subpaths.
 
 ## ⚙️ Configuration
 **Site title** is taken from the GitHub repository description.
