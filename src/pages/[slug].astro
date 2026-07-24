@@ -89,7 +89,7 @@ if (series) {
 
 <Layout title={title} description={description} image={image} siteTitle={site.siteTitle}>
 	{isPage ? (
-		<div class="prose max-w-none" data-pagefind-body>
+		<div class="prose dark:prose-invert max-w-none" data-pagefind-body>
 			{description && (
 				<span class="sr-only" data-pagefind-meta="description">{description}</span>
 			)}
@@ -108,7 +108,7 @@ if (series) {
 				<hgroup>
 					<h1 class="text-3xl" data-pagefind-meta="title">{title}</h1>
 					{description && (
-						<p class="mt-1 text-slate-500" data-pagefind-meta="description">{description}</p>
+						<p class="mt-1 text-slate-500 dark:text-slate-400" data-pagefind-meta="description">{description}</p>
 					)}
 				</hgroup>
 
@@ -126,7 +126,7 @@ if (series) {
 					<SeriesNavList name={series} posts={seriesPosts} currentSlug={slug} data-pagefind-ignore />
 				)}
 
-				<div class="prose max-w-none">
+				<div class="prose dark:prose-invert max-w-none">
 					<Content />
 				</div>
 			</div>

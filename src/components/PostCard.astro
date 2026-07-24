@@ -12,7 +12,7 @@ const { slug, title, date, description, image, imageAlt, tags } = Astro.props as
 };
 ---
 
-<li class="flex flex-col sm:flex-row sm:gap-4 max-sm:bg-white max-sm:shadow-md max-sm:border max-sm:border-slate-200 max-sm:corner-squircle max-sm:rounded-2xl">
+<li class="flex flex-col sm:flex-row sm:gap-4 max-sm:bg-white max-sm:dark:bg-slate-800 max-sm:shadow-md max-sm:border max-sm:border-slate-200 max-sm:dark:border-slate-700 max-sm:corner-squircle max-sm:rounded-2xl">
 	<div class="w-full sm:w-48 sm:shrink-0">
 		{image && <img src={image} alt={imageAlt || title} loading="lazy" class="w-full aspect-[1200/630] object-cover max-sm:corner-squircle max-sm:rounded-t-2xl sm:corner-squircle sm:rounded-xl" />}
 	</div>
@@ -23,7 +23,7 @@ const { slug, title, date, description, image, imageAlt, tags } = Astro.props as
 				<a href={`${import.meta.env.BASE_URL}${slug}/`} class="no-underline hover:underline">{title}</a>
 			</h2>
 
-			{(date || description) && <p class="mt-1 text-sm text-slate-500 leading-normal">
+			{(date || description) && <p class="mt-1 text-sm text-slate-500 dark:text-slate-400 leading-normal">
 				{date && <><time>{date}</time><br></>}
 				{description}
 			</p>}

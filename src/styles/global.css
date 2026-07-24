@@ -31,7 +31,11 @@
 
 @layer base {
   a {
-    @apply text-blue-700;
+    @apply text-blue-700 dark:text-blue-400;
+  }
+
+  :root {
+    color-scheme: light dark;
   }
 }
 
@@ -49,4 +53,18 @@
   --pf-font: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol", "Noto Color Emoji";
   --pf-border-radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pf-text: #f1f5f9; /* slate-100 */
+    --pf-text-secondary: #94a3b8; /* slate-400 */
+    --pf-text-muted: #64748b; /* slate-500 */
+    --pf-background: #0f172a; /* slate-900 */
+    --pf-border: #334155; /* slate-700 */
+    --pf-border-focus: #64748b; /* slate-500 */
+    --pf-hover: #1e293b; /* slate-800 */
+    --pf-mark: #f1f5f9; /* slate-100 */
+    --pf-outline-focus: #60a5fa; /* blue-400 */
+  }
 }

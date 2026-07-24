@@ -37,7 +37,7 @@ const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.nav
 ---
 
 <!doctype html>
-<html lang="en" class="bg-white p-0 text-slate-900 font-sans leading-relaxed">
+<html lang="en" class="bg-white p-0 text-slate-900 font-sans leading-relaxed dark:bg-slate-900 dark:text-slate-100">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -60,7 +60,7 @@ const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.nav
 	</head>
 
 	<body class="flex flex-col max-w-2xl min-h-dvh mx-auto px-4 py-8">
-		<header class="flex justify-between items-center gap-2 border-b border-b-slate-200 mb-8 pb-4">
+		<header class="flex justify-between items-center gap-2 border-b border-b-slate-200 dark:border-b-slate-700 mb-8 pb-4">
 			<a href={import.meta.env.BASE_URL} class="text-2xl font-semibold no-underline text-inherit">
 				{siteTitle}
 			</a>
@@ -83,28 +83,28 @@ const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.nav
 			<slot />
 		</main>
 
-		<footer class="flex flex-wrap justify-center items-baseline gap-1 border-t border-t-slate-200 mt-8 pt-4 text-xs text-slate-500">
+		<footer class="flex flex-wrap justify-center items-baseline gap-1 border-t border-t-slate-200 dark:border-t-slate-700 mt-8 pt-4 text-xs text-slate-500 dark:text-slate-400">
 			{owner?.login && (
 				<>
 					<p>
 						created by{' '}
 						<a href={`https://github.com/${owner.login}`} rel="author" target="_blank">
-							<img class="inline-block align-middle w-4 h-4 inset-shadow corner-squircle rounded-full object-cover mx-0.5 bg-slate-100 mb-1" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" />
+							<img class="inline-block align-middle w-4 h-4 inset-shadow corner-squircle rounded-full object-cover mx-0.5 bg-slate-100 dark:bg-slate-800 mb-1" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" />
 							@{owner.login}
 						</a>
 					</p>
-					<span class="text-slate-300">·</span>
+					<span class="text-slate-300 dark:text-slate-600">·</span>
 				</>
 			)}
 
 			<p>powered by <a href="https://github.com/vdsabev/cmless">cmless</a></p>
-			<span class="text-slate-300">·</span>
+			<span class="text-slate-300 dark:text-slate-600">·</span>
 
 			<NavLink href={`${BASE_URL}rss.xml`}>rss</NavLink>
 
 			{footerNav.map((item) => (
 				<>
-					<span class="text-slate-300">·</span>
+					<span class="text-slate-300 dark:text-slate-600">·</span>
 					<NavLink href={`${BASE_URL}${item.slug}/`}>{item.title}</NavLink>
 				</>
 			))}

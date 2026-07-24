@@ -9,7 +9,7 @@ const BASE_URL = import.meta.env.BASE_URL;
 ---
 
 <nav
-	class="corner-squircle rounded-xl border border-blue-200 mt-3 mb-4 bg-blue-50 p-3"
+	class="corner-squircle rounded-xl border border-blue-200 dark:border-blue-800 mt-3 mb-4 bg-blue-50 dark:bg-blue-950 p-3"
 	aria-label={`Series: ${name}`}
 	{...props}
 >
@@ -18,7 +18,7 @@ const BASE_URL = import.meta.env.BASE_URL;
 		{posts.map((post) => (
 			<li>
 				{post.slug === currentSlug ? (
-					<span class="text-blue-900">{post.title}</span>
+					<span class="text-blue-900 dark:text-blue-100">{post.title}</span>
 				) : (
 					<a href={`${BASE_URL}${post.slug}/`} class="hover:underline">{post.title}</a>
 				)}
