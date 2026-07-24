@@ -5,6 +5,7 @@
  * - Fetches issues labeled "status: published" or "status: unlisted"
  * - Reads author (login, name) from issue; avatar + profile from login
  * - Tags from frontmatter (comma separated or list)
+ * - series from frontmatter (named post series for prev/next + list)
  * - image / imageAlt from frontmatter or first content image
  * - Optional frontmatter at top of issue body (--- ... ---)
  * - Writes Markdown files to src/content/blog/
@@ -195,6 +196,9 @@ function main() {
     const navigation = frontmatter.navigation || '';
     const navigationIndex = frontmatter.navigationIndex ? parseInt(frontmatter.navigationIndex, 10) : 0;
 
+    // Series - optional named group for prev/next and related posts
+    const series = (frontmatter.series || '').trim();
+
     posts.push({
       status,
       number: issue.number,
@@ -210,6 +214,7 @@ function main() {
       authorAvatar,
       navigation,
       navigationIndex,
+      series,
       content: content
         // Embed YouTube videos
         .replace(
@@ -293,6 +298,7 @@ function main() {
       'tags',
       'navigation',
       'navigationIndex',
+      'series',
     ];
     for (const field of fields) {
       const value = post[field];
