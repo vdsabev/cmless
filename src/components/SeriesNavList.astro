@@ -1,0 +1,30 @@
+---
+export type SeriesPost = {
+	slug: string;
+	title: string;
+};
+
+interface Props {
+	name: string;
+	posts: SeriesPost[];
+	currentSlug: string;
+}
+
+const { name, posts, currentSlug } = Astro.props as Props;
+const BASE_URL = import.meta.env.BASE_URL;
+---
+
+<nav class="corner-squircle rounded-xl border border-blue-200 mt-3 mb-4 bg-blue-50 p-3" aria-label={`Series: ${name}`}>
+	<p class="text-sm font-semibold">Series: {name}</p>
+	<ol class="mt-2 list-decimal list-inside space-y-1 text-sm">
+		{posts.map((post) => (
+			<li>
+				{post.slug === currentSlug ? (
+					<span class="text-blue-900">{post.title}</span>
+				) : (
+					<a href={`${BASE_URL}${post.slug}/`} class="hover:underline">{post.title}</a>
+				)}
+			</li>
+		))}
+	</ol>
+</nav>

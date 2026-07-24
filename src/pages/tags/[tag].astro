@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import PostCard from '../../components/PostCard.astro';
 import { firstImageAlt } from '../../lib/images';
+import { pathToSlug } from '../../lib/slug';
 import { tagHashColor } from '../../lib/tags';
 import site from '../../generated/site.json';
 
@@ -33,7 +34,7 @@ export function getStaticPaths() {
 
 	const publishedPosts: PublishedPost[] = Object.entries(modules)
 		.map(([path, post]) => {
-			const slug = path.split('/').pop()!.replace(/\.md$/, '');
+			const slug = pathToSlug(path);
 			const body = typeof post.rawContent === 'function' ? post.rawContent() : '';
 			return {
 				slug,

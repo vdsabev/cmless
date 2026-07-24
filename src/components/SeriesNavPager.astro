@@ -1,0 +1,36 @@
+---
+export type SeriesPost = {
+	slug: string;
+	title: string;
+};
+
+interface Props {
+	name: string;
+	prev: SeriesPost | null;
+	next: SeriesPost | null;
+}
+
+const { name, prev, next } = Astro.props as Props;
+const BASE_URL = import.meta.env.BASE_URL;
+---
+
+{(prev || next) && (
+	<nav
+		class="flex flex-col sm:flex-row gap-2 border-t border-slate-200 mt-6 pt-6 text-sm"
+		aria-label={`Series navigation: ${name}`}
+	>
+		{prev && (
+			<div class="min-w-0">
+				<span class="block text-xs uppercase tracking-wide text-slate-400">Previous</span>
+				<a href={`${BASE_URL}${prev.slug}/`} class="hover:underline">{prev.title}</a>
+			</div>
+		)}
+
+		{next && (
+			<div class="min-w-0 sm:ms-auto sm:text-right">
+				<span class="block text-xs uppercase tracking-wide text-slate-400">Next</span>
+				<a href={`${BASE_URL}${next.slug}/`} class="hover:underline">{next.title}</a>
+			</div>
+		)}
+	</nav>
+)}

@@ -18,6 +18,7 @@ assignees: ''
 > date: "2026-07-10"
 > description: "Short summary for SEO."
 > slug: my-custom-url-slug   # optional - stable if the title changes
+> series: "My Series Name"   # optional - groups posts for prev/next + series list (by date)
 > image: https://...         # optional
 > author: Name               # optional - automatic from the GitHub issue user
 > authorUrl: https://...

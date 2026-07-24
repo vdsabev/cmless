@@ -1,11 +1,12 @@
 import rss from '@astrojs/rss';
+import { pathToSlug } from '../lib/slug';
 import site from '../generated/site.json';
 
 const modules: Record<string, { frontmatter: Record<string, any> }> = import.meta.glob('../content/blog/*.md', { eager: true });
 
 const publishedPosts = Object.entries(modules)
   .map(([path, post]) => {
-    const slug = path.split('/').pop()!.replace(/\.md$/, '');
+    const slug = pathToSlug(path);
     return {
       slug,
       title: post.frontmatter.title,

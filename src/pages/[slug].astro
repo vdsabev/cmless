@@ -2,12 +2,15 @@
 import Layout from '../layouts/Layout.astro';
 import Author from '../components/Author.astro';
 import Tags from '../components/Tags.astro';
+import SeriesNavList from '../components/SeriesNavList.astro';
+import SeriesNavPager from '../components/SeriesNavPager.astro';
+import { pathToSlug } from '../lib/slug';
 import site from '../generated/site.json';
 
 export function getStaticPaths() {
 	const modules = import.meta.glob('../content/blog/*.md', { eager: true });
 	return Object.entries(modules).map(([filePath, mod]) => {
-		const slug = filePath.split('/').pop()!.replace(/\.md$/, '');
+		const slug = pathToSlug(filePath);
 		const frontmatter = (mod as any).frontmatter || {};
 		return {
 			params: { slug },
@@ -29,8 +32,9 @@ const author = frontmatter.author;
 const authorUrl = frontmatter.authorUrl;
 const authorAvatar = frontmatter.authorAvatar;
 const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : (frontmatter.tags ? String(frontmatter.tags).split(/,\s*/) : []);
+const series = typeof frontmatter.series === 'string' ? frontmatter.series.trim() : '';
 
-/** Approximate minutes to read, ~200 words per minute. */
+/** Approximate minutes to read. */
 function getReadingTimeInMinutes(markdown: string): number {
 	const text = markdown
 		.replace(/```[\s\S]*?```/g, ' ') // fenced code blocks
@@ -42,12 +46,45 @@ function getReadingTimeInMinutes(markdown: string): number {
 		.replace(/\s+/g, ' ')
 		.trim();
 	const words = text ? text.split(' ').length : 0;
-	return Math.max(1, Math.ceil(words / 200));
+	const wpm = 180;
+	return Math.max(1, Math.ceil(words / wpm));
 }
 
 const readingTime = !isPage && typeof rawContent === 'function'
 	? getReadingTimeInMinutes(rawContent())
 	: null;
+
+// Series peers: same `series` value, ordered by date ascending
+type SeriesPeer = { slug: string; title: string; date: string };
+let seriesPosts: SeriesPeer[] = [];
+let seriesPrev: SeriesPeer | null = null;
+let seriesNext: SeriesPeer | null = null;
+
+if (series) {
+	const allModules = import.meta.glob('../content/blog/*.md', { eager: true });
+	seriesPosts = Object.entries(allModules)
+		.map(([path, markdown]) => {
+			const peerSlug = pathToSlug(path);
+			const fm = (markdown as any).frontmatter || {};
+			const peerSeries = typeof fm.series === 'string' ? fm.series.trim() : '';
+			return {
+				slug: peerSlug,
+				title: fm.title || peerSlug,
+				date: fm.date || '',
+				series: peerSeries,
+			};
+		})
+		.filter((p) => p.series === series && p.date)
+		.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+		.map(({ slug, title, date }) => ({ slug, title, date }));
+
+	const index = seriesPosts.findIndex((post) => post.slug === slug);
+	if (index >= 0) {
+		seriesPrev = index > 0 ? seriesPosts[index - 1] : null;
+		seriesNext = index < seriesPosts.length - 1 ? seriesPosts[index + 1] : null;
+	}
+}
+
 ---
 
 <Layout title={title} description={description} image={image} siteTitle={site.siteTitle}>
@@ -68,9 +105,17 @@ const readingTime = !isPage && typeof rawContent === 'function'
 
 			<Tags class="mt-1 mb-4" tags={tags} />
 
+			{series && seriesPosts.length > 0 && (
+				<SeriesNavList name={series} posts={seriesPosts} currentSlug={slug} />
+			)}
+
 			<div class="prose max-w-none">
 				<Content />
 			</div>
+
+			{series && seriesPosts.length > 0 && (
+				<SeriesNavPager name={series} prev={seriesPrev} next={seriesNext} />
+			)}
 		</article>
 	)}
 </Layout>

@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import PostCard from '../components/PostCard.astro';
 import { firstImageAlt } from '../lib/images';
+import { pathToSlug } from '../lib/slug';
 import site from '../generated/site.json';
 
 // Load all generated posts at build time (simple + reliable)
@@ -23,7 +24,7 @@ type PostModule = {
 
 const publishedPosts = Object.entries(modules)
   .map(([path, post]) => {
-    const slug = path.split('/').pop()!.replace(/\.md$/, '');
+    const slug = pathToSlug(path);
     const body = typeof post.rawContent === 'function' ? post.rawContent() : '';
     return {
       slug,
