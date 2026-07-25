@@ -69,14 +69,17 @@ const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.nav
 				{headerNav.map((item) => (
 					<NavLink href={`${BASE_URL}${item.slug}${item.slug ? '/' : ''}`} class="whitespace-nowrap">{item.title}</NavLink>
 				))}
-				<pagefind-modal-trigger compact placeholder="Search" shortcut="mod+k"></pagefind-modal-trigger>
+
+				<pagefind-modal-trigger
+					placeholder="Search"
+					shortcut="mod+k"
+					hide-shortcut
+					compact
+				></pagefind-modal-trigger>
 			</nav>
 		</header>
 
-		<pagefind-config
-			bundle-path={`${BASE_URL}pagefind/`}
-			base-url={BASE_URL}
-		></pagefind-config>
+		<pagefind-config bundle-path={`${BASE_URL}pagefind/`} base-url={BASE_URL}></pagefind-config>
 		<pagefind-modal reset-on-close></pagefind-modal>
 
 		<main class="flex-1">
