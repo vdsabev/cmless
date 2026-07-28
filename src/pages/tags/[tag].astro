@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import PostCard from '../../components/PostCard.astro';
 import { firstImageAlt } from '../../lib/images';
+import { getReadingTimeInMinutes } from '../../lib/reading-time';
 import { pathToSlug } from '../../lib/slug';
 import { tagHashColor } from '../../lib/tags';
 import site from '../../generated/site.json';
@@ -23,6 +24,7 @@ type PublishedPost = {
 	slug: string;
 	title: string;
 	date: string;
+	readingTime: number | null;
 	description?: string;
 	image?: string;
 	imageAlt?: string;
@@ -40,6 +42,7 @@ export function getStaticPaths() {
 				slug,
 				title: post.frontmatter.title,
 				date: post.frontmatter.date,
+				readingTime: body ? getReadingTimeInMinutes(body) : null,
 				description: post.frontmatter.description,
 				image: post.frontmatter.image,
 				imageAlt: post.frontmatter.imageAlt || firstImageAlt(body),
@@ -84,6 +87,7 @@ const { tag, posts } = Astro.props as { tag: string; posts: PublishedPost[] };
 						slug={post.slug}
 						title={post.title}
 						date={post.date}
+						readingTime={post.readingTime}
 						description={post.description}
 						image={post.image}
 						imageAlt={post.imageAlt}
