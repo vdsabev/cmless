@@ -1,4 +1,5 @@
 ---
+import PostMeta from './PostMeta.astro';
 import Tags from './Tags.astro';
 
 const { slug, title, date, readingTime, description, image, imageAlt, tags } = Astro.props as {
@@ -11,30 +12,61 @@ const { slug, title, date, readingTime, description, image, imageAlt, tags } = A
 	imageAlt?: string;
 	tags: string[];
 };
+
+const href = `${import.meta.env.BASE_URL}${slug}/`;
 ---
 
-<li class="flex flex-col sm:flex-row sm:gap-4 max-sm:bg-white max-sm:dark:bg-slate-800 max-sm:shadow-md max-sm:border max-sm:border-slate-200 max-sm:dark:border-slate-700 max-sm:corner-squircle max-sm:rounded-2xl">
+<li
+	data-vt-card-root
+	data-slug={slug}
+	class="group relative flex flex-col sm:flex-row sm:gap-4 max-sm:bg-white max-sm:dark:bg-slate-800 max-sm:shadow-md max-sm:border max-sm:border-slate-200 max-sm:dark:border-slate-700 max-sm:corner-squircle max-sm:rounded-2xl"
+>
+	{/* Single full-card link: one tab stop; title is visual only (group-hover underline). */}
+	<a
+		href={href}
+		data-vt-card
+		class="absolute inset-0 z-10 corner-squircle rounded-[inherit] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400"
+		aria-label={title}
+	></a>
+
 	<div class="w-full sm:w-48 sm:shrink-0">
-		{image && <img src={image} alt={imageAlt || title} loading="lazy" class="w-full aspect-[1200/630] object-cover max-sm:corner-squircle max-sm:rounded-t-2xl sm:corner-squircle sm:rounded-xl" />}
+		{image && (
+			<img
+				data-vt-image
+				src={image}
+				alt={imageAlt || title}
+				loading="lazy"
+				class="w-full aspect-[1200/630] object-cover max-sm:corner-squircle max-sm:rounded-t-2xl sm:corner-squircle sm:rounded-xl"
+			/>
+		)}
 	</div>
 
 	<div class="sm:flex-1 sm:min-w-0 p-4 sm:p-0">
 		<hgroup>
-			<h2 class="text-xl font-semibold leading-tight">
-				<a href={`${import.meta.env.BASE_URL}${slug}/`} class="no-underline hover:underline">{title}</a>
+			<h2 data-vt-title class="text-xl font-semibold leading-tight group-hover:underline">
+				{title}
 			</h2>
 
-			{(date || readingTime || description) && <p class="mt-1 text-sm text-slate-500 dark:text-slate-400 leading-normal">
-				{(date || readingTime) && <>
-					{date && <time>{date}</time>}
-					{date && readingTime && ' · '}
-					{readingTime && <span>{readingTime} min read</span>}
-					<br>
-				</>}
-				{description}
-			</p>}
+			{/* data-vt-meta only exists when PostMeta has something to show */}
+			<PostMeta
+				data-vt-meta
+				class="mt-1"
+				date={date}
+				readingTime={readingTime}
+				showAuthor={false}
+				size="md"
+			/>
+			{description && (
+				<p
+					data-vt-description
+					class="mt-1 text-sm text-slate-500 dark:text-slate-400 leading-normal"
+				>
+					{description}
+				</p>
+			)}
 		</hgroup>
 
-		<Tags class="mt-2" tags={tags} />
+		{/* z-20 keeps chips above the full-card hit target; data-vt-tags only exists when Tags renders */}
+		<Tags data-vt-tags class="relative z-20 mt-2" tags={tags} />
 	</div>
 </li>

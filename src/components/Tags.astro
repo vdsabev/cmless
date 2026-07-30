@@ -1,13 +1,19 @@
 ---
+import type { HTMLAttributes } from 'astro/types';
 import { tagHashColor } from '../lib/tags';
 
-const { class: className, tags, ...props } = Astro.props as { class?: string; tags: string[] };
+type Props = HTMLAttributes<'ul'> & {
+  tags?: string[];
+};
+
+const { class: className, tags = [], ...props } = Astro.props as Props;
 
 const sortedTags = [...tags].sort();
 ---
 
+{/* Renders nothing when empty so callers can always pass data-vt-* / class. */}
 {sortedTags.length > 0 && (
-  <ul class={`flex flex-wrap gap-2 text-xs ${className}`} {...props}>
+  <ul class:list={['flex flex-wrap gap-2 text-xs', className]} {...props}>
     {sortedTags.map((tag: string) => (
       <li>
         <a

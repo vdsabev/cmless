@@ -6,7 +6,10 @@
  * - Reads author (login, name) from issue; avatar + profile from login
  * - Tags from frontmatter (comma separated or list)
  * - series from frontmatter (named post series for prev/next + list)
- * - image / imageAlt from frontmatter or first content image
+ * - image from frontmatter, else leading body image (promoted into FM), else
+ *   repo social preview. imageAlt from frontmatter, else that leading image's
+ *   alt attribute / markdown alt. Matching leading body image is stripped so
+ *   the cover lives only in frontmatter (hero + OG, not twice in body).
  * - Optional frontmatter at top of issue body (--- ... ---)
  * - Writes Markdown files to src/content/blog/
  *
@@ -36,25 +39,47 @@ function slugify(str: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-/** First HTML or Markdown image in content: { src, alt }. */
-function firstImage(content: string): { src?: string; alt?: string } {
-  const htmlTag = content.match(/<img\b[^>]*>/i)?.[0];
-  if (htmlTag) {
+/**
+ * Leading HTML or Markdown image (cover candidate): src, alt, and body after that image.
+ * Only the first image at the start of the body counts — mid-post figures are left alone.
+ */
+function leadingImage(content: string): { src?: string; alt?: string; after: string } {
+  const rest = content.replace(/^\s+/, '');
+
+  const htmlMatch = rest.match(/^<img\b[^>]*>\s*/i);
+  if (htmlMatch) {
+    const tag = htmlMatch[0];
+    const src = tag.match(/\bsrc\s*=\s*(["'])([\s\S]*?)\1/i)?.[2]?.trim();
+    const alt = tag.match(/\balt\s*=\s*(["'])([\s\S]*?)\1/i)?.[2]?.trim();
     return {
-      src: htmlTag.match(/\bsrc\s*=\s*(["'])([\s\S]*?)\1/i)?.[2]?.trim(),
-      alt: htmlTag.match(/\balt\s*=\s*(["'])([\s\S]*?)\1/i)?.[2]?.trim(),
+      src: src || undefined,
+      alt: alt || undefined,
+      after: rest.slice(htmlMatch[0].length).replace(/^\s*\n+/, ''),
     };
   }
 
-  const mdMatch = content.match(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/);
+  const mdMatch = rest.match(/^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)\s*/);
   if (mdMatch) {
     return {
       alt: mdMatch[1].trim() || undefined,
-      src: mdMatch[2].trim(),
+      src: mdMatch[2].trim() || undefined,
+      after: rest.slice(mdMatch[0].length).replace(/^\s*\n+/, ''),
     };
   }
 
-  return {};
+  return { after: content };
+}
+
+/** First non-image paragraph of body, truncated for SEO / cards. */
+function autoDescription(body: string): string {
+  const imageOnly =
+    /^\s*(?:!\[[^\]]*\]\([^)]*\)|<img\b[^>]*>)\s*$/i;
+  for (const block of body.split(/\n\n+/)) {
+    const trimmed = block.trim();
+    if (!trimmed || imageOnly.test(trimmed)) continue;
+    return trimmed.slice(0, 180).trim();
+  }
+  return '';
 }
 
 function parseFrontmatter(rawBody: string): { frontmatter: Record<string, string>; content: string } {
@@ -174,12 +199,25 @@ function main() {
     const title = (frontmatter.title || issue.title || `Issue #${issue.number}`).trim();
     const slug = (frontmatter.slug || slugify(title) || `issue-${issue.number}`).trim();
     const date = (frontmatter.date || (issue.createdAt ? issue.createdAt.split('T')[0] : '')).trim();
-    const description = frontmatter.description || content.split(/\n\n+/)[0]?.slice(0, 180).trim() || '';
-    
-    // Image + alt (frontmatter wins; else first content image; else repo social preview)
-    const inferredImage = firstImage(content);
-    const image = frontmatter.image || inferredImage.src || socialPreviewUrl;
-    const imageAlt = frontmatter.imageAlt || inferredImage.alt || '';
+
+    // Cover: frontmatter wins; else promote leading body image into FM; else repo OG.
+    // Alt: frontmatter wins; else alt from that leading image (HTML alt= or ![alt](...)).
+    // When the leading image is the cover, strip it so hero/OG are the only cover.
+    const lead = leadingImage(content);
+    const image = (frontmatter.image || lead.src || socialPreviewUrl || '').trim();
+    const imageAlt = (
+      (frontmatter.imageAlt || '').trim() ||
+      (lead.src && image && lead.src === image ? lead.alt || '' : '') ||
+      ''
+    ).trim();
+    const bodyWithoutCover =
+      image && lead.src && lead.src === image ? lead.after : content;
+
+    // Description after cover strip so a leading cover is never used as the SEO summary.
+    // Skip image-only opening blocks (markdown/HTML) when picking a fallback paragraph.
+    const description =
+      (frontmatter.description || '').trim() ||
+      autoDescription(bodyWithoutCover);
 
     // Author from GitHub issue author (issue author's login)
     const githubAuthor = issue.author || {};
@@ -215,7 +253,7 @@ function main() {
       navigation,
       navigationIndex,
       series,
-      content: content
+      content: bodyWithoutCover
         // Embed YouTube videos
         .replace(
           /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})[^)]*\)/g,

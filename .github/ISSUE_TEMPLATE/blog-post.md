@@ -19,7 +19,8 @@ assignees: ''
 > description: "Short summary for SEO."
 > slug: my-custom-url-slug   # optional - stable if the title changes
 > series: "My Series Name"   # optional - groups posts for prev/next + series list (by date)
-> image: https://...         # optional
+> image: https://...         # optional cover (list card, post hero, OG). If omitted, a leading image at the top of the body is promoted here and removed from the body.
+> imageAlt: "..."            # optional alt text for the cover
 > author: Name               # optional - automatic from the GitHub issue user
 > authorUrl: https://...
 > authorAvatar: https://...

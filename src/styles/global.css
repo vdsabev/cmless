@@ -20,6 +20,87 @@
   }
 }
 
+/*
+ * MPA view transitions: root crossfade + shared post elements.
+ * Post: .vt-post-* names. List: one card claims via Layout script.
+ * Don't name header/main/footer — holes in root stack opaque layers.
+ */
+@view-transition {
+  navigation: auto;
+}
+
+.vt-post-title {
+  view-transition-name: post-title;
+}
+.vt-post-meta {
+  view-transition-name: post-meta;
+}
+.vt-post-description {
+  view-transition-name: post-description;
+}
+.vt-post-tags {
+  view-transition-name: post-tags;
+}
+.vt-post-image {
+  view-transition-name: post-image;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.28s;
+  animation-timing-function: ease;
+}
+
+::view-transition-group(post-title),
+::view-transition-group(post-meta),
+::view-transition-group(post-description),
+::view-transition-group(post-tags),
+::view-transition-group(post-image) {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+/* Text morphs: size to content; plus-lighter avoids double-stack opacity */
+::view-transition-old(post-title),
+::view-transition-new(post-title),
+::view-transition-old(post-meta),
+::view-transition-new(post-meta),
+::view-transition-old(post-description),
+::view-transition-new(post-description),
+::view-transition-old(post-tags),
+::view-transition-new(post-tags) {
+  height: 100%;
+  width: auto;
+  overflow: clip;
+  animation-duration: 0.4s;
+  animation-timing-function: ease;
+  mix-blend-mode: plus-lighter;
+}
+
+::view-transition-old(post-image),
+::view-transition-new(post-image) {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  overflow: clip;
+  animation-duration: 0.4s;
+  animation-timing-function: ease;
+  mix-blend-mode: plus-lighter;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 /* Base styles that apply site-wide.
    Ensures images never overflow their containers (e.g. in prose-rendered Markdown). */
 @layer base {

@@ -7,3 +7,13 @@ export function tagHashColor(tag: string): (typeof hashColors)[number] {
 	}
 	return hashColors[Math.abs(hash) % hashColors.length];
 }
+
+/** Normalize frontmatter tags (array or comma-separated string) to a string[]. */
+export function parseTags(tags: string[] | string | undefined | null): string[] {
+	if (Array.isArray(tags)) return tags;
+	if (tags == null || tags === '') return [];
+	return String(tags)
+		.split(/,\s*/)
+		.map((tag) => tag.trim())
+		.filter(Boolean);
+}

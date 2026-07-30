@@ -1,0 +1,67 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<'div'> & {
+  name?: string;
+  url?: string;
+  avatar?: string;
+  date?: string;
+  readingTime?: number | null;
+  /** When false, only date / reading time (list cards). Default true. */
+  showAuthor?: boolean;
+  size?: 'sm' | 'md';
+};
+
+const {
+  class: className,
+  name,
+  url,
+  avatar,
+  date,
+  readingTime,
+  showAuthor = true,
+  size = 'sm',
+  ...props
+} = Astro.props as Props;
+
+const avatarSize = size === 'md' ? 'w-6 h-6' : 'w-4 h-4';
+const textSize = size === 'md' ? 'text-sm' : 'text-xs';
+const showName = showAuthor && !!name;
+const showAvatar = showAuthor && !!avatar;
+const showAuthorChrome = showName || showAvatar;
+const hasReadingTime = readingTime != null && readingTime > 0;
+const hasMeta = !!(date || hasReadingTime);
+---
+
+{/* Renders nothing when empty so callers can always pass data-vt-* / class. */}
+{(showAuthorChrome || hasMeta) && (
+  <div
+    class:list={[
+      'flex flex-wrap items-center gap-1 text-slate-500 dark:text-slate-400',
+      textSize,
+      className,
+    ]}
+    {...props}
+  >
+    {showAvatar && (
+      <img
+        class={`${avatarSize} inset-shadow corner-squircle rounded-full object-cover bg-slate-100 dark:bg-slate-800`}
+        src={avatar}
+        alt={name ? `${name}'s avatar` : 'Author avatar'}
+      />
+    )}
+    {showName && (url ? <a href={url} rel="author" target="_blank">{name}</a> : <span>{name}</span>)}
+    {date && (
+      <>
+        {showAuthorChrome && <span aria-hidden="true">·</span>}
+        <time>{date}</time>
+      </>
+    )}
+    {hasReadingTime && (
+      <>
+        {(showAuthorChrome || date) && <span aria-hidden="true">·</span>}
+        <span>{readingTime} min read</span>
+      </>
+    )}
+  </div>
+)}

@@ -1,11 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Author from '../components/Author.astro';
+import PostMeta from '../components/PostMeta.astro';
 import Tags from '../components/Tags.astro';
 import SeriesNavList from '../components/SeriesNavList.astro';
 import SeriesNavPager from '../components/SeriesNavPager.astro';
 import { pathToSlug } from '../lib/slug';
 import { getReadingTimeInMinutes } from '../lib/reading-time';
+import { parseTags } from '../lib/tags';
 import site from '../generated/site.json';
 
 export function getStaticPaths() {
@@ -27,17 +28,20 @@ const isPage = !!frontmatter.navigation;
 const title = frontmatter.title || slug;
 const date = frontmatter.date || '';
 const description = frontmatter.description;
-const image = frontmatter.image;
+const image = frontmatter.image as string | undefined;
+const body = !isPage && typeof rawContent === 'function' ? rawContent() : '';
+const imageAlt = (frontmatter.imageAlt as string | undefined) || title;
+/** In-article hero for real covers only — not the repo social-preview fallback (still used for OG via Layout). */
+const socialPreviewUrl = ((site as { socialPreviewUrl?: string }).socialPreviewUrl || '').trim();
+const showCover = !!image && image.trim() !== socialPreviewUrl;
 
 const author = frontmatter.author;
 const authorUrl = frontmatter.authorUrl;
 const authorAvatar = frontmatter.authorAvatar;
-const tags = Array.isArray(frontmatter.tags) ? frontmatter.tags : (frontmatter.tags ? String(frontmatter.tags).split(/,\s*/) : []);
+const tags = parseTags(frontmatter.tags);
 const series = typeof frontmatter.series === 'string' ? frontmatter.series.trim() : '';
 
-const readingTime = !isPage && typeof rawContent === 'function'
-	? getReadingTimeInMinutes(rawContent())
-	: null;
+const readingTime = body ? getReadingTimeInMinutes(body) : null;
 
 // Series peers: same `series` value, ordered by date ascending
 type SeriesPeer = { slug: string; title: string; date: string };
@@ -85,29 +89,44 @@ if (series) {
 		</div>
 	) : (
 		<article>
-			<div class="mb-2" data-pagefind-ignore>
-				<Author name={author} url={authorUrl} avatar={authorAvatar} date={date} readingTime={readingTime} size="md" />
-			</div>
-
 			<div data-pagefind-body>
 				<hgroup>
-					<h1 class="text-3xl" data-pagefind-meta="title">{title}</h1>
+					<h1 class="vt-post-title text-3xl" data-pagefind-meta="title">{title}</h1>
+					<div class="mt-1" data-pagefind-ignore>
+						<PostMeta
+							class="vt-post-meta"
+							name={author}
+							url={authorUrl}
+							avatar={authorAvatar}
+							date={date}
+							readingTime={readingTime}
+							size="md"
+						/>
+					</div>
 					{description && (
-						<p class="mt-1 text-slate-500 dark:text-slate-400" data-pagefind-meta="description">{description}</p>
+						<p
+							class="vt-post-description mt-1 text-slate-500 dark:text-slate-400"
+							data-pagefind-meta="description"
+						>
+							{description}
+						</p>
 					)}
 				</hgroup>
 
-				{tags.length > 0 && (
-					<div class="mt-1 mb-4">
-						{/* Tag labels are visible via Tags; also filterable in Pagefind */}
-						{tags.map((tag: string) => (
-							<span class="sr-only" data-pagefind-filter="tag">{tag}</span>
-						))}
-						<Tags tags={tags} />
-					</div>
+				{tags.map((tag: string) => (
+					<span class="sr-only" data-pagefind-filter="tag">{tag}</span>
+				))}
+				<Tags class="vt-post-tags mt-2 mb-4" tags={tags} />
+
+				{showCover && image && (
+					<img
+						src={image}
+						alt={imageAlt}
+						class="vt-post-image mt-0 mb-4 w-full aspect-[1200/630] object-cover corner-squircle rounded-xl"
+					/>
 				)}
 
-				{series && seriesPosts.length > 0 && (
+				{series && (
 					<SeriesNavList name={series} posts={seriesPosts} currentSlug={slug} data-pagefind-ignore />
 				)}
 
@@ -116,7 +135,7 @@ if (series) {
 				</div>
 			</div>
 
-			{series && seriesPosts.length > 0 && (
+			{series && (
 				<SeriesNavPager name={series} prev={seriesPrev} next={seriesNext} data-pagefind-ignore />
 			)}
 		</article>
