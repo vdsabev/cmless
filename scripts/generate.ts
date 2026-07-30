@@ -4,6 +4,7 @@
  *
  * - Fetches issues labeled "status: published" or "status: unlisted"
  * - Reads author (login, name) from issue; avatar + profile from login
+ * - Writes repo owner social accounts (website + GitHub social_accounts) into site.json
  * - Tags from frontmatter (comma separated or list)
  * - series from frontmatter (named post series for prev/next + list)
  * - image from frontmatter, else leading body image (promoted into FM), else
@@ -182,6 +183,47 @@ function main() {
   console.log(`Using site title: ${siteTitle}`);
   const ownerAvatar = ownerLogin ? `https://github.com/${ownerLogin}.png` : '';
 
+  // Social links from the repo owner's GitHub profile (website + social accounts)
+  type SocialLink = { provider: string; url: string };
+  let socials: SocialLink[] = [];
+  if (ownerLogin) {
+    try {
+      const userOutput = execSync(`gh api users/${ownerLogin}`, {
+        encoding: 'utf8',
+        env,
+        stdio: ['pipe', 'pipe', 'ignore'],
+      });
+      const user = JSON.parse(userOutput);
+      const blog = typeof user.blog === 'string' ? user.blog.trim() : '';
+      if (blog) {
+        const url = /^https?:\/\//i.test(blog) ? blog : `https://${blog}`;
+        socials.push({ provider: 'website', url });
+      }
+    } catch {
+      // optional
+    }
+    try {
+      const accountsOutput = execSync(`gh api users/${ownerLogin}/social_accounts`, {
+        encoding: 'utf8',
+        env,
+        stdio: ['pipe', 'pipe', 'ignore'],
+      });
+      const accounts = JSON.parse(accountsOutput) as Array<{ provider?: string; url?: string }>;
+      if (Array.isArray(accounts)) {
+        for (const account of accounts) {
+          const url = (account.url || '').trim();
+          if (!url) continue;
+          const provider = (account.provider || 'generic').toLowerCase();
+          // Skip duplicates (same URL as website or another account)
+          if (socials.some((s) => s.url.replace(/\/$/, '') === url.replace(/\/$/, ''))) continue;
+          socials.push({ provider, url });
+        }
+      }
+    } catch {
+      console.warn('⚠️  Could not fetch owner social accounts.');
+    }
+  }
+
   const posts: any[] = [];
 
   for (const issue of issues) {
@@ -297,14 +339,23 @@ function main() {
   }
   mkdirSync(CONTENT_DIR, { recursive: true });
 
-  // Write site metadata (title + repo owner for credit/avatar)
+  // Write site metadata (title + repo owner for credit/avatar + profile socials)
   mkdirSync(GENERATED_DIR, { recursive: true });
   writeFileSync(
     join(GENERATED_DIR, 'site.json'),
-    JSON.stringify({ siteTitle, owner: { login: ownerLogin, avatarUrl: ownerAvatar }, socialPreviewUrl }, null, 2) + '\n',
+    JSON.stringify(
+      {
+        siteTitle,
+        owner: { login: ownerLogin, avatarUrl: ownerAvatar },
+        socialPreviewUrl,
+        socials,
+      },
+      null,
+      2,
+    ) + '\n',
     'utf8'
   );
-  console.log(`✓ generated/site.json (siteTitle: ${siteTitle})`);
+  console.log(`✓ generated/site.json (siteTitle: ${siteTitle}, socials: ${socials.length})`);
 
   // Build navigation links
   const headerNavLinks = posts

@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import NavLink from '../components/NavLink.astro';
+import SocialIcon from '../components/SocialIcon.astro';
 import site from '../generated/site.json';
 import nav from '../generated/navigation.json';
 
@@ -34,6 +35,13 @@ const afterPosts = rawHeader.filter((n) => n.navigationIndex >= 0).sort((a, b) =
 const headerNav: NavItem[] = [...beforePosts, { title: 'Posts', slug: '', navigationIndex: 0 }, ...afterPosts];
 
 const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.navigationIndex - b.navigationIndex);
+
+interface SocialLink {
+	provider: string;
+	url: string;
+}
+
+const socials: SocialLink[] = Array.isArray((site as any).socials) ? (site as any).socials : [];
 ---
 
 <!doctype html>
@@ -86,31 +94,48 @@ const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.nav
 			<slot />
 		</main>
 
-		<footer class="flex flex-wrap justify-center items-baseline gap-1 border-t border-t-slate-200 dark:border-t-slate-700 mt-8 pt-4 text-xs text-slate-500 dark:text-slate-400">
-			{owner?.login && (
-				<>
-					<p>
-						created by{' '}
-						<a href={`https://github.com/${owner.login}`} rel="author" target="_blank">
-							<img class="inline-block align-middle w-4 h-4 inset-shadow corner-squircle rounded-full object-cover mx-0.5 bg-slate-100 dark:bg-slate-800 mb-1" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" />
-							@{owner.login}
+		<footer class="flex flex-col items-center gap-2 border-t border-t-slate-200 dark:border-t-slate-700 mt-8 pt-4 text-xs text-slate-500 dark:text-slate-400">
+			<div class="flex flex-wrap justify-center items-baseline gap-1">
+				{owner?.login && (
+					<>
+						<p>
+							created by{' '}
+							<a href={`https://github.com/${owner.login}`} rel="author" target="_blank">
+								<img class="inline-block align-middle w-4 h-4 inset-shadow corner-squircle rounded-full object-cover mx-0.5 bg-slate-100 dark:bg-slate-800 mb-1" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" />
+								@{owner.login}
+							</a>
+						</p>
+						<span class="text-slate-300 dark:text-slate-600">·</span>
+					</>
+				)}
+
+				<p>powered by <a href="https://github.com/vdsabev/cmless">cmless</a></p>
+				<span class="text-slate-300 dark:text-slate-600">·</span>
+
+				<NavLink href={`${BASE_URL}rss.xml`}>rss</NavLink>
+
+				{footerNav.map((item) => (
+					<>
+						<span class="text-slate-300 dark:text-slate-600">·</span>
+						<NavLink href={`${BASE_URL}${item.slug}/`}>{item.title}</NavLink>
+					</>
+				))}
+			</div>
+
+			{socials.length > 0 && (
+				<nav class="flex flex-wrap justify-center items-center gap-3" aria-label="Social links">
+					{socials.map((link) => (
+						<a
+							href={link.url}
+							target="_blank"
+							rel="me noopener noreferrer"
+							class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
+						>
+							<SocialIcon provider={link.provider} />
 						</a>
-					</p>
-					<span class="text-slate-300 dark:text-slate-600">·</span>
-				</>
+					))}
+				</nav>
 			)}
-
-			<p>powered by <a href="https://github.com/vdsabev/cmless">cmless</a></p>
-			<span class="text-slate-300 dark:text-slate-600">·</span>
-
-			<NavLink href={`${BASE_URL}rss.xml`}>rss</NavLink>
-
-			{footerNav.map((item) => (
-				<>
-					<span class="text-slate-300 dark:text-slate-600">·</span>
-					<NavLink href={`${BASE_URL}${item.slug}/`}>{item.title}</NavLink>
-				</>
-			))}
 		</footer>
 
 		{/*

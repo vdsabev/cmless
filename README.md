@@ -87,6 +87,8 @@ GH_REPO=<username>/<repo> npm run dev # run another cmless-based repo as a blog
 
 **Author / avatar / profile:** auto from the GitHub issue author (or override with `author`, `authorUrl`, `authorAvatar`).
 
+**Footer social links:** from the repository owner’s GitHub profile — website (`blog` field) plus [social accounts](https://docs.github.com/en/rest/users/social-accounts) (X/Twitter, Mastodon, Bluesky, LinkedIn, etc.).
+
 **Series:** from `series: My Series Name` Frontmatter. Posts that share the same series name get previous/next navigation and a list of posts in the series, ordered by date (oldest first).
 
 **Tags:** from `tags: a, b` Frontmatter.
