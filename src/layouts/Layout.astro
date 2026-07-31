@@ -201,7 +201,18 @@ const socials: SocialLink[] = Array.isArray((site as any).socials) ? (site as an
 				const parts = rest.split('/').filter(Boolean);
 				if (parts.length !== 1) return null;
 				const segment = parts[0];
-				if (segment === 'tags' || segment === 'rss.xml') return null;
+				// Catalog / feed endpoints and any non-HTML twin (*.md, *.xml, *.txt).
+				if (
+					segment === 'tags' ||
+					segment === 'rss.xml' ||
+					segment === 'sitemap.xml' ||
+					segment === 'robots.txt' ||
+					segment === 'llms.txt' ||
+					segment === 'index.md' ||
+					/\.(md|xml|txt)$/i.test(segment)
+				) {
+					return null;
+				}
 				return segment;
 			}
 

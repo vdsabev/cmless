@@ -8,6 +8,7 @@ import SeriesNavPager from '../components/SeriesNavPager.astro';
 import { pathToSlug } from '../lib/slug';
 import { getReadingTimeInMinutes } from '../lib/reading-time';
 import { parseTags } from '../lib/tags';
+import { abs, postMdPath } from '../lib/content';
 import site from '../generated/site.json';
 
 export function getStaticPaths() {
@@ -44,8 +45,7 @@ const series = typeof frontmatter.series === 'string' ? frontmatter.series.trim(
 
 const readingTime = body ? getReadingTimeInMinutes(body) : null;
 
-const markdownPath = `${import.meta.env.BASE_URL}${slug}.md`;
-const markdownHref = Astro.site ? new URL(markdownPath, Astro.site).href : markdownPath;
+const markdownHref = abs(postMdPath(slug), Astro.site);
 
 // Series peers: same `series` value, ordered by date ascending
 type SeriesPeer = { slug: string; title: string; date: string };

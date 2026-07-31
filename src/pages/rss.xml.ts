@@ -1,32 +1,41 @@
 import rss from '@astrojs/rss';
-import { pathToSlug } from '../lib/slug';
+import {
+	SITE_DESCRIPTION,
+	abs,
+	absoluteUrl,
+	escapeXml,
+	getPublishedPosts,
+	parseContentDate,
+	postHtmlPath,
+	siteBase,
+} from '../lib/content';
 import site from '../generated/site.json';
 
-const modules: Record<string, { frontmatter: Record<string, any> }> = import.meta.glob('../content/blog/*.md', { eager: true });
+export const GET = (context: { site?: URL }) => {
+	const siteUrl = context.site ?? import.meta.env.SITE;
+	// Channel <link> is createCanonicalURL(site); include BASE_URL for project Pages.
+	const channelSite = abs(siteBase(), siteUrl);
+	const posts = getPublishedPosts();
 
-const publishedPosts = Object.entries(modules)
-  .map(([path, post]) => {
-    const slug = pathToSlug(path);
-    return {
-      slug,
-      title: post.frontmatter.title,
-      date: post.frontmatter.date,
-      description: post.frontmatter.description,
-      status: post.frontmatter.status || 'published',
-    };
-  })
-  .filter((post) => post.status === 'published')
-  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-export const GET = () =>
-  rss({
-    title: site.siteTitle,
-    description: 'A blog powered by GitHub Issues and Astro.',
-    site: import.meta.env.SITE,
-    items: publishedPosts.map((post) => ({
-      title: post.title,
-      pubDate: new Date(post.date),
-      description: post.description,
-      link: `/${post.slug}/`,
-    })),
-  });
+	return rss({
+		title: site.siteTitle,
+		description: SITE_DESCRIPTION,
+		site: channelSite,
+		xmlns: {
+			atom: 'http://www.w3.org/2005/Atom',
+		},
+		items: posts.map((post) => {
+			const mdUrl = absoluteUrl(`${post.slug}.md`, siteUrl);
+			return {
+				title: post.title,
+				// Omit invalid dates so @astrojs/rss Zod refine does not fail the build.
+				pubDate: parseContentDate(post.date),
+				description: post.description,
+				// HTML remains canonical; Markdown is advertised via atom:link alternate.
+				// Path includes BASE_URL so project sites resolve correctly.
+				link: postHtmlPath(post.slug),
+				customData: `<atom:link rel="alternate" type="text/markdown" href="${escapeXml(mdUrl)}"/>`,
+			};
+		}),
+	});
+};

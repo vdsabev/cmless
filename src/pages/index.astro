@@ -1,52 +1,28 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PostCard from '../components/PostCard.astro';
+import { SITE_DESCRIPTION, abs, getPublishedPosts, indexMdPath } from '../lib/content';
 import { getReadingTimeInMinutes } from '../lib/reading-time';
-import { pathToSlug } from '../lib/slug';
-import { parseTags } from '../lib/tags';
 import site from '../generated/site.json';
 
-// Load all generated posts at build time (simple + reliable)
-const modules: Record<string, PostModule> = import.meta.glob('../content/blog/*.md', { eager: true });
-
-type PostModule = {
-  frontmatter: {
-    title: string;
-    date: string;
-    description?: string;
-    image?: string;
-    imageAlt?: string;
-    status?: 'published' | 'unlisted';
-    tags?: string[] | string;
-  };
-  rawContent?: () => string;
-  url?: string;
-};
-
-const publishedPosts = Object.entries(modules)
-  .map(([path, post]) => {
-    const slug = pathToSlug(path);
-    const body = typeof post.rawContent === 'function' ? post.rawContent() : '';
-    return {
-      slug,
-      title: post.frontmatter.title,
-      date: post.frontmatter.date,
-      readingTime: body ? getReadingTimeInMinutes(body) : null,
-      description: post.frontmatter.description,
-      image: post.frontmatter.image,
-      imageAlt: post.frontmatter.imageAlt,
-      status: post.frontmatter.status || 'published',
-      tags: parseTags(post.frontmatter.tags),
-    };
-  })
-  .filter((post) => post.status === 'published')
-  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+const publishedPosts = getPublishedPosts().map((post) => ({
+	slug: post.slug,
+	title: post.title,
+	date: post.date,
+	readingTime: post.body ? getReadingTimeInMinutes(post.body) : null,
+	description: post.description,
+	image: post.image,
+	imageAlt: post.imageAlt,
+	tags: post.tags,
+}));
 
 // Prioritize the first card that has a cover (LCP candidate on the index).
 const firstPostWithImage = publishedPosts.find((post) => post.image);
+
+const markdownHref = abs(indexMdPath(), Astro.site);
 ---
 
-<Layout title="Posts" siteTitle={site.siteTitle} description="A blog powered by GitHub Issues and Astro.">
+<Layout title="Posts" siteTitle={site.siteTitle} description={SITE_DESCRIPTION} markdownHref={markdownHref}>
 	{
 		publishedPosts.length === 0 ? (
 			<p>No published posts yet. Create a GitHub Issue and apply the <code>status: published</code> label.</p>

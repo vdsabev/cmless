@@ -1,25 +1,12 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import PostCard from '../../components/PostCard.astro';
+import { abs, getTagsMap, tagMdPath } from '../../lib/content';
 import { getReadingTimeInMinutes } from '../../lib/reading-time';
-import { pathToSlug } from '../../lib/slug';
-import { parseTags, tagHashColor } from '../../lib/tags';
+import { tagHashColor } from '../../lib/tags';
 import site from '../../generated/site.json';
 
-type PostModule = {
-	frontmatter: {
-		title: string;
-		date: string;
-		description?: string;
-		image?: string;
-		imageAlt?: string;
-		status?: 'published' | 'unlisted';
-		tags?: string[] | string;
-	};
-	rawContent?: () => string;
-};
-
-type PublishedPost = {
+type TagPost = {
 	slug: string;
 	title: string;
 	date: string;
@@ -31,46 +18,34 @@ type PublishedPost = {
 };
 
 export function getStaticPaths() {
-	const modules: Record<string, PostModule> = import.meta.glob('../../content/blog/*.md', { eager: true });
-
-	const publishedPosts: PublishedPost[] = Object.entries(modules)
-		.map(([path, post]) => {
-			const slug = pathToSlug(path);
-			const body = typeof post.rawContent === 'function' ? post.rawContent() : '';
-			return {
-				slug,
-				title: post.frontmatter.title,
-				date: post.frontmatter.date,
-				readingTime: body ? getReadingTimeInMinutes(body) : null,
-				description: post.frontmatter.description,
-				image: post.frontmatter.image,
-				imageAlt: post.frontmatter.imageAlt,
-				status: post.frontmatter.status || 'published',
-				tags: parseTags(post.frontmatter.tags),
-			};
-		})
-		.filter((post) => post.status === 'published')
-		.map(({ status: _, ...post }) => post)
-		.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-	const tags = [...new Set(publishedPosts.flatMap((post) => post.tags))];
-
-	return tags.map((tag) => ({
+	const tagsMap = getTagsMap();
+	return [...tagsMap.entries()].map(([tag, entries]) => ({
 		params: { tag },
 		props: {
 			tag,
-			posts: publishedPosts.filter((post) => post.tags.includes(tag)),
+			posts: entries.map((post) => ({
+				slug: post.slug,
+				title: post.title,
+				date: post.date,
+				readingTime: post.body ? getReadingTimeInMinutes(post.body) : null,
+				description: post.description,
+				image: post.image,
+				imageAlt: post.imageAlt,
+				tags: post.tags,
+			})) satisfies TagPost[],
 		},
 	}));
 }
 
-const { tag, posts } = Astro.props as { tag: string; posts: PublishedPost[] };
+const { tag, posts } = Astro.props as { tag: string; posts: TagPost[] };
 
 // Prioritize the first card that has a cover (LCP candidate on tag pages).
 const firstImagePost = posts.find((post) => post.image);
+
+const markdownHref = abs(tagMdPath(tag), Astro.site);
 ---
 
-<Layout title={`#${tag}`} siteTitle={site.siteTitle} description={`Posts tagged ${tag}.`}>
+<Layout title={`#${tag}`} siteTitle={site.siteTitle} description={`Posts tagged ${tag}.`} markdownHref={markdownHref}>
 	<h1 class="text-2xl font-semibold mb-8">
 		<span class={tagHashColor(tag)}>#</span>{tag}
 	</h1>
