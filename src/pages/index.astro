@@ -41,6 +41,9 @@ const publishedPosts = Object.entries(modules)
   })
   .filter((post) => post.status === 'published')
   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+// Prioritize the first card that has a cover (LCP candidate on the index).
+const firstPostWithImage = publishedPosts.find((post) => post.image);
 ---
 
 <Layout title="Posts" siteTitle={site.siteTitle} description="A blog powered by GitHub Issues and Astro.">
@@ -60,6 +63,7 @@ const publishedPosts = Object.entries(modules)
 							image={post.image}
 							imageAlt={post.imageAlt}
 							tags={post.tags}
+							priority={post === firstPostWithImage}
 						/>
 					))
 				}

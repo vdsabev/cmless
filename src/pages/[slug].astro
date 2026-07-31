@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import CoverImage from '../components/CoverImage.astro';
 import PostMeta from '../components/PostMeta.astro';
 import Tags from '../components/Tags.astro';
 import SeriesNavList from '../components/SeriesNavList.astro';
@@ -119,10 +120,11 @@ if (series) {
 				<Tags class="vt-post-tags mt-2 mb-4" tags={tags} />
 
 				{showCover && image && (
-					<img
+					<CoverImage
+						class="vt-post-image mt-0 mb-4 w-full aspect-[1200/630] object-cover corner-squircle rounded-xl"
 						src={image}
 						alt={imageAlt}
-						class="vt-post-image mt-0 mb-4 w-full aspect-[1200/630] object-cover corner-squircle rounded-xl"
+						priority
 					/>
 				)}
 

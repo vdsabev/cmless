@@ -1,17 +1,20 @@
 ---
+import CoverImage from './CoverImage.astro';
 import PostMeta from './PostMeta.astro';
 import Tags from './Tags.astro';
 
-const { slug, title, date, readingTime, description, image, imageAlt, tags } = Astro.props as {
-	slug: string;
-	title: string;
-	date?: string;
-	readingTime?: number | null;
-	description?: string;
-	image?: string;
-	imageAlt?: string;
-	tags: string[];
-};
+const { slug, title, date, readingTime, description, image, imageAlt, tags, priority = false } =
+	Astro.props as {
+		slug: string;
+		title: string;
+		date?: string;
+		readingTime?: number | null;
+		description?: string;
+		image?: string;
+		imageAlt?: string;
+		tags: string[];
+		priority?: boolean; // First visible LCP card: eager load + fetchpriority high (do not combine with lazy).
+	};
 
 const href = `${import.meta.env.BASE_URL}${slug}/`;
 ---
@@ -31,12 +34,12 @@ const href = `${import.meta.env.BASE_URL}${slug}/`;
 
 	<div class="w-full sm:w-48 sm:shrink-0">
 		{image && (
-			<img
+			<CoverImage
 				data-vt-image
+				class="w-full aspect-[1200/630] object-cover max-sm:corner-squircle max-sm:rounded-t-2xl sm:corner-squircle sm:rounded-xl"
 				src={image}
 				alt={imageAlt || title}
-				loading="lazy"
-				class="w-full aspect-[1200/630] object-cover max-sm:corner-squircle max-sm:rounded-t-2xl sm:corner-squircle sm:rounded-xl"
+				priority={priority}
 			/>
 		)}
 	</div>

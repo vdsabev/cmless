@@ -1,0 +1,25 @@
+---
+/**
+ * Remote cover image.
+ * priority: LCP path (eager + fetchpriority high); never combine with lazy.
+ */
+type Props = {
+	src: string;
+	alt: string;
+	priority?: boolean;
+	class?: string;
+	'data-vt-image'?: boolean | string;
+};
+
+const { src, alt, priority = false, class: className, ...rest } = Astro.props as Props;
+---
+
+<img
+	src={src}
+	alt={alt}
+	class={className}
+	loading={priority ? 'eager' : 'lazy'}
+	fetchpriority={priority ? 'high' : undefined}
+	decoding="async"
+	{...rest}
+/>

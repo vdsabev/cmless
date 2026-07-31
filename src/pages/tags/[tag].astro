@@ -65,6 +65,9 @@ export function getStaticPaths() {
 }
 
 const { tag, posts } = Astro.props as { tag: string; posts: PublishedPost[] };
+
+// Prioritize the first card that has a cover (LCP candidate on tag pages).
+const firstImagePost = posts.find((post) => post.image);
 ---
 
 <Layout title={`#${tag}`} siteTitle={site.siteTitle} description={`Posts tagged ${tag}.`}>
@@ -87,6 +90,7 @@ const { tag, posts } = Astro.props as { tag: string; posts: PublishedPost[] };
 						image={post.image}
 						imageAlt={post.imageAlt}
 						tags={post.tags}
+						priority={post === firstImagePost}
 					/>
 				))}
 			</ul>
