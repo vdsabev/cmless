@@ -1,5 +1,4 @@
 import {
-	SITE_DESCRIPTION,
 	abs,
 	absoluteUrl,
 	escapeMd,
@@ -7,12 +6,38 @@ import {
 	getPublishedPosts,
 	getTagsMap,
 	indexMdPath,
+	parseContentDate,
 	postHtmlPath,
 	postMdPath,
 	siteBase,
 	tagMdPath,
+	type ContentEntry,
 } from '../lib/content';
 import site from '../generated/site.json';
+
+/** Meta in parentheses after the link: date, tags, author (when present). */
+function formatEntryMeta(entry: ContentEntry): string {
+	const parts: string[] = [];
+	const d = parseContentDate(entry.date);
+	if (d) {
+		parts.push(d.toISOString().slice(0, 10));
+	} else if (entry.date.trim()) {
+		parts.push(escapeMd(entry.date.trim()));
+	}
+	if (entry.tags.length > 0) {
+		parts.push(`tags: ${entry.tags.map((t) => escapeMd(t)).join(', ')}`);
+	}
+	if (entry.author) {
+		parts.push(`author: ${escapeMd(entry.author)}`);
+	}
+	return parts.length > 0 ? ` (${parts.join('; ')})` : '';
+}
+
+function formatCatalogLine(entry: ContentEntry, href: string): string {
+	const meta = formatEntryMeta(entry);
+	const desc = entry.description ? `: ${escapeMd(entry.description)}` : '';
+	return `- [${escapeMd(entry.title)}](${href})${meta}${desc}`;
+}
 
 export const GET = (context: { site?: URL }) => {
 	const siteUrl = context.site ?? import.meta.env.SITE;
@@ -28,23 +53,22 @@ export const GET = (context: { site?: URL }) => {
 	const indexMd = indexMdPath();
 	const tagMdExample = `${base}tags/<tag>.md`;
 
-	const lines: string[] = [
-		`# ${escapeMd(site.siteTitle)}`,
-		'',
-		`> ${SITE_DESCRIPTION}`,
-		'',
+	const lines: string[] = [`# ${escapeMd(site.siteTitle)}`, ''];
+	if (site.siteDescription) {
+		lines.push(`> ${escapeMd(site.siteDescription)}`, '');
+	}
+	lines.push(
 		'This site is a static blog. Posts and pages are available as Markdown at the same',
 		`slug with a \`.md\` extension (\`${exampleHtml}\` ↔ \`${exampleMd}\`). The post index`,
 		`is \`${indexMd}\`; tag listings are \`${tagMdExample}\`.`,
 		'',
 		'## Posts',
 		'',
-	];
+	);
 
 	for (const post of posts) {
 		const href = absoluteUrl(`${post.slug}.md`, siteUrl);
-		const desc = post.description ? `: ${escapeMd(post.description)}` : '';
-		lines.push(`- [${escapeMd(post.title)}](${href})${desc}`);
+		lines.push(formatCatalogLine(post, href));
 	}
 
 	if (posts.length === 0) {
@@ -55,8 +79,7 @@ export const GET = (context: { site?: URL }) => {
 
 	for (const page of pages) {
 		const href = absoluteUrl(`${page.slug}.md`, siteUrl);
-		const desc = page.description ? `: ${escapeMd(page.description)}` : '';
-		lines.push(`- [${escapeMd(page.title)}](${href})${desc}`);
+		lines.push(formatCatalogLine(page, href));
 	}
 
 	if (pages.length === 0) {

@@ -69,6 +69,7 @@ const socials: SocialLink[] = Array.isArray((site as any).socials) ? (site as an
 		{markdownHref && (
 			<link rel="alternate" type="text/markdown" title="Markdown" href={markdownHref} />
 		)}
+		<link rel="llms-txt" type="text/plain" title="LLMs" href={`${BASE_URL}llms.txt`} />
 		<link rel="stylesheet" href={`${BASE_URL}pagefind/pagefind-component-ui.css`} />
 		<script src={`${BASE_URL}pagefind/pagefind-component-ui.js`} type="module"></script>
 	</head>

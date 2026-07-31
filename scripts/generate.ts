@@ -5,6 +5,7 @@
  * - Fetches issues labeled "status: published" or "status: unlisted"
  * - Reads author (login, name) from issue; avatar + profile from login
  * - Writes repo owner social accounts (website + GitHub social_accounts) into site.json
+ * - Site title + description from repo description (optional "Title | blurb" / "Title - blurb" / "Title: blurb" split)
  * - Tags from frontmatter (comma separated or list)
  * - series from frontmatter (named post series for prev/next + list)
  * - image from frontmatter, else leading body image (promoted into FM), else
@@ -29,6 +30,7 @@
 import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
+import { parseRepoDescription } from './parse-repo-description';
 
 const CONTENT_DIR = 'src/content/blog';
 const GENERATED_DIR = 'src/generated';
@@ -160,8 +162,9 @@ function main() {
     process.exit(1);
   }
 
-  // Fetch site title + repo owner login (for site credit + avatar)
+  // Fetch site title + description + repo owner login (for site credit + avatar)
   let siteTitle = 'My Blog';
+  let siteDescription = '';
   let ownerLogin = '';
   let socialPreviewUrl = '';
   try {
@@ -172,17 +175,20 @@ function main() {
     });
     const repo = JSON.parse(repoOutput);
     if (repo.description && typeof repo.description === 'string') {
-      const desc = repo.description.trim();
-      if (desc) {
-        siteTitle = desc;
-      }
+      const parsed = parseRepoDescription(repo.description);
+      if (parsed.title) siteTitle = parsed.title;
+      siteDescription = parsed.description;
     }
     ownerLogin = repo.owner?.login || '';
     socialPreviewUrl = repo.openGraphImageUrl || '';
   } catch (err) {
     console.warn('⚠️  Could not fetch repo info, using defaults.');
   }
-  console.log(`Using site title: ${siteTitle}`);
+  console.log(
+    siteDescription
+      ? `Using site title: ${siteTitle} · description: ${siteDescription}`
+      : `Using site title: ${siteTitle}`,
+  );
   const ownerAvatar = ownerLogin ? `https://github.com/${ownerLogin}.png` : '';
 
   // Social links from the repo owner's GitHub profile (website + social accounts)
@@ -359,13 +365,14 @@ function main() {
   }
   mkdirSync(CONTENT_DIR, { recursive: true });
 
-  // Write site metadata (title + repo owner for credit/avatar + profile socials)
+  // Write site metadata (title + description + repo owner for credit/avatar + profile socials)
   mkdirSync(GENERATED_DIR, { recursive: true });
   writeFileSync(
     join(GENERATED_DIR, 'site.json'),
     JSON.stringify(
       {
         siteTitle,
+        siteDescription,
         owner: { login: ownerLogin, avatarUrl: ownerAvatar },
         socialPreviewUrl,
         socials,
@@ -375,7 +382,9 @@ function main() {
     ) + '\n',
     'utf8'
   );
-  console.log(`✓ generated/site.json (siteTitle: ${siteTitle}, socials: ${socials.length})`);
+  console.log(
+    `✓ generated/site.json (siteTitle: ${siteTitle}, siteDescription: ${siteDescription ? 'yes' : 'no'}, socials: ${socials.length})`,
+  );
 
   // Build navigation links
   const headerNavLinks = posts

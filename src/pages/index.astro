@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PostCard from '../components/PostCard.astro';
-import { SITE_DESCRIPTION, abs, getPublishedPosts, indexMdPath } from '../lib/content';
+import { abs, getPublishedPosts, indexMdPath } from '../lib/content';
 import { getReadingTimeInMinutes } from '../lib/reading-time';
 import site from '../generated/site.json';
 
@@ -22,7 +22,7 @@ const firstPostWithImage = publishedPosts.find((post) => post.image);
 const markdownHref = abs(indexMdPath(), Astro.site);
 ---
 
-<Layout title="Posts" siteTitle={site.siteTitle} description={SITE_DESCRIPTION} markdownHref={markdownHref}>
+<Layout title="Posts" siteTitle={site.siteTitle} description={site.siteDescription || undefined} markdownHref={markdownHref}>
 	{
 		publishedPosts.length === 0 ? (
 			<p>No published posts yet. Create a GitHub Issue and apply the <code>status: published</code> label.</p>

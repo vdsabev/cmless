@@ -1,6 +1,5 @@
 import rss from '@astrojs/rss';
 import {
-	SITE_DESCRIPTION,
 	abs,
 	absoluteUrl,
 	escapeXml,
@@ -19,7 +18,8 @@ export const GET = (context: { site?: URL }) => {
 
 	return rss({
 		title: site.siteTitle,
-		description: SITE_DESCRIPTION,
+		// Same as homepage / llms.txt / index.md: omit tagline when empty (no title fallback).
+		description: site.siteDescription || '',
 		site: channelSite,
 		xmlns: {
 			atom: 'http://www.w3.org/2005/Atom',

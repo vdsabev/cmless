@@ -1,5 +1,4 @@
 import {
-	SITE_DESCRIPTION,
 	absoluteUrl,
 	escapeMd,
 	getPublishedPosts,
@@ -10,14 +9,11 @@ export const GET = (context: { site?: URL }) => {
 	const siteUrl = context.site ?? import.meta.env.SITE;
 	const posts = getPublishedPosts();
 
-	const lines: string[] = [
-		`# ${escapeMd(site.siteTitle)}`,
-		'',
-		`> ${SITE_DESCRIPTION}`,
-		'',
-		'## Posts',
-		'',
-	];
+	const lines: string[] = [`# ${escapeMd(site.siteTitle)}`, ''];
+	if (site.siteDescription) {
+		lines.push(`> ${escapeMd(site.siteDescription)}`, '');
+	}
+	lines.push('## Posts', '');
 
 	for (const post of posts) {
 		const href = absoluteUrl(`${post.slug}.md`, siteUrl);

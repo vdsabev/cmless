@@ -1,8 +1,6 @@
 import { pathToSlug } from './slug';
 import { parseTags } from './tags';
 
-export const SITE_DESCRIPTION = 'A blog powered by GitHub Issues and Astro.';
-
 export type ContentEntry = {
 	slug: string;
 	title: string;
@@ -10,6 +8,8 @@ export type ContentEntry = {
 	description: string;
 	status: string;
 	tags: string[];
+	/** From frontmatter `author`; empty when unset. */
+	author: string;
 	/** Same truthiness as `[slug].astro` (`!!frontmatter.navigation`). */
 	isNav: boolean;
 	/** From frontmatter; used to match human header/footer order. */
@@ -132,6 +132,7 @@ function loadInventory(): ContentEntry[] {
 					: 0;
 		const image = typeof fm.image === 'string' ? fm.image : undefined;
 		const imageAlt = typeof fm.imageAlt === 'string' ? fm.imageAlt : undefined;
+		const author = typeof fm.author === 'string' ? fm.author.trim() : '';
 
 		entries.push({
 			slug,
@@ -140,6 +141,7 @@ function loadInventory(): ContentEntry[] {
 			description,
 			status,
 			tags: parseTags(fm.tags as string[] | string | undefined),
+			author,
 			isNav,
 			navigationIndex,
 			image,
