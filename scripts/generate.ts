@@ -27,13 +27,35 @@
  *     GH_TOKEN: ${{ github.token }}
  */
 
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { parseRepoDescription } from './parse-repo-description';
 
 const CONTENT_DIR = 'src/content/blog';
 const GENERATED_DIR = 'src/generated';
+
+/**
+ * Run `gh` with argv (no shell) so repo/login args cannot be misinterpreted.
+ * Returns stdout. Throws on non-zero exit or spawn failure.
+ */
+function gh(
+  args: string[],
+  env: NodeJS.ProcessEnv,
+  opts: { inheritStderr?: boolean } = {},
+): string {
+  const result = spawnSync('gh', args, {
+    encoding: 'utf8',
+    env,
+    stdio: ['pipe', 'pipe', opts.inheritStderr ? 'inherit' : 'pipe'],
+  });
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    const detail = (result.stderr || result.stdout || '').trim();
+    throw new Error(detail || `gh ${args[0] ?? ''} exited with status ${result.status}`);
+  }
+  return result.stdout;
+}
 
 function slugify(str: string): string {
   return str
@@ -135,18 +157,33 @@ function main() {
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';
   const env = token ? { ...process.env, GH_TOKEN: token } : process.env;
 
-  console.log('Fetching issues using gh CLI...');
+  // Prefer GH_REPO when set. Note: `gh repo view` ignores GH_REPO when run inside a
+  // local git checkout (it always targets that remote), so we pass the repo explicitly.
+  // `gh issue list` does honor GH_REPO; we still pass -R so both paths stay consistent.
+  // Always invoke `gh` via spawnSync argv (no shell) so the repo string is never expanded.
+  const ghRepo = (process.env.GH_REPO || '').trim();
+
+  console.log(
+    ghRepo
+      ? `Fetching issues from ${ghRepo} using gh CLI...`
+      : 'Fetching issues using gh CLI (current repository)...',
+  );
 
   // --state all so we can publish from closed issues too if desired
-  const getGitHubIssues = `gh issue list --state all --limit 200 --json number,title,body,labels,createdAt,url,author`;
-
   let output: string;
   try {
-    output = execSync(getGitHubIssues, {
-      encoding: 'utf8',
-      env,
-      stdio: ['pipe', 'pipe', 'inherit'],
-    });
+    const issueArgs = [
+      'issue',
+      'list',
+      ...(ghRepo ? (['-R', ghRepo] as const) : []),
+      '--state',
+      'all',
+      '--limit',
+      '200',
+      '--json',
+      'number,title,body,labels,createdAt,url,author',
+    ];
+    output = gh([...issueArgs], env, { inheritStderr: true });
   } catch (error) {
     console.error('❌ Failed to list issues with gh.');
     console.error('Make sure the GitHub CLI (gh) is installed and you are logged in (gh auth status).');
@@ -168,11 +205,15 @@ function main() {
   let ownerLogin = '';
   let socialPreviewUrl = '';
   try {
-    const repoOutput = execSync('gh repo view --json description,owner,name,openGraphImageUrl', {
-      encoding: 'utf8',
-      env,
-      stdio: ['pipe', 'pipe', 'ignore'],
-    });
+    // `gh repo view [<repository>]` — positional arg required for GH_REPO overrides
+    const viewArgs = [
+      'repo',
+      'view',
+      ...(ghRepo ? [ghRepo] : []),
+      '--json',
+      'description,owner,name,openGraphImageUrl',
+    ];
+    const repoOutput = gh(viewArgs, env);
     const repo = JSON.parse(repoOutput);
     if (repo.description && typeof repo.description === 'string') {
       const parsed = parseRepoDescription(repo.description);
@@ -196,11 +237,7 @@ function main() {
   let socials: SocialLink[] = [];
   if (ownerLogin) {
     try {
-      const userOutput = execSync(`gh api users/${ownerLogin}`, {
-        encoding: 'utf8',
-        env,
-        stdio: ['pipe', 'pipe', 'ignore'],
-      });
+      const userOutput = gh(['api', `users/${ownerLogin}`], env);
       const user = JSON.parse(userOutput);
       const blog = typeof user.blog === 'string' ? user.blog.trim() : '';
       if (blog) {
@@ -211,11 +248,7 @@ function main() {
       // optional
     }
     try {
-      const accountsOutput = execSync(`gh api users/${ownerLogin}/social_accounts`, {
-        encoding: 'utf8',
-        env,
-        stdio: ['pipe', 'pipe', 'ignore'],
-      });
+      const accountsOutput = gh(['api', `users/${ownerLogin}/social_accounts`], env);
       const accounts = JSON.parse(accountsOutput) as Array<{ provider?: string; url?: string }>;
       if (Array.isArray(accounts)) {
         for (const account of accounts) {

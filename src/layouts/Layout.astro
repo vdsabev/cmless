@@ -48,9 +48,98 @@ const footerNav: NavItem[] = [...(nav as any).footer || []].sort((a, b) => a.nav
 interface SocialLink {
 	provider: string;
 	url: string;
+	handle: string;
 }
 
-const socials: SocialLink[] = Array.isArray((site as any).socials) ? (site as any).socials : [];
+/** Display handle next to social icons (e.g. @vdsabev, or domain for website). */
+function socialHandle(provider: string, url: string): string {
+	const key = (provider || '').toLowerCase();
+	try {
+		const u = new URL(url);
+		const host = u.hostname.replace(/^www\./i, '');
+		const parts = u.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+
+		if (key === 'website' || key === 'generic') {
+			return host || url;
+		}
+
+		// Mastodon: instance.example/@user or /@user
+		if (key === 'mastodon') {
+			const at = parts.find((p) => p.startsWith('@'));
+			if (at) return at;
+			if (parts[0]) return parts[0].startsWith('@') ? parts[0] : `@${parts[0]}`;
+		}
+
+		// LinkedIn: /in/username or /company/name — no leading @ (product choice)
+		if (key === 'linkedin') {
+			const handle = parts[parts[0] === 'in' || parts[0] === 'company' ? 1 : 0];
+			if (handle) return handle;
+		}
+
+		// Bluesky: /profile/handle.bsky.social
+		if (key === 'bluesky') {
+			const handle = parts[0] === 'profile' ? parts[1] : parts[0];
+			if (handle) return handle.startsWith('@') ? handle : `@${handle}`;
+		}
+
+		// YouTube: /@user, /c/name, /channel/id, /user/name
+		if (key === 'youtube') {
+			if (parts[0]?.startsWith('@')) return parts[0];
+			if ((parts[0] === 'c' || parts[0] === 'user' || parts[0] === 'channel') && parts[1]) {
+				return parts[1].startsWith('@') ? parts[1] : `@${parts[1]}`;
+			}
+			if (parts[0]) return parts[0].startsWith('@') ? parts[0] : `@${parts[0]}`;
+		}
+
+		// X, Instagram, Twitch, Reddit, Stack Overflow, Facebook, etc.: last meaningful path segment
+		let segment = parts[parts.length - 1] || '';
+		// Reddit: /user/name or /u/name
+		if (key === 'reddit' && (parts[0] === 'user' || parts[0] === 'u') && parts[1]) {
+			segment = parts[1];
+		}
+		// Stack Overflow: /users/id/name → prefer name
+		if (key === 'stackoverflow' && parts[0] === 'users' && parts.length >= 3) {
+			segment = parts[2];
+		}
+		if (!segment) return host || url;
+		segment = decodeURIComponent(segment).replace(/^@/, '');
+		// Prefer @handle for socials; website (above) and LinkedIn are the exceptions without @.
+		return `@${segment}`;
+	} catch {
+		return url;
+	}
+}
+
+const rawSocials: { provider: string; url: string }[] = Array.isArray((site as any).socials)
+	? (site as any).socials
+	: [];
+
+function normalizeSocialUrl(url: string): string {
+	return url.replace(/\/+$/, '').toLowerCase();
+}
+
+const ownerGithubUrl = owner?.login ? `https://github.com/${owner.login}` : '';
+const ownerGithubNorm = ownerGithubUrl ? normalizeSocialUrl(ownerGithubUrl) : '';
+
+// Prepend repo owner GitHub; skip any raw entry that is the same GitHub profile
+// (provider github or same normalized URL) so we never show two identical links.
+const filteredSocials = rawSocials.filter((link) => {
+	const provider = (link.provider || '').toLowerCase();
+	if (provider === 'github') return false;
+	if (ownerGithubNorm && normalizeSocialUrl(link.url) === ownerGithubNorm) return false;
+	return true;
+});
+
+const socialItems: SocialLink[] = [
+	...(owner?.login
+		? [{ provider: 'github', url: ownerGithubUrl, handle: `@${owner.login}` }]
+		: []),
+	...filteredSocials.map((link) => ({
+		provider: link.provider,
+		url: link.url,
+		handle: socialHandle(link.provider, link.url),
+	})),
+];
 ---
 
 <!doctype html>
@@ -112,20 +201,26 @@ const socials: SocialLink[] = Array.isArray((site as any).socials) ? (site as an
 		</main>
 
 		<footer class="flex flex-col items-center gap-2 border-t border-t-slate-200 dark:border-t-slate-700 mt-8 pt-4 text-xs text-slate-500 dark:text-slate-400">
-			<div class="flex flex-wrap justify-center items-baseline gap-1">
-				{owner?.login && (
-					<>
-						<p>
-							created by{' '}
-							<a href={`https://github.com/${owner.login}`} rel="author" target="_blank">
-								<img class="inline-block align-middle w-4 h-4 inset-shadow corner-squircle rounded-full object-cover mx-0.5 bg-slate-100 dark:bg-slate-800 mb-1" src={owner.avatarUrl} alt="`@{owner.login}'s avatar`" />
-								@{owner.login}
+			{socialItems.length > 0 && (
+				<nav class="flex flex-wrap justify-center items-center gap-1" aria-label="Social links">
+					{socialItems.map((link, i) => (
+						<>
+							{i > 0 && <span class="text-slate-300 dark:text-slate-600">·</span>}
+							<a
+								href={link.url}
+								target="_blank"
+								rel={link.provider === 'github' ? 'author me noopener noreferrer' : 'me noopener noreferrer'}
+								class="inline-flex items-center gap-1 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 transition-colors no-underline"
+							>
+								<SocialIcon provider={link.provider} decorative />
+								<span>{link.handle}</span>
 							</a>
-						</p>
-						<span class="text-slate-300 dark:text-slate-600">·</span>
-					</>
-				)}
+						</>
+					))}
+				</nav>
+			)}
 
+			<div class="flex flex-wrap justify-center items-baseline gap-1">
 				<p>powered by <a href="https://github.com/vdsabev/cmless">cmless</a></p>
 				<span class="text-slate-300 dark:text-slate-600">·</span>
 
@@ -138,21 +233,6 @@ const socials: SocialLink[] = Array.isArray((site as any).socials) ? (site as an
 					</>
 				))}
 			</div>
-
-			{socials.length > 0 && (
-				<nav class="flex flex-wrap justify-center items-center gap-3" aria-label="Social links">
-					{socials.map((link) => (
-						<a
-							href={link.url}
-							target="_blank"
-							rel="me noopener noreferrer"
-							class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
-						>
-							<SocialIcon provider={link.provider} />
-						</a>
-					))}
-				</nav>
-			)}
 		</footer>
 
 		{/*

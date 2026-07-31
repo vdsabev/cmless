@@ -6,13 +6,19 @@
 interface Props {
 	provider: string;
 	class?: string;
+	/**
+	 * When true, the icon is decorative (paired with visible text).
+	 * Suppresses role/aria-label/title so AT does not double-announce.
+	 */
+	decorative?: boolean;
 }
 
-const { provider, class: className = '' } = Astro.props;
+const { provider, class: className = '', decorative = false } = Astro.props;
 const key = (provider || '').toLowerCase();
 
 /** Accessible name for the icon / link. */
 const titles: Record<string, string> = {
+	github: 'GitHub',
 	twitter: 'X',
 	x: 'X',
 	linkedin: 'LinkedIn',
@@ -32,6 +38,9 @@ const title = titles[key] || titles.generic;
 
 // SVG path `d` (and optional extra markup) from GitHub profile social icons
 const paths: Record<string, string> = {
+	// Primer octicon-mark-github
+	github:
+		'M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z',
 	// GitHub profile “X” icon (twitter provider)
 	twitter:
 		'M9.332 6.925 14.544 1h-1.235L8.783 6.145 5.17 1H1l5.466 7.78L1 14.993h1.235l4.78-5.433 3.816 5.433H15L9.332 6.925ZM7.64 8.848l-.554-.775L2.68 1.91h1.897l3.556 4.975.554.775 4.622 6.466h-1.897L7.64 8.848Z',
@@ -54,16 +63,30 @@ const paths: Record<string, string> = {
 const d = paths[key] || paths.generic;
 ---
 
-<svg
-	xmlns="http://www.w3.org/2000/svg"
-	viewBox="0 0 16 16"
-	width="16"
-	height="16"
-	fill="currentColor"
-	role="img"
-	aria-label={title}
-	class:list={['inline-block align-middle shrink-0', className]}
->
-	<title>{title}</title>
-	<path d={d}></path>
-</svg>
+{decorative ? (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 16 16"
+		width="16"
+		height="16"
+		fill="currentColor"
+		aria-hidden="true"
+		class:list={['inline-block align-middle shrink-0', className]}
+	>
+		<path d={d}></path>
+	</svg>
+) : (
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 16 16"
+		width="16"
+		height="16"
+		fill="currentColor"
+		role="img"
+		aria-label={title}
+		class:list={['inline-block align-middle shrink-0', className]}
+	>
+		<title>{title}</title>
+		<path d={d}></path>
+	</svg>
+)}
