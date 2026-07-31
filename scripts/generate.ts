@@ -9,8 +9,10 @@
  * - series from frontmatter (named post series for prev/next + list)
  * - image from frontmatter, else leading body image (promoted into FM), else
  *   repo social preview. imageAlt from frontmatter, else that leading image's
- *   alt attribute / markdown alt. Matching leading body image is stripped so
- *   the cover lives only in frontmatter (hero + OG, not twice in body).
+ *   alt attribute / markdown alt. For blog posts only, matching leading body
+ *   image is stripped so the cover lives only in frontmatter (hero + OG, not
+ *   twice in body). Navigation pages keep the leading image in the body (no
+ *   in-page cover); it may still be promoted into FM for og:image.
  * - Optional frontmatter at top of issue body (--- ... ---)
  * - Writes Markdown files to src/content/blog/
  *
@@ -242,24 +244,46 @@ function main() {
     const slug = (frontmatter.slug || slugify(title) || `issue-${issue.number}`).trim();
     const date = (frontmatter.date || (issue.createdAt ? issue.createdAt.split('T')[0] : '')).trim();
 
+    // Navigation - insert link to page in header or footer; index sorts relative to other links.
+    // Same truthiness as [slug].astro (`isPage = !!frontmatter.navigation`).
+    const navigation = frontmatter.navigation || '';
+    const isPage = !!navigation;
+    const navigationIndex = frontmatter.navigationIndex ? parseInt(frontmatter.navigationIndex, 10) : 0;
+
     // Cover: frontmatter wins; else promote leading body image into FM; else repo OG.
     // Alt: frontmatter wins; else alt from that leading image (HTML alt= or ![alt](...)).
-    // When the leading image is the cover, strip it so hero/OG are the only cover.
+    // Blog posts: strip matching leading body image so hero/OG are the only cover.
+    // Navigation pages: keep body intact (template has no cover); still promote for og:image.
     const lead = leadingImage(content);
-    const image = (frontmatter.image || lead.src || socialPreviewUrl || '').trim();
-    const imageAlt = (
-      (frontmatter.imageAlt || '').trim() ||
-      (lead.src && image && lead.src === image ? lead.alt || '' : '') ||
-      ''
-    ).trim();
-    const bodyWithoutCover =
-      image && lead.src && lead.src === image ? lead.after : content;
+    let image = (frontmatter.image || '').trim();
+    let imageAlt = (frontmatter.imageAlt || '').trim();
+    let bodyContent = content;
 
-    // Description after cover strip so a leading cover is never used as the SEO summary.
+    if (!isPage) {
+      image = (image || lead.src || socialPreviewUrl || '').trim();
+      if (!imageAlt && lead.src && image && lead.src === image) {
+        imageAlt = (lead.alt || '').trim();
+      }
+      bodyContent =
+        image && lead.src && lead.src === image ? lead.after : content;
+    } else {
+      if (!image && lead.src) {
+        image = lead.src.trim();
+      }
+      if (!imageAlt && lead.src && image && lead.src === image) {
+        imageAlt = (lead.alt || '').trim();
+      }
+      if (!image) {
+        image = (socialPreviewUrl || '').trim();
+      }
+      bodyContent = content;
+    }
+
+    // Description after cover strip (posts) so a leading cover is never the SEO summary.
     // Skip image-only opening blocks (markdown/HTML) when picking a fallback paragraph.
     const description =
       (frontmatter.description || '').trim() ||
-      autoDescription(bodyWithoutCover);
+      autoDescription(bodyContent);
 
     // Author from GitHub issue author (issue author's login)
     const githubAuthor = issue.author || {};
@@ -271,10 +295,6 @@ function main() {
     const tags = frontmatter.tags
       ? frontmatter.tags.split(/,\s*/).map((tag: string) => tag.trim()).filter(Boolean)
       : [];
-
-    // Navigation - insert link to page in header or footer; index sorts the link relative to other links 
-    const navigation = frontmatter.navigation || '';
-    const navigationIndex = frontmatter.navigationIndex ? parseInt(frontmatter.navigationIndex, 10) : 0;
 
     // Series - optional named group for prev/next and related posts
     const series = (frontmatter.series || '').trim();
@@ -295,7 +315,7 @@ function main() {
       navigation,
       navigationIndex,
       series,
-      content: bodyWithoutCover
+      content: bodyContent
         // Embed YouTube videos
         .replace(
           /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})[^)]*\)/g,

@@ -93,7 +93,7 @@ GH_REPO=<username>/<repo> npm run dev # run another cmless-based repo as a blog
 
 **Tags:** from `tags: a, b` Frontmatter.
 
-**Navigation pages:** useful for custom pages like "About me". Add `navigation: Label` and `navigationIndex: N` to an issue's Frontmatter. Negative indices place the link before "Posts" in the header, non-negative after. Footer links are sorted by index and appear before "powered by". These pages render as plain prose without blog metadata.
+**Navigation pages:** useful for custom pages like "About me". Add `navigation: Label` and `navigationIndex: N` to an issue's Frontmatter. Negative indices place the link before "Posts" in the header, non-negative after. Footer links are sorted by index and appear before "powered by". These pages render as plain prose without blog metadata. Leading body images stay in the page content (unlike blog posts, where the first image is promoted to a cover and removed from the body); they may still set Open Graph `image` when frontmatter omits it.
 
 **Custom domain:** Place a `CNAME` file in `public/` and set up DNS.
 
