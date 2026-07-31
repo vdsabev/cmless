@@ -16,12 +16,15 @@ interface Props {
 	description?: string;
 	image?: string;
 	siteTitle?: string;
+	/** Absolute or site-root URL of the static Markdown twin (`/<slug>.md`). */
+	markdownHref?: string;
 }
 const {
 	title = 'Blog',
 	description = '',
 	image,
 	siteTitle = 'My Blog',
+	markdownHref,
 } = Astro.props as Props;
 
 const resolvedImage = image || (site as any).socialPreviewUrl || '';
@@ -63,6 +66,9 @@ const socials: SocialLink[] = Array.isArray((site as any).socials) ? (site as an
 		{description && <meta name="twitter:description" content={description} />}
 		{resolvedImage && <meta property="og:image" content={resolvedImage} />}
 		{resolvedImage && <meta name="twitter:image" content={resolvedImage} />}
+		{markdownHref && (
+			<link rel="alternate" type="text/markdown" title="Markdown" href={markdownHref} />
+		)}
 		<link rel="stylesheet" href={`${BASE_URL}pagefind/pagefind-component-ui.css`} />
 		<script src={`${BASE_URL}pagefind/pagefind-component-ui.js`} type="module"></script>
 	</head>

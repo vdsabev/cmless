@@ -44,6 +44,9 @@ const series = typeof frontmatter.series === 'string' ? frontmatter.series.trim(
 
 const readingTime = body ? getReadingTimeInMinutes(body) : null;
 
+const markdownPath = `${import.meta.env.BASE_URL}${slug}.md`;
+const markdownHref = Astro.site ? new URL(markdownPath, Astro.site).href : markdownPath;
+
 // Series peers: same `series` value, ordered by date ascending
 type SeriesPeer = { slug: string; title: string; date: string };
 let seriesPosts: SeriesPeer[] = [];
@@ -77,7 +80,13 @@ if (series) {
 
 ---
 
-<Layout title={title} description={description} image={image} siteTitle={site.siteTitle}>
+<Layout
+	title={title}
+	description={description}
+	image={image}
+	siteTitle={site.siteTitle}
+	markdownHref={markdownHref}
+>
 	{isPage ? (
 		<div class="prose dark:prose-invert max-w-none" data-pagefind-body>
 			{description && (
