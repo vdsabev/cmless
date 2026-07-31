@@ -4,6 +4,7 @@ import NavLink from '../components/NavLink.astro';
 import SocialIcon from '../components/SocialIcon.astro';
 import site from '../generated/site.json';
 import nav from '../generated/navigation.json';
+import { serializeJsonLd } from '../lib/jsonld';
 
 interface NavItem {
 	title: string;
@@ -18,6 +19,8 @@ interface Props {
 	siteTitle?: string;
 	/** Absolute or site-root URL of the static Markdown twin (`/<slug>.md`). */
 	markdownHref?: string;
+	/** schema.org JSON-LD object (or @graph array) embedded in the document head. */
+	jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 const {
 	title = 'Blog',
@@ -25,7 +28,10 @@ const {
 	image,
 	siteTitle = 'My Blog',
 	markdownHref,
+	jsonLd,
 } = Astro.props as Props;
+
+const jsonLdScript = jsonLd ? serializeJsonLd(jsonLd) : '';
 
 const resolvedImage = image || (site as any).socialPreviewUrl || '';
 
@@ -70,8 +76,12 @@ const socials: SocialLink[] = Array.isArray((site as any).socials) ? (site as an
 			<link rel="alternate" type="text/markdown" title="Markdown" href={markdownHref} />
 		)}
 		<link rel="llms-txt" type="text/plain" title="LLMs" href={`${BASE_URL}llms.txt`} />
+		<link rel="alternate" type="text/plain" title="LLMs full text" href={`${BASE_URL}llms-full.txt`} />
 		<link rel="stylesheet" href={`${BASE_URL}pagefind/pagefind-component-ui.css`} />
 		<script src={`${BASE_URL}pagefind/pagefind-component-ui.js`} type="module"></script>
+		{jsonLdScript && (
+			<script type="application/ld+json" set:html={jsonLdScript} />
+		)}
 	</head>
 
 	<body class="flex flex-col max-w-2xl min-h-dvh mx-auto px-4 py-8">

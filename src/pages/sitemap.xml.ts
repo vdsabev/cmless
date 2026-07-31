@@ -41,6 +41,8 @@ export const GET = (context: { site?: URL }) => {
 	push(siteBase());
 	push(indexMdPath());
 	push(`${siteBase()}llms.txt`);
+	push(`${siteBase()}llms-full.txt`);
+	push(`${siteBase()}rss.xml`);
 
 	// Published first; nav pages may overlap (published post also in nav) — dedupe by loc.
 	for (const post of posts) {

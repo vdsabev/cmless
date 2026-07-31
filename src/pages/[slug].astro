@@ -9,6 +9,7 @@ import { pathToSlug } from '../lib/slug';
 import { getReadingTimeInMinutes } from '../lib/reading-time';
 import { parseTags } from '../lib/tags';
 import { abs, postMdPath } from '../lib/content';
+import { blogPostingJsonLd, webPageJsonLd } from '../lib/jsonld';
 import site from '../generated/site.json';
 
 export function getStaticPaths() {
@@ -46,6 +47,39 @@ const series = typeof frontmatter.series === 'string' ? frontmatter.series.trim(
 const readingTime = body ? getReadingTimeInMinutes(body) : null;
 
 const markdownHref = abs(postMdPath(slug), Astro.site);
+
+// Same default as content.ts: missing/non-string status → published; blank string stays unpublished.
+const status = typeof frontmatter.status === 'string' ? frontmatter.status : 'published';
+const isPublished = status === 'published';
+
+const jsonLd = !isPublished
+	? undefined
+	: isPage
+		? webPageJsonLd({
+				site: Astro.site,
+				slug,
+				title,
+				description,
+				date,
+				image,
+				author,
+				authorUrl,
+				authorAvatar,
+			})
+		: blogPostingJsonLd({
+				site: Astro.site,
+				slug,
+				title,
+				description,
+				date,
+				image,
+				imageAlt,
+				tags,
+				author,
+				authorUrl,
+				authorAvatar,
+				siteTitle: site.siteTitle,
+			});
 
 // Series peers: same `series` value, ordered by date ascending
 type SeriesPeer = { slug: string; title: string; date: string };
@@ -86,6 +120,7 @@ if (series) {
 	image={image}
 	siteTitle={site.siteTitle}
 	markdownHref={markdownHref}
+	jsonLd={jsonLd}
 >
 	{isPage ? (
 		<div class="prose dark:prose-invert max-w-none" data-pagefind-body>

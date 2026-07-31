@@ -28,9 +28,14 @@ export const GET = (context: { site?: URL }) => {
 	}
 
 	const llms = absoluteUrl('llms.txt', siteUrl);
+	const llmsFull = absoluteUrl('llms-full.txt', siteUrl);
 	const rss = absoluteUrl('rss.xml', siteUrl);
 
-	lines.push('', `Catalogs: [llms.txt](${llms}) · [rss.xml](${rss})`, '');
+	lines.push(
+		'',
+		`Catalogs: [llms.txt](${llms}) · [llms-full.txt](${llmsFull}) · [rss.xml](${rss})`,
+		'',
+	);
 
 	return new Response(lines.join('\n'), {
 		headers: {

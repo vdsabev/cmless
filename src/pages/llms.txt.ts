@@ -101,6 +101,7 @@ export const GET = (context: { site?: URL }) => {
 	const rssHref = absoluteUrl('rss.xml', siteUrl);
 	const sitemapHref = absoluteUrl('sitemap.xml', siteUrl);
 	const indexHref = abs(indexMdPath(), siteUrl);
+	const fullHref = absoluteUrl('llms-full.txt', siteUrl);
 
 	lines.push(
 		'',
@@ -109,6 +110,7 @@ export const GET = (context: { site?: URL }) => {
 		`- [RSS](${rssHref}): Published posts`,
 		`- [Sitemap](${sitemapHref}): HTML and Markdown URLs`,
 		`- [Post index (Markdown)](${indexHref})`,
+		`- [Full text (llms-full.txt)](${fullHref}): Complete Markdown sources for posts and pages`,
 		'',
 	);
 

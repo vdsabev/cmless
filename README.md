@@ -94,7 +94,7 @@ GH_REPO=<username>/<repo> npm run dev # run another cmless-based repo as a blog
 | `Vlad Sabev: Essays on software` | Vlad Sabev | Essays on software |
 | `My Blog` | My Blog | *(empty)* |
 
-Supported separators (first match wins): pipe (`|`) with spaces on both sides; hyphen (`-`), en dash (`–`), or em dash (`—`) with spaces on both sides; colon (`:`) with a space after (optional space before). Without a separator, the whole string is the title. The description feeds homepage meta tags, RSS channel text, `llms.txt`, and `index.md`.
+Supported separators (first match wins): pipe (`|`) with spaces on both sides; hyphen (`-`), en dash (`–`), or em dash (`—`) with spaces on both sides; colon (`:`) with a space after (optional space before). Without a separator, the whole string is the title. The description feeds homepage meta tags, RSS channel text, `llms.txt`, `llms-full.txt`, and `index.md`.
 
 **Author / avatar / profile:** auto from the GitHub issue author (or override with `author`, `authorUrl`, `authorAvatar`).
 
