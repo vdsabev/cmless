@@ -38,6 +38,16 @@ import {
   pagesBaseFromRepo,
   rewriteGithubImageUrls,
 } from './github-images';
+import {
+  databaseIdFromNodeId,
+  isGithubAvatarUrl,
+  localizeGithubAvatars,
+  parseGithubAvatarRef,
+  pickResolvedAvatar,
+  postAvatarRef,
+  usernameAvatarUrl,
+  type AvatarRef,
+} from './github-avatars';
 
 const CONTENT_DIR = 'src/content/blog';
 const GENERATED_DIR = 'src/generated';
@@ -221,6 +231,7 @@ async function main() {
   let siteTitle = 'My Blog';
   let siteDescription = '';
   let ownerLogin = '';
+  let ownerId: number | undefined;
   let socialPreviewUrl = '';
   try {
     // `gh repo view [<repository>]` — positional arg required for GH_REPO overrides
@@ -248,7 +259,7 @@ async function main() {
       ? `Using site title: ${siteTitle} · description: ${siteDescription}`
       : `Using site title: ${siteTitle}`,
   );
-  const ownerAvatar = ownerLogin ? `https://github.com/${ownerLogin}.png` : '';
+  let ownerAvatar = ownerLogin ? usernameAvatarUrl(ownerLogin) : '';
 
   // Social links from the repo owner's GitHub profile (website + social accounts)
   type SocialLink = { provider: string; url: string };
@@ -257,6 +268,7 @@ async function main() {
     try {
       const userOutput = gh(['api', `users/${ownerLogin}`], env);
       const user = JSON.parse(userOutput);
+      if (typeof user.id === 'number') ownerId = user.id;
       const blog = typeof user.blog === 'string' ? user.blog.trim() : '';
       if (blog) {
         const url = /^https?:\/\//i.test(blog) ? blog : `https://${blog}`;
@@ -344,9 +356,15 @@ async function main() {
 
     // Author from GitHub issue author (issue author's login)
     const githubAuthor = issue.author || {};
-    const author = (frontmatter.author || githubAuthor.name || githubAuthor.login || '').trim();
-    const authorUrl = (frontmatter.authorUrl || (githubAuthor.login ? `https://github.com/${githubAuthor.login}` : '')).trim();
-    const authorAvatar = (frontmatter.authorAvatar || (githubAuthor.login ? `https://github.com/${githubAuthor.login}.png` : '')).trim();
+    const authorLogin = typeof githubAuthor.login === 'string' ? githubAuthor.login.trim() : '';
+    const authorId = databaseIdFromNodeId(String(githubAuthor.id || ''));
+    const author = (frontmatter.author || githubAuthor.name || authorLogin || '').trim();
+    const authorUrl = (frontmatter.authorUrl || (authorLogin ? `https://github.com/${authorLogin}` : '')).trim();
+    const authorAvatarOverride = (frontmatter.authorAvatar || '').trim();
+    const authorAvatar = (
+      authorAvatarOverride ||
+      (authorLogin ? usernameAvatarUrl(authorLogin) : '')
+    ).trim();
 
     // Tags from frontmatter (comma separated or YAML list)
     const tags = frontmatter.tags
@@ -367,8 +385,11 @@ async function main() {
       imageAlt,
       tags,
       author,
+      authorLogin,
+      authorId,
       authorUrl,
       authorAvatar,
+      authorAvatarOverride,
       navigation,
       navigationIndex,
       series,
@@ -428,6 +449,48 @@ async function main() {
   if (failed > 0) {
     throw new Error(`Failed to download ${failed} GitHub attachment(s); refusing to ship expiring hotlinks`);
   }
+
+  const avatarRefs: AvatarRef[] = [];
+  if (ownerLogin) avatarRefs.push({ login: ownerLogin, userId: ownerId });
+  for (const post of posts) {
+    if (post.authorAvatarOverride && !isGithubAvatarUrl(post.authorAvatarOverride)) continue;
+    const fromOverride = post.authorAvatarOverride
+      ? parseGithubAvatarRef(post.authorAvatarOverride)
+      : undefined;
+    avatarRefs.push(postAvatarRef(fromOverride, post));
+  }
+  const avatars = await localizeGithubAvatars(avatarRefs, {
+    pagesBase,
+    lookupUser: async (login) => {
+      try {
+        const user = JSON.parse(gh(['api', `users/${login}`], env));
+        return typeof user.id === 'number' ? { id: user.id } : undefined;
+      } catch {
+        return undefined;
+      }
+    },
+  });
+  if (ownerLogin) {
+    ownerAvatar = pickResolvedAvatar(
+      avatars.resolved,
+      { login: ownerLogin, userId: ownerId },
+      ownerAvatar,
+    );
+  }
+  for (const post of posts) {
+    if (post.authorAvatarOverride && !isGithubAvatarUrl(post.authorAvatarOverride)) continue;
+    const fromOverride = post.authorAvatarOverride
+      ? parseGithubAvatarRef(post.authorAvatarOverride)
+      : undefined;
+    post.authorAvatar = pickResolvedAvatar(
+      avatars.resolved,
+      postAvatarRef(fromOverride, post),
+      post.authorAvatar,
+    );
+  }
+  console.log(
+    `✓ avatars: ${avatars.downloaded} downloaded, ${avatars.cached} reused after failure, ${avatars.failed} failed`,
+  );
 
   // Remove previous generated posts (but preserve .gitkeep)
   if (existsSync(CONTENT_DIR)) {

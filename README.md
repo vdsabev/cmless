@@ -96,7 +96,7 @@ GH_REPO=<username>/<repo> npm run dev # run another cmless-based repo as a blog
 
 Supported separators (first match wins): pipe (`|`) with spaces on both sides; hyphen (`-`), en dash (`–`), or em dash (`—`) with spaces on both sides; colon (`:`) with a space after (optional space before). Without a separator, the whole string is the title. The description feeds homepage meta tags, RSS channel text, `llms.txt`, `llms-full.txt`, and `index.md`.
 
-**Author / avatar / profile:** auto from the GitHub issue author (or override with `author`, `authorUrl`, `authorAvatar`).
+**Author / avatar / profile:** auto from the GitHub issue author (or override with `author`, `authorUrl`, `authorAvatar`). GitHub profile photos are downloaded into `public/media/avatars/` at generate time. If a download fails, the site falls back to `avatars.githubusercontent.com/u/<id>` (stable user id) instead of `github.com/<login>.png`.
 
 **Footer social links:** from the repository owner’s GitHub profile — website (`blog` field) plus [social accounts](https://docs.github.com/en/rest/users/social-accounts) (X/Twitter, Mastodon, Bluesky, LinkedIn, etc.).
 
@@ -109,7 +109,7 @@ Supported separators (first match wins): pipe (`|`) with spaces on both sides; h
 **Custom domain:** Place a `CNAME` file in `public/` and set up DNS.
 
 ## 🔄 How It Works
-A GitHub Actions workflow runs `scripts/generate.ts` (via `gh`) on issue events and pushes. Draft issue edits and non-status label changes skip the build (they cannot change the live site). It turns qualifying issues into Markdown files in `src/content/blog/`. GitHub issue attachments (`github.com/user-attachments/assets/…` and `user-images.githubusercontent.com`) are downloaded into `public/media/` and rewritten to site-relative URLs — those attachment URLs 302 to a 5-minute S3 signature and are not safe to hotlink. Downloads are incremental: a file is skipped if that attachment id is already on disk; CI restores `public/media/` with Actions cache. Astro builds a static site that GitHub Pages serves. Nothing about individual posts is stored in the repository.
+A GitHub Actions workflow runs `scripts/generate.ts` (via `gh`) on issue events and pushes. Draft issue edits and non-status label changes skip the build (they cannot change the live site). It turns qualifying issues into Markdown files in `src/content/blog/`. GitHub issue attachments (`github.com/user-attachments/assets/…` and `user-images.githubusercontent.com`) are downloaded into `public/media/` and rewritten to site-relative URLs — those attachment URLs 302 to a 5-minute S3 signature and are not safe to hotlink. Author and site-owner GitHub avatars are downloaded into `public/media/avatars/` the same way (those `github.com/<login>.png` shortcuts are an uncached 302 and can land on short-lived private-avatar JWTs). Attachment downloads are incremental: a file is skipped if that attachment id is already on disk; CI restores `public/media/` with Actions cache. Astro builds a static site that GitHub Pages serves. Nothing about individual posts is stored in the repository.
 
 ## ⬆️ Syncing updates from cmless
 Template clones have their own history. To sync:

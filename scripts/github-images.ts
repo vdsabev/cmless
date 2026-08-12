@@ -7,7 +7,7 @@
  */
 
 import { createHash } from 'crypto';
-import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 export const MEDIA_DIR = 'public/media';
@@ -262,6 +262,7 @@ export async function localizeGithubImages(
   if (existsSync(mediaDir)) {
     for (const name of readdirSync(mediaDir)) {
       if (name.startsWith('.')) continue;
+      if (statSync(join(mediaDir, name)).isDirectory()) continue;
       if (!usedFiles.has(name)) rmSync(join(mediaDir, name));
     }
   }
