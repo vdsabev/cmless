@@ -31,6 +31,13 @@ import { spawnSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { parseRepoDescription } from './parse-repo-description';
+import { isPublishedLabel, isUnlistedLabel } from './status-labels';
+import {
+  collectGithubImageUrls,
+  localizeGithubImages,
+  pagesBaseFromRepo,
+  rewriteGithubImageUrls,
+} from './github-images';
 
 const CONTENT_DIR = 'src/content/blog';
 const GENERATED_DIR = 'src/generated';
@@ -55,6 +62,17 @@ function gh(
     throw new Error(detail || `gh ${args[0] ?? ''} exited with status ${result.status}`);
   }
   return result.stdout;
+}
+
+/** owner/repo from the origin remote when GH_REPO / GITHUB_REPOSITORY are unset. */
+function detectGithubRepo(): string {
+  const result = spawnSync('git', ['remote', 'get-url', 'origin'], {
+    encoding: 'utf8',
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
+  if (result.status !== 0) return '';
+  const match = (result.stdout || '').trim().match(/[:/]([^/]+)\/([^/.]+?)(?:\.git)?$/);
+  return match ? `${match[1]}/${match[2]}` : '';
 }
 
 function slugify(str: string): string {
@@ -153,7 +171,7 @@ function parseFrontmatter(rawBody: string): { frontmatter: Record<string, string
   return { frontmatter: frontmatter, content };
 }
 
-function main() {
+async function main() {
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';
   const env = token ? { ...process.env, GH_TOKEN: token } : process.env;
 
@@ -269,8 +287,8 @@ function main() {
 
   for (const issue of issues) {
     const labelNames: string[] = (issue.labels || []).map((label: any) => typeof label === 'string' ? label : label.name);
-    const isPublished = labelNames.some((label) => /^status:\s*published$/i.test(label) || label === 'status:published');
-    const isUnlisted = labelNames.some((label) => /^status:\s*unlisted$/i.test(label) || label === 'status:unlisted');
+    const isPublished = labelNames.some(isPublishedLabel);
+    const isUnlisted = labelNames.some(isUnlistedLabel);
 
     if (!isPublished && !isUnlisted) continue;
 
@@ -388,6 +406,29 @@ function main() {
     });
   }
 
+  const remoteImages = collectGithubImageUrls(
+    ...posts.flatMap((post) => [post.image || '', post.content || '']),
+  );
+  const repoForBase = ghRepo || process.env.GITHUB_REPOSITORY || detectGithubRepo() || '';
+  const pagesBase = pagesBaseFromRepo(repoForBase);
+  if (remoteImages.length) {
+    console.log(`Localizing ${remoteImages.length} GitHub attachment(s) into public/media/ …`);
+  }
+  const { urlToLocal, downloaded, cached, failed } = await localizeGithubImages(remoteImages, {
+    token,
+    pagesBase,
+  });
+  for (const post of posts) {
+    if (post.image) post.image = rewriteGithubImageUrls(post.image, urlToLocal);
+    post.content = rewriteGithubImageUrls(post.content, urlToLocal);
+  }
+  console.log(
+    `✓ media: ${downloaded} downloaded, ${cached} cached, ${failed} failed (base ${pagesBase})`,
+  );
+  if (failed > 0) {
+    throw new Error(`Failed to download ${failed} GitHub attachment(s); refusing to ship expiring hotlinks`);
+  }
+
   // Remove previous generated posts (but preserve .gitkeep)
   if (existsSync(CONTENT_DIR)) {
     for (const file of readdirSync(CONTENT_DIR)) {
@@ -471,4 +512,7 @@ function main() {
   console.log(`\nGenerated ${posts.length} post(s).`);
 }
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

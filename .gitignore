@@ -4,6 +4,9 @@ dist/
 # Pagefind index (generated; synced into public/ for `bun dev`)
 public/pagefind/
 
+# Localized GitHub issue attachments (generate cache)
+public/media/
+
 # generated types
 .astro/
 

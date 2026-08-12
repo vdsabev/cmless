@@ -10,6 +10,7 @@
     "build": "bun generate && astro build && bun run pagefind",
     "pagefind": "rm -rf dist/pagefind public/pagefind && pagefind --site dist && cp -r dist/pagefind public/pagefind",
     "generate": "bun scripts/generate.ts",
+    "test": "bun test scripts",
     "astro": "astro"
   },
   "dependencies": {

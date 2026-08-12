@@ -2,7 +2,7 @@
 Seamless blogging with GitHub issues.
 
 - Open GitHub issues in your repo to write posts
-- Drag-and-drop or paste images in the issue to upload them to GitHub
+- Drag-and-drop or paste images in the issue to upload them to GitHub (copied into the site at build time)
 - Blog post automatically rebuilds when its issue is created or updated
 - Manually manage post publishing by applying labels: `state: draft`, `state: unlisted`, `state: published`
 - Set metadata via Frontmatter
@@ -109,7 +109,7 @@ Supported separators (first match wins): pipe (`|`) with spaces on both sides; h
 **Custom domain:** Place a `CNAME` file in `public/` and set up DNS.
 
 ## 🔄 How It Works
-A GitHub Actions workflow runs `scripts/generate.ts` (via `gh`) on issue events and pushes. It turns qualifying issues into Markdown files in `src/content/blog/`. Astro builds a static site that GitHub Pages serves. Nothing about individual posts is stored in the repository.
+A GitHub Actions workflow runs `scripts/generate.ts` (via `gh`) on issue events and pushes. Draft issue edits and non-status label changes skip the build (they cannot change the live site). It turns qualifying issues into Markdown files in `src/content/blog/`. GitHub issue attachments (`github.com/user-attachments/assets/…` and `user-images.githubusercontent.com`) are downloaded into `public/media/` and rewritten to site-relative URLs — those attachment URLs 302 to a 5-minute S3 signature and are not safe to hotlink. Downloads are incremental: a file is skipped if that attachment id is already on disk; CI restores `public/media/` with Actions cache. Astro builds a static site that GitHub Pages serves. Nothing about individual posts is stored in the repository.
 
 ## ⬆️ Syncing updates from cmless
 Template clones have their own history. To sync:
