@@ -1,6 +1,17 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@custom-variant dark {
+	&:where(.dark, .dark *) {
+		@slot;
+	}
+	@media (prefers-color-scheme: dark) {
+		&:where(:root:not([data-theme='light']), :root:not([data-theme='light']) *) {
+			@slot;
+		}
+	}
+}
+
 @utility corner-* {
   corner-shape: --value('bevel', 'notch', 'round', 'scoop', 'square', 'squircle');
 }
@@ -27,6 +38,11 @@
  */
 @view-transition {
   navigation: auto;
+}
+
+/* Theme toggle must not remorph MPA shared-element names. */
+html:active-view-transition-type(theme) * {
+  view-transition-name: none !important;
 }
 
 .vt-post-title {
@@ -115,12 +131,24 @@
     @apply text-blue-700 dark:text-blue-400;
   }
 
-  :root {
-    color-scheme: light dark;
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme='light']) {
+      color-scheme: dark;
+    }
   }
 }
 
-/* Pagefind Component UI — align with site palette (slate + blue) */
+/* Pagefind Component UI — align with site palette (slate + blue).
+   Set resolved colors on html, not light-dark(): pagefind hosts use
+   `all: initial`, which resets color-scheme so light-dark() follows the OS. */
 :root {
   --pf-text: #0f172a; /* slate-900 */
   --pf-text-secondary: #64748b; /* slate-500 */
@@ -134,18 +162,53 @@
   --pf-font: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol", "Noto Color Emoji";
   --pf-border-radius: 0.5rem;
+  --pf-input-height: 36px;
+
+  --pf-on-dark-text: #f1f5f9; /* slate-100 */
+  --pf-on-dark-text-secondary: #94a3b8; /* slate-400 */
+  --pf-on-dark-text-muted: #64748b; /* slate-500 */
+  --pf-on-dark-background: #0f172a; /* slate-900 */
+  --pf-on-dark-border: #334155; /* slate-700 */
+  --pf-on-dark-border-focus: #64748b; /* slate-500 */
+  --pf-on-dark-hover: #1e293b; /* slate-800 */
+  --pf-on-dark-mark: #f1f5f9; /* slate-100 */
+  --pf-on-dark-outline-focus: #60a5fa; /* blue-400 */
+}
+
+html.dark {
+  --pf-text: var(--pf-on-dark-text);
+  --pf-text-secondary: var(--pf-on-dark-text-secondary);
+  --pf-text-muted: var(--pf-on-dark-text-muted);
+  --pf-background: var(--pf-on-dark-background);
+  --pf-border: var(--pf-on-dark-border);
+  --pf-border-focus: var(--pf-on-dark-border-focus);
+  --pf-hover: var(--pf-on-dark-hover);
+  --pf-mark: var(--pf-on-dark-mark);
+  --pf-outline-focus: var(--pf-on-dark-outline-focus);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --pf-text: #f1f5f9; /* slate-100 */
-    --pf-text-secondary: #94a3b8; /* slate-400 */
-    --pf-text-muted: #64748b; /* slate-500 */
-    --pf-background: #0f172a; /* slate-900 */
-    --pf-border: #334155; /* slate-700 */
-    --pf-border-focus: #64748b; /* slate-500 */
-    --pf-hover: #1e293b; /* slate-800 */
-    --pf-mark: #f1f5f9; /* slate-100 */
-    --pf-outline-focus: #60a5fa; /* blue-400 */
+  html:not([data-theme='light']) {
+    --pf-text: var(--pf-on-dark-text);
+    --pf-text-secondary: var(--pf-on-dark-text-secondary);
+    --pf-text-muted: var(--pf-on-dark-text-muted);
+    --pf-background: var(--pf-on-dark-background);
+    --pf-border: var(--pf-on-dark-border);
+    --pf-border-focus: var(--pf-on-dark-border-focus);
+    --pf-hover: var(--pf-on-dark-hover);
+    --pf-mark: var(--pf-on-dark-mark);
+    --pf-outline-focus: var(--pf-on-dark-outline-focus);
   }
 }
+
+/* Compact search trigger matches the theme button size. */
+:is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal-trigger[compact] .pf-trigger-btn {
+  width: var(--pf-input-height);
+  min-width: var(--pf-input-height);
+  padding-inline: 0;
+  justify-content: center;
+  gap: 0;
+}
+
+
+

@@ -2,9 +2,11 @@
 import '../styles/global.css';
 import NavLink from '../components/NavLink.astro';
 import SocialIcon from '../components/SocialIcon.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
 import site from '../generated/site.json';
 import nav from '../generated/navigation.json';
 import { serializeJsonLd } from '../lib/jsonld';
+import themeInlineScript from '../lib/theme-inline.js?raw';
 
 interface NavItem {
 	title: string;
@@ -171,6 +173,18 @@ const socialItems: SocialLink[] = [
 		{jsonLdScript && (
 			<script type="application/ld+json" set:html={jsonLdScript} />
 		)}
+		<style is:inline>
+			#theme-toggle [data-theme-icon] {
+				display: none;
+			}
+			html:not([data-theme]) #theme-toggle [data-theme-icon='system'],
+			html[data-theme='system'] #theme-toggle [data-theme-icon='system'],
+			html[data-theme='dark'] #theme-toggle [data-theme-icon='dark'],
+			html[data-theme='light'] #theme-toggle [data-theme-icon='light'] {
+				display: block;
+			}
+		</style>
+		<script is:inline set:html={themeInlineScript} />
 	</head>
 
 	<body class="flex flex-col max-w-2xl min-h-dvh mx-auto px-4 py-8">
@@ -190,6 +204,8 @@ const socialItems: SocialLink[] = [
 					hide-shortcut
 					compact
 				></pagefind-modal-trigger>
+
+				<ThemeToggle />
 			</nav>
 		</header>
 
