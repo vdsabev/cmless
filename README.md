@@ -4,7 +4,7 @@ Seamless blogging with GitHub issues.
 - Open GitHub issues in your repo to write posts
 - Drag-and-drop or paste images in the issue to upload them to GitHub (copied into the site at build time)
 - Blog post automatically rebuilds when its issue is created or updated
-- Manually manage post publishing by applying labels: `state: draft`, `state: unlisted`, `state: published`
+- Manually manage post publishing by applying labels: `status: draft`, `status: unlisted`, `status: published`
 - Set metadata via Frontmatter
 - Add a link to a page in the header or footer
 - Full-text client-side search (Pagefind) — titles, content, tags, and descriptions
