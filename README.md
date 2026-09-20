@@ -67,8 +67,8 @@ gh issue edit 42 --body 'New markdown...'
 
 Re-applying the status label (or just editing a published/unlisted issue) triggers a rebuild.
 
-> [!WARNING]
-> You cannot upload images through the `gh` CLI.
+> [!TIP]
+> Since `gh` v2.99.0 you can attach images and videos with `--attach`, with no need to upload them via the web interface. The flag can be repeated for multiple files, and alt text goes after a hash: `gh issue create --attach './shot.png#A red error dialog'`. If the body already references the file (`![alt](./shot.png)`), that link is rewritten to the uploaded asset; otherwise the attachment is appended.
 
 ## 🛠️ Local Development
 ```sh
