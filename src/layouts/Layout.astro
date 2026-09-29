@@ -120,6 +120,13 @@ function normalizeSocialUrl(url: string): string {
 	return url.replace(/\/+$/, '').toLowerCase();
 }
 
+// Absolute URL of this site (base included), normalized for comparison. Social
+// links that point here are dropped so the footer never links to its own site.
+const siteEnv = import.meta.env.SITE;
+const selfUrlNorm = siteEnv
+	? normalizeSocialUrl(new URL(BASE_URL, siteEnv).href)
+	: '';
+
 const ownerGithubUrl = owner?.login ? `https://github.com/${owner.login}` : '';
 const ownerGithubNorm = ownerGithubUrl ? normalizeSocialUrl(ownerGithubUrl) : '';
 
@@ -128,7 +135,9 @@ const ownerGithubNorm = ownerGithubUrl ? normalizeSocialUrl(ownerGithubUrl) : ''
 const filteredSocials = rawSocials.filter((link) => {
 	const provider = (link.provider || '').toLowerCase();
 	if (provider === 'github') return false;
-	if (ownerGithubNorm && normalizeSocialUrl(link.url) === ownerGithubNorm) return false;
+	const norm = normalizeSocialUrl(link.url);
+	if (ownerGithubNorm && norm === ownerGithubNorm) return false;
+	if (selfUrlNorm && norm === selfUrlNorm) return false;
 	return true;
 });
 
