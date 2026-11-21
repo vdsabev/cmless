@@ -49,7 +49,7 @@ describe('issueEventNeedsGenerate', () => {
   });
 
   test('unknown issue action rebuilds', () => {
-    expect(issueEventNeedsGenerate({ action: 'transferred', labelNames: [] })).toBe(true);
+    expect(issueEventNeedsGenerate({ action: 'pinned', labelNames: [] })).toBe(true);
   });
 });
 
@@ -66,5 +66,30 @@ describe('eventNeedsGenerate', () => {
         issue: { labels: [{ name: 'status: draft' }] },
       }),
     ).toBe(false);
+  });
+});
+
+describe('deleted / transferred issues', () => {
+  test('deleting or transferring a live post rebuilds', () => {
+    for (const action of ['deleted', 'transferred']) {
+      expect(issueEventNeedsGenerate({ action, labelNames: ['status: published'] })).toBe(true);
+      expect(issueEventNeedsGenerate({ action, labelNames: ['status: unlisted'] })).toBe(true);
+    }
+  });
+
+  test('deleting or transferring a draft is skipped', () => {
+    for (const action of ['deleted', 'transferred']) {
+      expect(issueEventNeedsGenerate({ action, labelNames: ['status: draft'] })).toBe(false);
+      expect(issueEventNeedsGenerate({ action, labelNames: [] })).toBe(false);
+    }
+  });
+
+  test('payload labels are read for deleted events', () => {
+    expect(
+      eventNeedsGenerate('issues', {
+        action: 'deleted',
+        issue: { labels: [{ name: 'status: published' }] },
+      }),
+    ).toBe(true);
   });
 });

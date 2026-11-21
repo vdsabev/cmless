@@ -6,6 +6,7 @@ import ThemeToggle from '../components/ThemeToggle.astro';
 import site from '../generated/site.json';
 import nav from '../generated/navigation.json';
 import { serializeJsonLd } from '../lib/jsonld';
+import { resolveAbsUrl } from '../lib/content';
 import themeInlineScript from '../lib/theme-inline.js?raw';
 
 interface NavItem {
@@ -35,7 +36,8 @@ const {
 
 const jsonLdScript = jsonLd ? serializeJsonLd(jsonLd) : '';
 
-const resolvedImage = image || (site as any).socialPreviewUrl || '';
+// Social scrapers need absolute URLs; localized covers are site-relative paths.
+const resolvedImage = resolveAbsUrl(image || (site as any).socialPreviewUrl || '', Astro.site) || '';
 
 const owner = (site as any).owner;
 const BASE_URL = import.meta.env.BASE_URL;

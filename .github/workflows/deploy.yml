@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, master]
   issues:
-    types: [opened, edited, labeled, unlabeled]
+    types: [opened, edited, labeled, unlabeled, deleted, transferred]
   workflow_dispatch:
 
 permissions:
@@ -56,7 +56,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: public/media
-          key: issue-images-${{ github.repository }}-v1
+          # Cache entries are immutable: a fixed key would never save new images.
+          # Save under a fresh key each run and restore the newest previous one.
+          key: issue-images-${{ github.repository }}-v1-${{ github.run_id }}
+          restore-keys: |
+            issue-images-${{ github.repository }}-v1-
 
       - name: Generate posts, build site, and index search
         env:

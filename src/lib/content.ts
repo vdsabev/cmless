@@ -43,6 +43,26 @@ export function abs(pathWithBase: string, site?: string | URL | null): string {
 	return pathWithBase;
 }
 
+/**
+ * Absolute URL for an asset reference (og:image, JSON-LD, …).
+ * - `http(s):` URLs pass through.
+ * - Root-relative paths (`/repo/media/x.png`, as written by generate) already
+ *   include the site base, so they resolve against the site origin only.
+ * - Bare relative paths (`media/x.png`) resolve under the site base.
+ * Without `site`, returns the path unchanged (or base-prefixed when bare).
+ */
+export function resolveAbsUrl(
+	value: string | undefined,
+	site?: string | URL | null,
+): string | undefined {
+	const v = value?.trim();
+	if (!v) return undefined;
+	if (/^https?:\/\//i.test(v)) return v;
+	if (v.startsWith('//')) return `https:${v}`;
+	if (v.startsWith('/')) return abs(v, site);
+	return absoluteUrl(v, site);
+}
+
 /** Absolute URL for a path under the site base (`slug.md`, `rss.xml`, …). */
 export function absoluteUrl(pathUnderBase: string, site?: string | URL | null): string {
 	const trimmed = pathUnderBase.replace(/^\//, '');

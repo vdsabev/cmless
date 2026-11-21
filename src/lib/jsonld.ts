@@ -1,4 +1,12 @@
-import { abs, absoluteUrl, parseContentDate, postHtmlPath, postMdPath, siteBase } from './content';
+import {
+	abs,
+	absoluteUrl,
+	parseContentDate,
+	postHtmlPath,
+	postMdPath,
+	resolveAbsUrl,
+	siteBase,
+} from './content';
 
 export type JsonLd = Record<string, unknown>;
 
@@ -8,19 +16,8 @@ export function jsonLdDate(date: string): string | undefined {
 	return d ? d.toISOString() : undefined;
 }
 
-/**
- * Absolute URL for schema.org fields. Already-absolute `http(s):` values pass through;
- * site-relative paths resolve against `site` via the same base rules as HTML/Markdown twins.
- */
-export function jsonLdAbsUrl(
-	value: string | undefined,
-	site?: string | URL | null,
-): string | undefined {
-	const v = value?.trim();
-	if (!v) return undefined;
-	if (/^https?:\/\//i.test(v)) return v;
-	return absoluteUrl(v.replace(/^\//, ''), site);
-}
+/** Absolute URL for schema.org fields (see `resolveAbsUrl`). */
+export const jsonLdAbsUrl = resolveAbsUrl;
 
 export function personJsonLd(opts: {
 	name?: string;

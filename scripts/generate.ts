@@ -32,6 +32,7 @@ import { writeFileSync, mkdirSync, rmSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { parseRepoDescription } from './parse-repo-description';
 import { isPublishedLabel, isUnlistedLabel } from './status-labels';
+import { assertIssuesNotTruncated, dedupeSlugs, issueListArgs } from './posts';
 import {
   collectGithubImageUrls,
   localizeGithubImages,
@@ -200,18 +201,7 @@ async function main() {
   // --state all so we can publish from closed issues too if desired
   let output: string;
   try {
-    const issueArgs = [
-      'issue',
-      'list',
-      ...(ghRepo ? (['-R', ghRepo] as const) : []),
-      '--state',
-      'all',
-      '--limit',
-      '200',
-      '--json',
-      'number,title,body,labels,createdAt,url,author',
-    ];
-    output = gh([...issueArgs], env, { inheritStderr: true });
+    output = gh(issueListArgs(ghRepo), env, { inheritStderr: true });
   } catch (error) {
     console.error('❌ Failed to list issues with gh.');
     console.error('Make sure the GitHub CLI (gh) is installed and you are logged in (gh auth status).');
@@ -226,6 +216,7 @@ async function main() {
     console.error('Failed to parse gh output', e);
     process.exit(1);
   }
+  assertIssuesNotTruncated(issues.length);
 
   // Fetch site title + description + repo owner login (for site credit + avatar)
   let siteTitle = 'My Blog';
@@ -426,6 +417,8 @@ async function main() {
         ),
     });
   }
+
+  for (const warning of dedupeSlugs(posts)) console.warn(`⚠️  ${warning}`);
 
   const remoteImages = collectGithubImageUrls(
     ...posts.flatMap((post) => [post.image || '', post.content || '']),

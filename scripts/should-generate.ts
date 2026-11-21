@@ -29,7 +29,8 @@ export function issueEventNeedsGenerate(event: IssueEventInput): boolean {
     return isLiveStatusLabel(event.labelName || '');
   }
 
-  if (action === 'opened' || action === 'edited') {
+  // Deleting or transferring a live post removes it from this repo's issues.
+  if (action === 'opened' || action === 'edited' || action === 'deleted' || action === 'transferred') {
     return hasLiveStatus(event.labelNames);
   }
 
