@@ -33,6 +33,7 @@ import { join } from 'path';
 import { parseRepoDescription } from './parse-repo-description';
 import { isPublishedLabel, isUnlistedLabel } from './status-labels';
 import { assertIssuesNotTruncated, dedupeSlugs, issueListArgs } from './posts';
+import { autoDescription, embedMedia, parseFrontmatter } from './markdown';
 import {
   collectGithubImageUrls,
   localizeGithubImages,
@@ -124,62 +125,6 @@ function leadingImage(content: string): { src?: string; alt?: string; after: str
   }
 
   return { after: content };
-}
-
-/** First non-image paragraph of body, truncated for SEO / cards. */
-function autoDescription(body: string): string {
-  const imageOnly =
-    /^\s*(?:!\[[^\]]*\]\([^)]*\)|<img\b[^>]*>)\s*$/i;
-  for (const block of body.split(/\n\n+/)) {
-    const trimmed = block.trim();
-    if (!trimmed || imageOnly.test(trimmed)) continue;
-    return trimmed.slice(0, 180).trim();
-  }
-  return '';
-}
-
-function parseFrontmatter(rawBody: string): { frontmatter: Record<string, string>; content: string } {
-  const match = rawBody.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);
-  if (!match) {
-    return { frontmatter: {}, content: rawBody.trim() };
-  }
-
-  const yamlBlock = match[1];
-  const content = match[2].trimStart();
-
-  const frontmatter: Record<string, string> = {};
-  const lines = yamlBlock.split(/\r?\n/);
-  let currentKey = '';
-  let currentList: string[] = [];
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-    const listMatch = trimmed.match(/^-\s+(.*)$/);
-    if (listMatch && currentKey) {
-      currentList.push(listMatch[1].trim());
-      continue;
-    }
-    if (currentKey && currentList.length) {
-      frontmatter[currentKey] = currentList.join(', ');
-      currentList = [];
-    }
-    const matches = trimmed.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-    if (matches) {
-      currentKey = matches[1];
-      let value = matches[2].trim();
-      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-        value = value.slice(1, -1);
-      }
-      if (value) {
-        frontmatter[currentKey] = value;
-      }
-      currentList = [];
-    }
-  }
-  if (currentKey && currentList.length) {
-    frontmatter[currentKey] = currentList.join(', ');
-  }
-  return { frontmatter: frontmatter, content };
 }
 
 async function main() {
@@ -384,37 +329,7 @@ async function main() {
       navigation,
       navigationIndex,
       series,
-      content: bodyContent
-        // Embed YouTube videos
-        .replace(
-          /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})[^)]*\)/g,
-          (_, alt, id) =>
-            `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%"><iframe src="https://www.youtube.com/embed/${id}" title="${alt.replace(/"/g, '&quot;')}" style="position:absolute;top:0;left:0;width:100%;height:100%" frameborder="0" allowfullscreen></iframe></div>`
-        )
-        // Embed X/Twitter posts
-        .replace(
-          /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(\w+)\/status\/(\d+)[^)]*\)/g,
-          (_, _alt, screenName, tweetId) =>
-            `<blockquote class="twitter-tweet" data-media-max-width="560"><a href="https://twitter.com/${screenName}/status/${tweetId}"></a></blockquote><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>`
-        )
-        // Embed Instagram posts/reels
-        .replace(
-          /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)[^)]*\)/g,
-          (_, alt, type, shortcode) =>
-            `<blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/${type}/${shortcode}/" style="background:#FFF;border:0;border-radius:3px;box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15);margin:1px;max-width:540px;min-width:326px;padding:0;width:calc(100% - 2px)"></blockquote><script async src="//www.instagram.com/embed.js"></script>`
-        )
-        // Embed GitHub Gists
-        .replace(
-          /!\[([^\]]*)\]\s*\(https?:\/\/gist\.github\.com\/(\w+)\/([a-f0-9]+)[^)]*\)/g,
-          (_, _alt, user, gistId) =>
-            `<script src="https://gist.github.com/${user}/${gistId}.js"></script>`
-        )
-        // Embed CodePen pens
-        .replace(
-          /!\[([^\]]*)\]\s*\(https?:\/\/(?:www\.)?codepen\.io\/(\w+)\/pen\/([a-zA-Z0-9_-]+)[^)]*\)/g,
-          (_, alt, user, slug) =>
-            `<iframe height="450" style="width:100%;" scrolling="no" title="${alt.replace(/"/g, '&quot;')}" src="https://codepen.io/${user}/embed/${slug}?default-tab=html%2Cresult" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true"></iframe>`
-        ),
+      content: embedMedia(bodyContent),
     });
   }
 

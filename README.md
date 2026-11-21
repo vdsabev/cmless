@@ -102,7 +102,7 @@ Supported separators (first match wins): pipe (`|`) with spaces on both sides; h
 
 **Series:** from `series: My Series Name` Frontmatter. Posts that share the same series name get previous/next navigation and a list of posts in the series, ordered by date (oldest first).
 
-**Tags:** from `tags: a, b` Frontmatter.
+**Tags:** from `tags: a, b` Frontmatter (or a YAML list: `tags: [a, b]` or `- a` lines).
 
 **Navigation pages:** useful for custom pages like "About me". Add `navigation: Label` and `navigationIndex: N` to an issue's Frontmatter. Negative indices place the link before "Posts" in the header, non-negative after. Footer links are sorted by index and appear before "powered by". These pages render as plain prose without blog metadata. Leading body images stay in the page content (unlike blog posts, where the first image is promoted to a cover and removed from the body); they may still set Open Graph `image` when frontmatter omits it.
 
