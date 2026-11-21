@@ -121,6 +121,9 @@ if (series) {
 	siteTitle={site.siteTitle}
 	markdownHref={markdownHref}
 	jsonLd={jsonLd}
+	ogType={isPage ? 'website' : 'article'}
+	publishedTime={date}
+	tags={tags}
 >
 	{isPage ? (
 		<div class="prose dark:prose-invert max-w-none" data-pagefind-body>

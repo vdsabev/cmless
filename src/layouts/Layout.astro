@@ -24,6 +24,12 @@ interface Props {
 	markdownHref?: string;
 	/** schema.org JSON-LD object (or @graph array) embedded in the document head. */
 	jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+	/** Open Graph type: `article` for blog posts, `website` for everything else. */
+	ogType?: 'website' | 'article';
+	/** ISO date for `article:published_time` (articles only). */
+	publishedTime?: string;
+	/** Tags for `article:tag` (articles only). */
+	tags?: string[];
 }
 const {
 	title = 'Blog',
@@ -32,7 +38,21 @@ const {
 	siteTitle = 'My Blog',
 	markdownHref,
 	jsonLd,
+	ogType = 'website',
+	publishedTime,
+	tags = [],
 } = Astro.props as Props;
+
+// One URL per page: drops query strings (?utm_source=…) and `index.html` variants.
+const canonicalUrl = Astro.site
+	? new URL(Astro.url.pathname.replace(/index\.html$/, ''), Astro.site).href
+	: '';
+const isArticle = ogType === 'article';
+const publishedIso = (() => {
+	if (!isArticle || !publishedTime) return '';
+	const d = new Date(publishedTime);
+	return Number.isNaN(d.getTime()) ? '' : d.toISOString();
+})();
 
 const jsonLdScript = jsonLd ? serializeJsonLd(jsonLd) : '';
 
@@ -166,6 +186,11 @@ const socialItems: SocialLink[] = [
 		}
 		<meta name="generator" content={Astro.generator} />
 		<title>{siteTitle} | {title}</title>
+		{canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+		{canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+		<meta property="og:type" content={ogType} />
+		{publishedIso && <meta property="article:published_time" content={publishedIso} />}
+		{isArticle && tags.map((tag) => <meta property="article:tag" content={tag} />)}
 		<meta property="og:title" content={`${siteTitle} | ${title}`} />
 		<meta property="og:site_name" content={siteTitle} />
 		<meta name="twitter:card" content="summary_large_image" />
