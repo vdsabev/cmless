@@ -16,6 +16,8 @@ export type ContentEntry = {
 	navigationIndex: number;
 	image?: string;
 	imageAlt?: string;
+	/** From frontmatter `series`, trimmed; empty when unset. */
+	series: string;
 	/** Markdown body without frontmatter (for reading-time). */
 	body: string;
 };
@@ -137,7 +139,7 @@ function loadInventory(): ContentEntry[] {
 		const slug = pathToSlug(filePath);
 		const fm = mod.frontmatter || {};
 		const body = typeof mod.rawContent === 'function' ? mod.rawContent() : '';
-		const title = typeof fm.title === 'string' ? fm.title : slug;
+		const title = typeof fm.title === 'string' && fm.title ? fm.title : slug;
 		const date = typeof fm.date === 'string' ? fm.date : '';
 		const description = typeof fm.description === 'string' ? fm.description : '';
 		// Blank string status stays blank (not published); only missing/non-string defaults.
@@ -153,6 +155,7 @@ function loadInventory(): ContentEntry[] {
 		const image = typeof fm.image === 'string' ? fm.image : undefined;
 		const imageAlt = typeof fm.imageAlt === 'string' ? fm.imageAlt : undefined;
 		const author = typeof fm.author === 'string' ? fm.author.trim() : '';
+		const series = typeof fm.series === 'string' ? fm.series.trim() : '';
 
 		entries.push({
 			slug,
@@ -166,6 +169,7 @@ function loadInventory(): ContentEntry[] {
 			navigationIndex,
 			image,
 			imageAlt,
+			series,
 			body,
 		});
 	}
@@ -217,6 +221,14 @@ export function getTagsMap(): Map<string, ContentEntry[]> {
 		}
 	}
 	return map;
+}
+
+/** Posts in a series that have a date, oldest first (series reading order). */
+export function getSeriesPosts(series: string): ContentEntry[] {
+	if (!series) return [];
+	return getAllContent()
+		.filter((e) => e.series === series && e.date)
+		.sort((a, b) => (parseContentDate(a.date)?.getTime() ?? 0) - (parseContentDate(b.date)?.getTime() ?? 0));
 }
 
 export function getTagNames(): string[] {

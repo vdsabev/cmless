@@ -9,11 +9,19 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { extFromMagic } from './github-images';
+import {
+  extFromContentType,
+  extFromMagic,
+  fetchWithRetry,
+  findCachedFile,
+  mediaUrlPath,
+  type FetchLike,
+} from './media-util';
 
 export const AVATAR_DIR = 'public/media/avatars';
 
-const EXT_BY_TYPE: Record<string, string> = {
+/** Avatars are raster images only. */
+const AVATAR_EXT_BY_TYPE: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/jpg': 'jpg',
   'image/png': 'png',
@@ -112,8 +120,6 @@ export type LocalizeAvatarsResult = {
   failed: number;
 };
 
-type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
-
 export async function localizeGithubAvatars(
   refs: AvatarRef[],
   opts: {
@@ -157,7 +163,7 @@ export async function localizeGithubAvatars(
     }
 
     const cacheId = String(userId);
-    const hit = existingAvatar(avatarDir, cacheId);
+    const hit = findCachedFile(avatarDir, cacheId);
 
     try {
       const res = await fetchWithRetry(fetchFn, publicAvatarUrl(userId), {
@@ -169,7 +175,7 @@ export async function localizeGithubAvatars(
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const buf = Buffer.from(await res.arrayBuffer());
       const ext =
-        extFromContentType(res.headers.get('content-type')) || extFromMagic(buf);
+        extFromContentType(res.headers.get('content-type'), AVATAR_EXT_BY_TYPE) || extFromMagic(buf);
       if (!ext) throw new Error('unknown avatar type');
       const file = `${cacheId}.${ext}`;
       const dest = join(avatarDir, file);
@@ -209,14 +215,7 @@ export async function localizeGithubAvatars(
 }
 
 function localAvatarPath(cacheId: string, ext: string, pagesBase: string): string {
-  const base = pagesBase.endsWith('/') ? pagesBase : `${pagesBase}/`;
-  return `${base}media/avatars/${cacheId}.${ext}`;
-}
-
-function extFromContentType(type: string | null): string | undefined {
-  if (!type) return undefined;
-  const mime = type.split(';')[0].trim().toLowerCase();
-  return EXT_BY_TYPE[mime];
+  return mediaUrlPath(pagesBase, 'avatars/', cacheId, ext);
 }
 
 const LOGIN_MAP_FILE = '.ids.json';
@@ -239,16 +238,6 @@ function loadLoginMap(dir: string): Map<string, number> {
 function saveLoginMap(dir: string, map: Map<string, number>): void {
   if (map.size === 0) return;
   writeFileSync(join(dir, LOGIN_MAP_FILE), JSON.stringify(Object.fromEntries(map)));
-}
-
-function existingAvatar(dir: string, cacheId: string): { file: string; ext: string } | undefined {
-  if (!existsSync(dir)) return undefined;
-  for (const name of readdirSync(dir)) {
-    if (!name.startsWith(`${cacheId}.`) || name.endsWith('.tmp')) continue;
-    const ext = name.slice(cacheId.length + 1);
-    if (ext) return { file: name, ext };
-  }
-  return undefined;
 }
 
 function dedupeRefs(refs: AvatarRef[]): AvatarRef[] {
@@ -299,26 +288,6 @@ function refKeys(ref: AvatarRef): string[] {
     keys.push(publicAvatarUrl(ref.userId));
   }
   return keys;
-}
-
-async function fetchWithRetry(
-  fetchFn: FetchLike,
-  url: string,
-  init: RequestInit,
-  attempts = 3,
-): Promise<Response> {
-  let last: unknown;
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const res = await fetchFn(url, init);
-      if (res.ok || res.status < 500) return res;
-      last = new Error(`HTTP ${res.status}`);
-    } catch (err) {
-      last = err;
-    }
-    await new Promise((r) => setTimeout(r, 250 * (i + 1)));
-  }
-  throw last instanceof Error ? last : new Error(String(last));
 }
 
 export function pickResolvedAvatar(

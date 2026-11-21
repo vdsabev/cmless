@@ -34,10 +34,10 @@ import { parseRepoDescription } from './parse-repo-description';
 import { isPublishedLabel, isUnlistedLabel } from './status-labels';
 import { assertIssuesNotTruncated, dedupeSlugs, issueListArgs } from './posts';
 import { autoDescription, embedMedia, parseFrontmatter } from './markdown';
+import { detectGithubRepo, pagesFromRepo } from './repo';
 import {
   collectGithubImageUrls,
   localizeGithubImages,
-  pagesBaseFromRepo,
   rewriteGithubImageUrls,
 } from './github-images';
 import {
@@ -74,17 +74,6 @@ function gh(
     throw new Error(detail || `gh ${args[0] ?? ''} exited with status ${result.status}`);
   }
   return result.stdout;
-}
-
-/** owner/repo from the origin remote when GH_REPO / GITHUB_REPOSITORY are unset. */
-function detectGithubRepo(): string {
-  const result = spawnSync('git', ['remote', 'get-url', 'origin'], {
-    encoding: 'utf8',
-    stdio: ['pipe', 'pipe', 'pipe'],
-  });
-  if (result.status !== 0) return '';
-  const match = (result.stdout || '').trim().match(/[:/]([^/]+)\/([^/.]+?)(?:\.git)?$/);
-  return match ? `${match[1]}/${match[2]}` : '';
 }
 
 function slugify(str: string): string {
@@ -338,8 +327,7 @@ async function main() {
   const remoteImages = collectGithubImageUrls(
     ...posts.flatMap((post) => [post.image || '', post.content || '']),
   );
-  const repoForBase = ghRepo || process.env.GITHUB_REPOSITORY || detectGithubRepo() || '';
-  const pagesBase = pagesBaseFromRepo(repoForBase);
+  const pagesBase = pagesFromRepo(detectGithubRepo()).base;
   if (remoteImages.length) {
     console.log(`Localizing ${remoteImages.length} GitHub attachment(s) into public/media/ …`);
   }
@@ -360,13 +348,15 @@ async function main() {
 
   const avatarRefs: AvatarRef[] = [];
   if (ownerLogin) avatarRefs.push({ login: ownerLogin, userId: ownerId });
-  for (const post of posts) {
-    if (post.authorAvatarOverride && !isGithubAvatarUrl(post.authorAvatarOverride)) continue;
-    const fromOverride = post.authorAvatarOverride
-      ? parseGithubAvatarRef(post.authorAvatarOverride)
-      : undefined;
-    avatarRefs.push(postAvatarRef(fromOverride, post));
-  }
+  // Posts whose avatar we localize: the issue author, or a GitHub avatar override.
+  // A non-GitHub override (any other image URL) is used as-is.
+  const postAvatars = posts.flatMap((post) => {
+    const override = post.authorAvatarOverride;
+    if (override && !isGithubAvatarUrl(override)) return [];
+    const fromOverride = override ? parseGithubAvatarRef(override) : undefined;
+    return [{ post, ref: postAvatarRef(fromOverride, post) }];
+  });
+  for (const { ref } of postAvatars) avatarRefs.push(ref);
   const avatars = await localizeGithubAvatars(avatarRefs, {
     pagesBase,
     lookupUser: async (login) => {
@@ -385,16 +375,8 @@ async function main() {
       ownerAvatar,
     );
   }
-  for (const post of posts) {
-    if (post.authorAvatarOverride && !isGithubAvatarUrl(post.authorAvatarOverride)) continue;
-    const fromOverride = post.authorAvatarOverride
-      ? parseGithubAvatarRef(post.authorAvatarOverride)
-      : undefined;
-    post.authorAvatar = pickResolvedAvatar(
-      avatars.resolved,
-      postAvatarRef(fromOverride, post),
-      post.authorAvatar,
-    );
+  for (const { post, ref } of postAvatars) {
+    post.authorAvatar = pickResolvedAvatar(avatars.resolved, ref, post.authorAvatar);
   }
   console.log(
     `✓ avatars: ${avatars.downloaded} downloaded, ${avatars.cached} reused after failure, ${avatars.failed} failed`,

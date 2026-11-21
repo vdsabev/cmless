@@ -5,23 +5,13 @@ import { join } from 'path';
 import {
   cacheIdForUrl,
   collectGithubImageUrls,
-  extFromMagic,
   hostNeedsGithubAuth,
   isGithubAttachmentUrl,
   localMediaPath,
   localizeGithubImages,
-  pagesBaseFromRepo,
   rewriteGithubImageUrls,
 } from './github-images';
-
-describe('pagesBaseFromRepo', () => {
-  test('user/org site is root', () => {
-    expect(pagesBaseFromRepo('vdsabev/vdsabev.github.io')).toBe('/');
-  });
-  test('project site is /repo/', () => {
-    expect(pagesBaseFromRepo('vdsabev/cmless')).toBe('/cmless/');
-  });
-});
+import { extFromMagic } from './media-util';
 
 describe('isGithubAttachmentUrl / cacheIdForUrl', () => {
   test('user-attachments UUID', () => {

@@ -7,8 +7,7 @@ import SeriesNavList from '../components/SeriesNavList.astro';
 import SeriesNavPager from '../components/SeriesNavPager.astro';
 import { pathToSlug } from '../lib/slug';
 import { getReadingTimeInMinutes } from '../lib/reading-time';
-import { parseTags } from '../lib/tags';
-import { abs, postMdPath } from '../lib/content';
+import { abs, getAllContent, getSeriesPosts, postMdPath } from '../lib/content';
 import { blogPostingJsonLd, webPageJsonLd } from '../lib/jsonld';
 import site from '../generated/site.json';
 
@@ -25,15 +24,14 @@ export function getStaticPaths() {
 }
 
 const { mod, frontmatter, slug } = Astro.props;
-const { Content, rawContent } = mod as any;
+const { Content } = mod as any;
 
-const isPage = !!frontmatter.navigation;
-const title = frontmatter.title || slug;
-const date = frontmatter.date || '';
-const description = frontmatter.description;
-const image = frontmatter.image as string | undefined;
-const body = !isPage && typeof rawContent === 'function' ? rawContent() : '';
-const imageAlt = (frontmatter.imageAlt as string | undefined) || title;
+// Normalized fields (status default, tags, series, …) come from lib/content.ts.
+const entry = getAllContent().find((e) => e.slug === slug)!;
+const { title, date, image, series, tags, body } = entry;
+const isPage = entry.isNav;
+const description = entry.description || undefined;
+const imageAlt = entry.imageAlt || title;
 /** In-article hero for real covers only — not the repo social-preview fallback (still used for OG via Layout). */
 const socialPreviewUrl = ((site as { socialPreviewUrl?: string }).socialPreviewUrl || '').trim();
 const showCover = !!image && image.trim() !== socialPreviewUrl;
@@ -41,16 +39,11 @@ const showCover = !!image && image.trim() !== socialPreviewUrl;
 const author = frontmatter.author;
 const authorUrl = frontmatter.authorUrl;
 const authorAvatar = frontmatter.authorAvatar;
-const tags = parseTags(frontmatter.tags);
-const series = typeof frontmatter.series === 'string' ? frontmatter.series.trim() : '';
-
-const readingTime = body ? getReadingTimeInMinutes(body) : null;
+const readingTime = !isPage && body ? getReadingTimeInMinutes(body) : null;
 
 const markdownHref = abs(postMdPath(slug), Astro.site);
 
-// Same default as content.ts: missing/non-string status → published; blank string stays unpublished.
-const status = typeof frontmatter.status === 'string' ? frontmatter.status : 'published';
-const isPublished = status === 'published';
+const isPublished = entry.status === 'published';
 
 const jsonLd = !isPublished
 	? undefined
@@ -82,35 +75,10 @@ const jsonLd = !isPublished
 			});
 
 // Series peers: same `series` value, ordered by date ascending
-type SeriesPeer = { slug: string; title: string; date: string };
-let seriesPosts: SeriesPeer[] = [];
-let seriesPrev: SeriesPeer | null = null;
-let seriesNext: SeriesPeer | null = null;
-
-if (series) {
-	const allModules = import.meta.glob('../content/blog/*.md', { eager: true });
-	seriesPosts = Object.entries(allModules)
-		.map(([path, markdown]) => {
-			const peerSlug = pathToSlug(path);
-			const fm = (markdown as any).frontmatter || {};
-			const peerSeries = typeof fm.series === 'string' ? fm.series.trim() : '';
-			return {
-				slug: peerSlug,
-				title: fm.title || peerSlug,
-				date: fm.date || '',
-				series: peerSeries,
-			};
-		})
-		.filter((p) => p.series === series && p.date)
-		.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-		.map(({ slug, title, date }) => ({ slug, title, date }));
-
-	const index = seriesPosts.findIndex((post) => post.slug === slug);
-	if (index >= 0) {
-		seriesPrev = index > 0 ? seriesPosts[index - 1] : null;
-		seriesNext = index < seriesPosts.length - 1 ? seriesPosts[index + 1] : null;
-	}
-}
+const seriesPosts = getSeriesPosts(series).map(({ slug, title, date }) => ({ slug, title, date }));
+const seriesIndex = seriesPosts.findIndex((post) => post.slug === slug);
+const seriesPrev = seriesIndex > 0 ? seriesPosts[seriesIndex - 1] : null;
+const seriesNext = seriesIndex >= 0 ? seriesPosts[seriesIndex + 1] ?? null : null;
 
 ---
 
