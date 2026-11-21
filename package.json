@@ -2,13 +2,11 @@
   "name": "cmless",
   "type": "module",
   "version": "0.0.1",
-  "engines": {
-    "node": ">=22.12.0"
-  },
+  "packageManager": "bun@1.4.5",
   "scripts": {
-    "dev": "bun generate && astro dev",
-    "build": "bun generate && astro build && bun run pagefind",
-    "pagefind": "rm -rf dist/pagefind public/pagefind && pagefind --site dist && cp -r dist/pagefind public/pagefind",
+    "dev": "bun generate && bunx --bun astro dev",
+    "build": "bun generate && bunx --bun astro build && bun run pagefind",
+    "pagefind": "rm -rf dist/pagefind public/pagefind && bunx --bun pagefind --site dist && cp -r dist/pagefind public/pagefind",
     "generate": "bun scripts/generate.ts",
     "test": "bun test scripts",
     "astro": "astro"

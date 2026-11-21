@@ -71,12 +71,15 @@ Re-applying the status label (or just editing a published/unlisted issue) trigge
 > Since `gh` v2.99.0 you can attach images and videos with `--attach`, with no need to upload them via the web interface. The flag can be repeated for multiple files, and alt text goes after a hash: `gh issue create --attach './shot.png#A red error dialog'`. If the body already references the file (`![alt](./shot.png)`), that link is rewritten to the uploaded asset; otherwise the attachment is appended.
 
 ## 🛠️ Local Development
+cmless runs on [Bun](https://bun.sh) (the version CI uses is pinned in `package.json` as `packageManager`). Posts are fetched with the [`gh` CLI](https://cli.github.com/), so run `gh auth login` first.
+
 ```sh
 git clone https://.../your-repo.git
 cd your-repo
-npm install # or bun, etc.
-npm run dev # run the current folder's repo as a blog
-GH_REPO=<username>/<repo> npm run dev # run another cmless-based repo as a blog
+bun install
+bun run dev # run the current folder's repo as a blog
+GH_REPO=<username>/<repo> bun run dev # run another cmless-based repo as a blog
+bun run test # unit tests for the generator scripts
 ```
 
 ## 🔍 Search

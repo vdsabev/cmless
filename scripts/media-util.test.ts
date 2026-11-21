@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { extFromContentType, fetchWithRetry, findCachedFile, mediaUrlPath } from './media-util';
+import { extFromContentType, fetchWithRetry, indexCachedFiles, mediaUrlPath, runPool } from './media-util';
 
 describe('extFromContentType', () => {
   test('maps MIME types and ignores parameters', () => {
@@ -16,18 +16,42 @@ describe('extFromContentType', () => {
   });
 });
 
-describe('findCachedFile', () => {
-  test('finds a finished download and skips partial files', () => {
+describe('indexCachedFiles', () => {
+  test('indexes finished downloads and skips partial files and dotfiles', () => {
     const dir = mkdtempSync(join(tmpdir(), 'cmless-media-'));
     try {
       writeFileSync(join(dir, 'abc.png.tmp'), '');
-      expect(findCachedFile(dir, 'abc')).toBeUndefined();
+      writeFileSync(join(dir, 'def.bin'), '');
+      writeFileSync(join(dir, '.ids.json'), '');
+      expect(indexCachedFiles(dir).size).toBe(0);
       writeFileSync(join(dir, 'abc.png'), '');
-      expect(findCachedFile(dir, 'abc')).toEqual({ file: 'abc.png', ext: 'png' });
-      expect(findCachedFile(join(dir, 'missing'), 'abc')).toBeUndefined();
+      writeFileSync(join(dir, '12-34.webm'), '');
+      const index = indexCachedFiles(dir);
+      expect(index.get('abc')).toEqual({ file: 'abc.png', ext: 'png' });
+      expect(index.get('12-34')).toEqual({ file: '12-34.webm', ext: 'webm' });
+      expect(index.size).toBe(2);
+      expect(indexCachedFiles(join(dir, 'missing')).size).toBe(0);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe('runPool', () => {
+  test('runs every job with bounded concurrency', async () => {
+    let active = 0;
+    let peak = 0;
+    const done: number[] = [];
+    const jobs = Array.from({ length: 10 }, (_, i) => async () => {
+      active += 1;
+      peak = Math.max(peak, active);
+      await new Promise((r) => setTimeout(r, 5));
+      active -= 1;
+      done.push(i);
+    });
+    await runPool(jobs, 3);
+    expect(done.sort((a, b) => a - b)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(peak).toBe(3);
   });
 });
 

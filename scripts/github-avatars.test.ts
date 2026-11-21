@@ -143,6 +143,29 @@ describe('localizeGithubAvatars', () => {
     }
   });
 
+  test('downloads once when a login and an id resolve to the same user', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'cmless-avatars-'));
+    let calls = 0;
+    const fetchMock: typeof fetch = async () => {
+      calls += 1;
+      return new Response(jpg, { status: 200, headers: { 'content-type': 'image/jpeg' } });
+    };
+    try {
+      const result = await localizeGithubAvatars([{ userId: 1333274 }, { login: 'someone' }, { userId: 42 }], {
+        pagesBase: '/',
+        fetch: fetchMock,
+        avatarDir: dir,
+        lookupUser: async () => ({ id: 1333274 }),
+      });
+      expect(calls).toBe(2);
+      expect(result.downloaded).toBe(2);
+      expect(result.resolved.get('someone')).toBe('/media/avatars/1333274.jpg');
+      expect(result.resolved.get('id:42')).toBe('/media/avatars/42.jpg');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   test('reuses sidecar id when lookup fails so prune keeps the cached file', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'cmless-avatars-'));
     writeFileSync(join(dir, '1333274.jpg'), jpg);

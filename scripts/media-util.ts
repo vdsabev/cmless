@@ -56,15 +56,22 @@ export function extFromMagic(buf: Buffer): string | undefined {
   return undefined;
 }
 
-/** A previously downloaded `<cacheId>.<ext>` in `dir`, ignoring partial (`.tmp`/`.bin`) files. */
-export function findCachedFile(dir: string, cacheId: string): { file: string; ext: string } | undefined {
-  if (!existsSync(dir)) return undefined;
+/**
+ * Previously downloaded files in `dir`, keyed by cache id (`<cacheId>.<ext>`).
+ * Reads the directory once so lookups stay O(1) however many files are cached.
+ * Partial downloads (`.tmp`/`.bin`) and dotfiles are ignored.
+ */
+export function indexCachedFiles(dir: string): Map<string, { file: string; ext: string }> {
+  const index = new Map<string, { file: string; ext: string }>();
+  if (!existsSync(dir)) return index;
   for (const name of readdirSync(dir)) {
-    if (!name.startsWith(`${cacheId}.`) || name.endsWith('.tmp') || name.endsWith('.bin')) continue;
-    const ext = name.slice(cacheId.length + 1);
-    if (ext) return { file: name, ext };
+    if (name.startsWith('.') || name.endsWith('.tmp') || name.endsWith('.bin')) continue;
+    const dot = name.lastIndexOf('.');
+    if (dot <= 0 || dot === name.length - 1) continue;
+    const id = name.slice(0, dot);
+    if (!index.has(id)) index.set(id, { file: name, ext: name.slice(dot + 1) });
   }
-  return undefined;
+  return index;
 }
 
 /** Site URL path for a file under `public/media/` (`subdir` e.g. `avatars/`). */
@@ -92,4 +99,17 @@ export async function fetchWithRetry(
     await new Promise((r) => setTimeout(r, 250 * (i + 1)));
   }
   throw last instanceof Error ? last : new Error(String(last));
+}
+
+/** Run async jobs with at most `concurrency` in flight. */
+export async function runPool(jobs: Array<() => Promise<void>>, concurrency: number): Promise<void> {
+  let next = 0;
+  async function worker() {
+    while (next < jobs.length) {
+      const i = next;
+      next += 1;
+      await jobs[i]();
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(Math.max(1, concurrency), jobs.length) }, () => worker()));
 }

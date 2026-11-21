@@ -13,8 +13,9 @@ import {
   extFromContentType,
   extFromMagic,
   fetchWithRetry,
-  findCachedFile,
+  indexCachedFiles,
   mediaUrlPath,
+  runPool,
   type FetchLike,
 } from './media-util';
 
@@ -127,6 +128,7 @@ export async function localizeGithubAvatars(
     fetch?: FetchLike;
     avatarDir?: string;
     lookupUser?: (login: string) => Promise<{ id: number } | undefined>;
+    concurrency?: number;
   },
 ): Promise<LocalizeAvatarsResult> {
   const avatarDir = opts.avatarDir || AVATAR_DIR;
@@ -142,7 +144,12 @@ export async function localizeGithubAvatars(
   let unresolvedLogin = false;
 
   const unique = dedupeRefs(refs);
+  const cachedFiles = indexCachedFiles(avatarDir);
+  const work: Array<() => Promise<void>> = [];
+  /** Resolved keys per user id, so refs that only meet after lookup share one download. */
+  const keysById = new Map<number, string[]>();
 
+  // Resolve user ids first (sequential: touches the login map), then download in parallel.
   for (const ref of unique) {
     let userId = ref.userId;
     if (!userId && ref.login && opts.lookupUser) {
@@ -162,45 +169,57 @@ export async function localizeGithubAvatars(
       continue;
     }
 
-    const cacheId = String(userId);
-    const hit = findCachedFile(avatarDir, cacheId);
-
-    try {
-      const res = await fetchWithRetry(fetchFn, publicAvatarUrl(userId), {
-        headers: {
-          Accept: 'image/*, */*',
-          'User-Agent': 'cmless',
-        },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const buf = Buffer.from(await res.arrayBuffer());
-      const ext =
-        extFromContentType(res.headers.get('content-type'), AVATAR_EXT_BY_TYPE) || extFromMagic(buf);
-      if (!ext) throw new Error('unknown avatar type');
-      const file = `${cacheId}.${ext}`;
-      const dest = join(avatarDir, file);
-      const tmp = `${dest}.tmp`;
-      writeFileSync(tmp, buf);
-      renameSync(tmp, dest);
-      if (hit && hit.file !== file) rmSync(join(avatarDir, hit.file), { force: true });
-      usedFiles.add(file);
-      const local = localAvatarPath(cacheId, ext, opts.pagesBase);
-      for (const key of keys) resolved.set(key, local);
-      downloaded += 1;
-    } catch (err) {
-      const detail = err instanceof Error ? err.message : String(err);
-      console.warn(`⚠️  Could not download avatar u/${userId}: ${detail}`);
-      if (hit) {
-        usedFiles.add(hit.file);
-        const local = localAvatarPath(cacheId, hit.ext, opts.pagesBase);
-        for (const key of keys) resolved.set(key, local);
-        cached += 1;
-      } else {
-        failed += 1;
-        for (const key of keys) resolved.set(key, fallback);
-      }
+    const sharedKeys = keysById.get(userId);
+    if (sharedKeys) {
+      sharedKeys.push(...keys);
+      continue;
     }
+    keysById.set(userId, keys);
+
+    const id = userId;
+    const cacheId = String(id);
+    const hit = cachedFiles.get(cacheId);
+
+    work.push(async () => {
+      try {
+        const res = await fetchWithRetry(fetchFn, publicAvatarUrl(id), {
+          headers: {
+            Accept: 'image/*, */*',
+            'User-Agent': 'cmless',
+          },
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const buf = Buffer.from(await res.arrayBuffer());
+        const ext =
+          extFromContentType(res.headers.get('content-type'), AVATAR_EXT_BY_TYPE) || extFromMagic(buf);
+        if (!ext) throw new Error('unknown avatar type');
+        const file = `${cacheId}.${ext}`;
+        const dest = join(avatarDir, file);
+        const tmp = `${dest}.tmp`;
+        writeFileSync(tmp, buf);
+        renameSync(tmp, dest);
+        if (hit && hit.file !== file) rmSync(join(avatarDir, hit.file), { force: true });
+        usedFiles.add(file);
+        const local = localAvatarPath(cacheId, ext, opts.pagesBase);
+        for (const key of keys) resolved.set(key, local);
+        downloaded += 1;
+      } catch (err) {
+        const detail = err instanceof Error ? err.message : String(err);
+        console.warn(`⚠️  Could not download avatar u/${id}: ${detail}`);
+        if (hit) {
+          usedFiles.add(hit.file);
+          const local = localAvatarPath(cacheId, hit.ext, opts.pagesBase);
+          for (const key of keys) resolved.set(key, local);
+          cached += 1;
+        } else {
+          failed += 1;
+          for (const key of keys) resolved.set(key, fallback);
+        }
+      }
+    });
   }
+
+  await runPool(work, opts.concurrency ?? 6);
 
   saveLoginMap(avatarDir, loginMap);
 

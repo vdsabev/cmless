@@ -14,8 +14,9 @@ import {
   extFromContentType,
   extFromMagic,
   fetchWithRetry,
-  findCachedFile,
+  indexCachedFiles,
   mediaUrlPath,
+  runPool,
   type FetchLike,
 } from './media-util';
 
@@ -165,12 +166,17 @@ export async function localizeGithubImages(
   const token = opts.token || '';
   const concurrency = Math.max(1, opts.concurrency ?? 6);
 
-  const unique = urls.filter((url, i, all) => all.findIndex((u) => normalizeUrlKey(u) === normalizeUrlKey(url)) === i);
-
-  const work = unique.map((url) => async () => {
+  // First URL wins for each normalized key.
+  const unique = new Map<string, string>();
+  for (const url of urls) {
     const key = normalizeUrlKey(url);
+    if (!unique.has(key)) unique.set(key, url);
+  }
+  const cachedFiles = indexCachedFiles(mediaDir);
+
+  const work = [...unique].map(([key, url]) => async () => {
     const id = cacheIdForUrl(url);
-    const hit = findCachedFile(mediaDir, id);
+    const hit = cachedFiles.get(id);
     if (hit) {
       usedFiles.add(hit.file);
       urlToLocal.set(key, localMediaPath(id, hit.ext, opts.pagesBase));
@@ -241,16 +247,4 @@ async function fetchAttachment(fetchFn: FetchLike, url: string, token: string): 
     return res;
   }
   throw new Error('too many redirects');
-}
-
-export async function runPool(jobs: Array<() => Promise<void>>, concurrency: number): Promise<void> {
-  let next = 0;
-  async function worker() {
-    while (next < jobs.length) {
-      const i = next;
-      next += 1;
-      await jobs[i]();
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(concurrency, jobs.length) }, () => worker()));
 }

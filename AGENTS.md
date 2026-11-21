@@ -8,6 +8,6 @@ This blog is built from GitHub issues: each issue is a post, and a GitHub Action
 
 Conventions:
 
-- Run `npm run dev` for local development; posts live as issues, not in the repo.
+- Bun is the runtime and package manager (`bun install`, `bun run dev`); use Node/npm only where Bun can't do the job. Posts live as issues, not in the repo.
 - Never edit files in `src/generated/` - they are produced by `scripts/generate.ts`.
-- `npm test` runs the unit tests under `scripts/`.
+- `bun run test` runs the unit tests under `scripts/`.
