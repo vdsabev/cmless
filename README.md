@@ -133,7 +133,7 @@ bun run test # unit tests for the generator scripts
 | `Vlad Sabev: Essays on software` | Vlad Sabev | Essays on software |
 | `My Blog` | My Blog | *(empty)* |
 
-Supported separators (first match wins): pipe (`|`) with spaces on both sides; hyphen (`-`), en dash (`–`), or em dash (`—`) with spaces on both sides; colon (`:`) with a space after (optional space before). Without a separator, the whole string is the title. The description feeds homepage meta tags, RSS channel text, `llms.txt`, `llms-full.txt`, and `index.md`.
+Supported separators (first match wins): pipe (`|`) with spaces on both sides; hyphen (`-`), en dash (`–`), or em dash (`—`) with spaces on both sides; colon (`:`) with a space after (optional space before). Without a separator, the whole string is the title. The description is shown at the top of the homepage and feeds meta tags, RSS channel text, `llms.txt`, `llms-full.txt`, and `index.md`.
 
 **Author / avatar / profile:** auto from the GitHub issue author (or override with `author`, `authorUrl`, `authorAvatar`). GitHub profile photos are downloaded into `public/media/avatars/` at generate time. If a download fails, the site falls back to `avatars.githubusercontent.com/u/<id>` (stable user id) instead of `github.com/<login>.png`.
 

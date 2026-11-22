@@ -37,6 +37,9 @@ const jsonLd = blogJsonLd({
 ---
 
 <Layout title="Posts" siteTitle={site.siteTitle} description={site.siteDescription || undefined} markdownHref={markdownHref} jsonLd={jsonLd}>
+	{site.siteDescription && (
+		<p class="mb-10 text-lg text-slate-600 dark:text-slate-300 leading-relaxed text-pretty">{site.siteDescription}</p>
+	)}
 	{linkSections.map((section, index) => <LinkStrip title={section.title} links={section.links} id={`links-${index}`} />)}
 	{linkSections.length > 0 && <h2 class="text-xl font-semibold mb-3">Posts</h2>}
 	{
