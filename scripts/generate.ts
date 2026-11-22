@@ -16,6 +16,7 @@
  *   in-page cover); it may still be promoted into FM for og:image.
  * - Optional frontmatter at top of issue body (--- ... ---)
  * - Writes Markdown files to src/content/blog/
+ * - Issues labeled `app` become homepage app cards (src/generated/apps.json), not posts
  *
  * Local usage:
  *   bun generate              # (uses gh auth)
@@ -35,6 +36,7 @@ import { isPublishedLabel, isUnlistedLabel } from './status-labels';
 import { assertIssuesNotTruncated, dedupeSlugs, issueListArgs } from './posts';
 import { autoDescription, embedMedia, parseFrontmatter } from './markdown';
 import { detectGithubRepo, pagesFromRepo } from './repo';
+import { isAppLabel, parseApp, sortApps, type App } from './apps';
 import {
   collectGithubImageUrls,
   localizeGithubImages,
@@ -221,6 +223,7 @@ async function main() {
   }
 
   const posts: any[] = [];
+  const apps: App[] = [];
 
   for (const issue of issues) {
     const labelNames: string[] = (issue.labels || []).map((label: any) => typeof label === 'string' ? label : label.name);
@@ -233,6 +236,15 @@ async function main() {
 
     // Frontmatter
     const { frontmatter, content } = parseFrontmatter(issue.body || '');
+
+    // Apps are homepage cards linking elsewhere, never posts. Only published apps are shown.
+    if (labelNames.some(isAppLabel)) {
+      if (!isPublished) continue;
+      const app = parseApp(issue, frontmatter, content);
+      if (typeof app === 'string') console.warn(`⚠️  ${app}`);
+      else apps.push(app);
+      continue;
+    }
 
     const title = (frontmatter.title || issue.title || `Issue #${issue.number}`).trim();
     const slug = (frontmatter.slug || slugify(title) || `issue-${issue.number}`).trim();
@@ -326,6 +338,7 @@ async function main() {
 
   const remoteImages = collectGithubImageUrls(
     ...posts.flatMap((post) => [post.image || '', post.content || '']),
+    ...apps.map((app) => app.image),
   );
   const pagesBase = pagesFromRepo(detectGithubRepo()).base;
   if (remoteImages.length) {
@@ -338,6 +351,9 @@ async function main() {
   for (const post of posts) {
     if (post.image) post.image = rewriteGithubImageUrls(post.image, urlToLocal);
     post.content = rewriteGithubImageUrls(post.content, urlToLocal);
+  }
+  for (const app of apps) {
+    if (app.image) app.image = rewriteGithubImageUrls(app.image, urlToLocal);
   }
   console.log(
     `✓ media: ${downloaded} downloaded, ${cached} cached, ${failed} failed (base ${pagesBase})`,
@@ -426,6 +442,17 @@ async function main() {
     JSON.stringify({ header: headerNavLinks, footer: footerNavLinks }, null, 2) + '\n',
     'utf8'
   );
+  writeFileSync(
+    join(GENERATED_DIR, 'apps.json'),
+    JSON.stringify(
+      sortApps(apps).map(({ title, url, description, image, imageAlt }) => ({ title, url, description, image, imageAlt })),
+      null,
+      2,
+    ) + '\n',
+    'utf8'
+  );
+  console.log(`✓ generated/apps.json (${apps.length} app(s))`);
+
   console.log(`✓ generated/navigation.json (header: ${headerNavLinks.length}, footer: ${footerNavLinks.length})`);
 
   for (const post of posts) {

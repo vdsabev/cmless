@@ -7,6 +7,7 @@ Seamless blogging with GitHub issues.
 - Manually manage post publishing by applying labels: `status: draft`, `status: unlisted`, `status: published`
 - Set metadata via Frontmatter
 - Add a link to a page in the header or footer
+- Showcase your apps in a scrollable strip at the top of the homepage
 - Full-text client-side search (Pagefind) — titles, content, tags, and descriptions
 
 ## 🚀 Get Started
@@ -21,6 +22,7 @@ The labels are provided by the "Blog post" issue template. Or create them with t
 gh label create "status: draft"    --color "d73a4a" --description "Not published"
 gh label create "status: unlisted" --color "5319e7" --description "Published but hidden from list"
 gh label create "status: published" --color "0e8a16" --description "Published and listed"
+gh label create "app" --color "1d76db" --description "Shown in the homepage Apps strip"
 ```
 
 ## 🏷️ Publishing States
@@ -35,6 +37,18 @@ gh label create "status: published" --color "0e8a16" --description "Published an
 
 > [!TIP]
 > When you're done writing and editing a post you can close its respective issue.
+
+## 📱 Apps
+Issues labeled `app` are shown as cards in a horizontally scrollable **Apps** strip at the top of the homepage instead of as posts. A card opens the app's URL; apps get no page of their own. With no published apps the homepage is just the post list.
+
+1. **Issues → New issue → "App"** (or add the `app` label to any issue).
+2. Set `url:` in the Frontmatter (required). The title is the app's name.
+3. Drag a screenshot into the body: the first image becomes the thumbnail (or set `image:`). Without one the card shows the name's first letter.
+4. `description:` is the card blurb; without it the first paragraph is used.
+5. `order:` sorts the strip: lower numbers first, apps without `order` after them, newest first. Leave gaps (10, 20, 30) to slot apps in between.
+6. Apply `status: published` to show the app; `status: draft` or `status: unlisted` hides it.
+
+Find all your apps with the issue filter `is:issue label:app` (add `label:"status: published"` for the live ones).
 
 ## ✍️ Writing Posts
 ### On GitHub
@@ -107,7 +121,7 @@ Supported separators (first match wins): pipe (`|`) with spaces on both sides; h
 
 **Tags:** from `tags: a, b` Frontmatter (or a YAML list: `tags: [a, b]` or `- a` lines).
 
-**Navigation pages:** useful for custom pages like "About me". Add `navigation: Label` and `navigationIndex: N` to an issue's Frontmatter. Negative indices place the link before "Posts" in the header, non-negative after. Footer links are sorted by index and appear before "powered by". These pages render as plain prose without blog metadata. Leading body images stay in the page content (unlike blog posts, where the first image is promoted to a cover and removed from the body); they may still set Open Graph `image` when frontmatter omits it.
+**Navigation pages:** useful for custom pages like "About me". Add `navigation: header` (or `footer`; the link text is the title) and `navigationIndex: N` to an issue's Frontmatter. Negative indices place the link before "Posts" in the header, non-negative after. Footer links are sorted by index and appear before "powered by". These pages render as plain prose without blog metadata. Leading body images stay in the page content (unlike blog posts, where the first image is promoted to a cover and removed from the body); they may still set Open Graph `image` when frontmatter omits it.
 
 **Custom domain:** Place a `CNAME` file in `public/` and set up DNS.
 

@@ -39,5 +39,8 @@ src/generated/site.json
 # Generated navigation links
 src/generated/navigation.json
 
+# Generated homepage apps
+src/generated/apps.json
+
 !src/generated/.gitkeep
 

@@ -1,0 +1,204 @@
+---
+/**
+ * Horizontally scrolling strip of app cards (issues labeled `app`).
+ *
+ * - Scroll snap, one card per snap point; swipe / trackpad / keyboard (Tab) all work.
+ * - Edge fades come from a scroll-driven animation (`animation-timeline: scroll()`):
+ *   the left fade grows in once you scroll away from the start, the right fade
+ *   shrinks out at the end, and neither shows when nothing overflows (the
+ *   timeline is inactive then). Browsers without support just show no fade.
+ * - Prev/next buttons page by the visible width; hidden when nothing overflows
+ *   and disabled at either end. Without JS they stay hidden.
+ */
+import CoverImage from './CoverImage.astro';
+
+type App = {
+	title: string;
+	url: string;
+	description?: string;
+	image?: string;
+	imageAlt?: string;
+};
+
+const { apps, title = 'Apps' } = Astro.props as { apps: App[]; title?: string };
+---
+
+<section class="app-strip-section mb-10" aria-labelledby="apps-heading" data-app-strip>
+	<div class="flex items-center justify-between gap-4 mb-3">
+		<h2 id="apps-heading" class="text-xl font-semibold">{title}</h2>
+		<div class="flex gap-2" data-app-strip-buttons hidden>
+			<button
+				type="button"
+				class="app-strip-button"
+				data-app-strip-prev
+				aria-label={`Scroll ${title.toLowerCase()} left`}
+			>
+				<svg class="size-5" viewBox="0 0 24 24" aria-hidden="true"
+					><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+					></path></svg
+				>
+			</button>
+			<button
+				type="button"
+				class="app-strip-button"
+				data-app-strip-next
+				aria-label={`Scroll ${title.toLowerCase()} right`}
+			>
+				<svg class="size-5" viewBox="0 0 24 24" aria-hidden="true"
+					><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+					></path></svg
+				>
+			</button>
+		</div>
+	</div>
+
+	<ul class="app-strip flex gap-4 overflow-x-auto" data-app-strip-track>
+		{
+			apps.map((app) => (
+				<li class="group relative shrink-0 w-40 sm:w-48 snap-start">
+					<a
+						href={app.url}
+						class="absolute inset-0 z-10 corner-squircle rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400"
+						aria-label={app.title}
+					/>
+					{app.image ? (
+						<CoverImage
+							class="w-full aspect-[1200/630] object-cover corner-squircle rounded-xl bg-slate-100 dark:bg-slate-800"
+							src={app.image}
+							alt={app.imageAlt || app.title}
+						/>
+					) : (
+						<div
+							class="w-full aspect-[1200/630] corner-squircle rounded-xl bg-gradient-to-br from-blue-100 to-slate-200 dark:from-blue-950 dark:to-slate-800 flex items-center justify-center text-3xl font-semibold text-slate-500 dark:text-slate-400"
+							aria-hidden="true"
+						>
+							{app.title.trim().charAt(0).toUpperCase()}
+						</div>
+					)}
+					<h3 class="mt-2 font-semibold leading-tight group-hover:underline">{app.title}</h3>
+					{app.description && (
+						<p class="mt-1 text-sm text-slate-500 dark:text-slate-400 leading-normal line-clamp-2">
+							{app.description}
+						</p>
+					)}
+				</li>
+			))
+		}
+	</ul>
+</section>
+
+<style>
+	@property --app-strip-fade-start {
+		syntax: '<length>';
+		inherits: false;
+		initial-value: 0px;
+	}
+	@property --app-strip-fade-end {
+		syntax: '<length>';
+		inherits: false;
+		initial-value: 0px;
+	}
+
+	.app-strip {
+		scroll-snap-type: x mandatory;
+		scrollbar-width: none;
+		overscroll-behavior-x: contain;
+		/* Room for focus rings, which overflow clips otherwise. */
+		padding-block: 4px;
+		margin-block: -4px;
+		mask-image: linear-gradient(
+			to right,
+			transparent,
+			#000 var(--app-strip-fade-start),
+			#000 calc(100% - var(--app-strip-fade-end)),
+			transparent
+		);
+	}
+	.app-strip::-webkit-scrollbar {
+		display: none;
+	}
+
+	@supports (animation-timeline: scroll()) {
+		.app-strip {
+			animation: app-strip-fade linear both;
+		}
+		/*
+		 * Separate rule on purpose: the CSS minifier folds a same-rule
+		 * animation-timeline into the `animation` shorthand, which Chrome rejects.
+		 */
+		ul.app-strip {
+			animation-timeline: scroll(self inline);
+		}
+	}
+
+	/* Fade grows in over the first ~5% of scroll and out over the last ~5%. */
+	@keyframes app-strip-fade {
+		0% {
+			--app-strip-fade-start: 0px;
+			--app-strip-fade-end: 3rem;
+		}
+		5% {
+			--app-strip-fade-start: 3rem;
+		}
+		95% {
+			--app-strip-fade-end: 3rem;
+		}
+		100% {
+			--app-strip-fade-start: 3rem;
+			--app-strip-fade-end: 0px;
+		}
+	}
+
+	.app-strip-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: var(--pf-input-height);
+		height: var(--pf-input-height);
+		border-radius: 0.5rem;
+		border: 1px solid var(--pf-border);
+		color: var(--pf-text-secondary);
+		background: transparent;
+		cursor: pointer;
+	}
+	.app-strip-button:hover:not(:disabled) {
+		color: var(--pf-text);
+	}
+	.app-strip-button:disabled {
+		opacity: 0.4;
+		cursor: default;
+	}
+	.app-strip-button:focus-visible {
+		outline: 2px solid var(--pf-outline-focus);
+		outline-offset: 2px;
+	}
+</style>
+
+<script>
+	for (const section of document.querySelectorAll<HTMLElement>('[data-app-strip]')) {
+		const track = section.querySelector<HTMLElement>('[data-app-strip-track]');
+		const buttons = section.querySelector<HTMLElement>('[data-app-strip-buttons]');
+		const prev = section.querySelector<HTMLButtonElement>('[data-app-strip-prev]');
+		const next = section.querySelector<HTMLButtonElement>('[data-app-strip-next]');
+		if (!track || !buttons || !prev || !next) continue;
+
+		const update = () => {
+			const max = track.scrollWidth - track.clientWidth;
+			buttons.hidden = max <= 1;
+			prev.disabled = track.scrollLeft <= 1;
+			next.disabled = track.scrollLeft >= max - 1;
+		};
+
+		const page = (direction: 1 | -1) => {
+			const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			// Scroll by the visible width minus one card's peek so nothing is skipped.
+			track.scrollBy({ left: direction * track.clientWidth * 0.8, behavior: reduce ? 'auto' : 'smooth' });
+		};
+
+		prev.addEventListener('click', () => page(-1));
+		next.addEventListener('click', () => page(1));
+		track.addEventListener('scroll', update, { passive: true });
+		new ResizeObserver(update).observe(track);
+		update();
+	}
+</script>

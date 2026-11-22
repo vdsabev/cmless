@@ -12,6 +12,7 @@
  */
 import { appendFileSync, readFileSync } from 'fs';
 import { hasLiveStatus, isLiveStatusLabel } from './status-labels';
+import { isAppLabel } from './apps';
 
 export type IssueEventInput = {
   action: string;
@@ -26,7 +27,9 @@ export function issueEventNeedsGenerate(event: IssueEventInput): boolean {
   const action = (event.action || '').toLowerCase();
 
   if (action === 'labeled' || action === 'unlabeled') {
-    return isLiveStatusLabel(event.labelName || '');
+    const label = event.labelName || '';
+    // Adding/removing `app` on a live issue moves it between the posts list and the apps strip.
+    return isLiveStatusLabel(label) || (isAppLabel(label) && hasLiveStatus(event.labelNames));
   }
 
   // Deleting or transferring a live post removes it from this repo's issues.

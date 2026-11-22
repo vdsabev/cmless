@@ -93,3 +93,20 @@ describe('deleted / transferred issues', () => {
     ).toBe(true);
   });
 });
+
+describe('app label', () => {
+  test('adding or removing app on a live issue rebuilds', () => {
+    expect(
+      issueEventNeedsGenerate({ action: 'labeled', labelName: 'app', labelNames: ['status: published', 'app'] }),
+    ).toBe(true);
+    expect(
+      issueEventNeedsGenerate({ action: 'unlabeled', labelName: 'app', labelNames: ['status: published'] }),
+    ).toBe(true);
+  });
+
+  test('app label on a draft is skipped', () => {
+    expect(
+      issueEventNeedsGenerate({ action: 'labeled', labelName: 'app', labelNames: ['status: draft', 'app'] }),
+    ).toBe(false);
+  });
+});

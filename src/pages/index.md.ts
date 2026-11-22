@@ -4,6 +4,7 @@ import {
 	getPublishedPosts,
 } from '../lib/content';
 import site from '../generated/site.json';
+import { getApps } from '../lib/apps';
 
 export const GET = (context: { site?: URL }) => {
 	const siteUrl = context.site ?? import.meta.env.SITE;
@@ -13,6 +14,17 @@ export const GET = (context: { site?: URL }) => {
 	if (site.siteDescription) {
 		lines.push(`> ${escapeMd(site.siteDescription)}`, '');
 	}
+	const apps = getApps();
+	if (apps.length > 0) {
+		lines.push('## Apps', '');
+		for (const app of apps) {
+			const href = /^https?:\/\//i.test(app.url) ? app.url : siteUrl ? new URL(app.url, siteUrl).href : app.url;
+			const desc = app.description ? ` — ${escapeMd(app.description)}` : '';
+			lines.push(`- [${escapeMd(app.title)}](${href})${desc}`);
+		}
+		lines.push('');
+	}
+
 	lines.push('## Posts', '');
 
 	for (const post of posts) {
