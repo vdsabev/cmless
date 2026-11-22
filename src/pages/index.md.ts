@@ -4,7 +4,7 @@ import {
 	getPublishedPosts,
 } from '../lib/content';
 import site from '../generated/site.json';
-import { getApps } from '../lib/apps';
+import { getLinkSections } from '../lib/links';
 
 export const GET = (context: { site?: URL }) => {
 	const siteUrl = context.site ?? import.meta.env.SITE;
@@ -14,13 +14,12 @@ export const GET = (context: { site?: URL }) => {
 	if (site.siteDescription) {
 		lines.push(`> ${escapeMd(site.siteDescription)}`, '');
 	}
-	const apps = getApps();
-	if (apps.length > 0) {
-		lines.push('## Apps', '');
-		for (const app of apps) {
-			const href = /^https?:\/\//i.test(app.url) ? app.url : siteUrl ? new URL(app.url, siteUrl).href : app.url;
-			const desc = app.description ? ` — ${escapeMd(app.description)}` : '';
-			lines.push(`- [${escapeMd(app.title)}](${href})${desc}`);
+	for (const section of getLinkSections()) {
+		lines.push(`## ${escapeMd(section.title)}`, '');
+		for (const link of section.links) {
+			const href = /^https?:\/\//i.test(link.url) ? link.url : siteUrl ? new URL(link.url, siteUrl).href : link.url;
+			const desc = link.description ? ` — ${escapeMd(link.description)}` : '';
+			lines.push(`- [${escapeMd(link.title)}](${href})${desc}`);
 		}
 		lines.push('');
 	}

@@ -1,6 +1,6 @@
 ---
 /**
- * Horizontally scrolling strip of app cards (issues labeled `app`).
+ * Horizontally scrolling strip of link cards (issues labeled `link`), one per section.
  *
  * - Scroll snap, one card per snap point; swipe / trackpad / keyboard (Tab) all work.
  * - Edge fades come from a scroll-driven animation (`animation-timeline: scroll()`):
@@ -9,28 +9,24 @@
  *   timeline is inactive then). Browsers without support just show no fade.
  * - Prev/next buttons page by the visible width; hidden when nothing overflows
  *   and disabled at either end. Without JS they stay hidden.
+ * - Cards open in a new tab unless the link sets `newTab: false`; an ↗ marks those.
  */
 import CoverImage from './CoverImage.astro';
 
-type App = {
-	title: string;
-	url: string;
-	description?: string;
-	image?: string;
-	imageAlt?: string;
-};
+import type { Link } from '../lib/links';
 
-const { apps, title = 'Apps' } = Astro.props as { apps: App[]; title?: string };
+const { links, title, id } = Astro.props as { links: Link[]; title: string; id: string };
+const headingId = `${id}-heading`;
 ---
 
-<section class="app-strip-section mb-10" aria-labelledby="apps-heading" data-app-strip>
+<section class="mb-10" aria-labelledby={headingId} data-link-strip>
 	<div class="flex items-center justify-between gap-4 mb-3">
-		<h2 id="apps-heading" class="text-xl font-semibold">{title}</h2>
-		<div class="flex gap-2" data-app-strip-buttons hidden>
+		<h2 id={headingId} class="text-xl font-semibold">{title}</h2>
+		<div class="flex gap-2" data-link-strip-buttons hidden>
 			<button
 				type="button"
-				class="app-strip-button"
-				data-app-strip-prev
+				class="link-strip-button"
+				data-link-strip-prev
 				aria-label={`Scroll ${title.toLowerCase()} left`}
 			>
 				<svg class="size-5" viewBox="0 0 24 24" aria-hidden="true"
@@ -40,8 +36,8 @@ const { apps, title = 'Apps' } = Astro.props as { apps: App[]; title?: string };
 			</button>
 			<button
 				type="button"
-				class="app-strip-button"
-				data-app-strip-next
+				class="link-strip-button"
+				data-link-strip-next
 				aria-label={`Scroll ${title.toLowerCase()} right`}
 			>
 				<svg class="size-5" viewBox="0 0 24 24" aria-hidden="true"
@@ -52,33 +48,43 @@ const { apps, title = 'Apps' } = Astro.props as { apps: App[]; title?: string };
 		</div>
 	</div>
 
-	<ul class="app-strip flex gap-4 overflow-x-auto" data-app-strip-track>
+	<ul class="link-strip flex gap-4 overflow-x-auto" data-link-strip-track>
 		{
-			apps.map((app) => (
+			links.map((link) => (
 				<li class="group relative shrink-0 w-40 sm:w-48 snap-start">
 					<a
-						href={app.url}
+						href={link.url}
+						target={link.newTab ? '_blank' : undefined}
+						rel={link.newTab ? 'noopener' : undefined}
 						class="absolute inset-0 z-10 corner-squircle rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:focus-visible:outline-blue-400"
-						aria-label={app.title}
+						aria-label={link.newTab ? `${link.title} (opens in new tab)` : link.title}
 					/>
-					{app.image ? (
+					{link.image ? (
 						<CoverImage
 							class="w-full aspect-[1200/630] object-cover corner-squircle rounded-xl bg-slate-100 dark:bg-slate-800"
-							src={app.image}
-							alt={app.imageAlt || app.title}
+							src={link.image}
+							alt={link.imageAlt || link.title}
 						/>
 					) : (
 						<div
 							class="w-full aspect-[1200/630] corner-squircle rounded-xl bg-gradient-to-br from-blue-100 to-slate-200 dark:from-blue-950 dark:to-slate-800 flex items-center justify-center text-3xl font-semibold text-slate-500 dark:text-slate-400"
 							aria-hidden="true"
 						>
-							{app.title.trim().charAt(0).toUpperCase()}
+							{link.title.trim().charAt(0).toUpperCase()}
 						</div>
 					)}
-					<h3 class="mt-2 font-semibold leading-tight group-hover:underline">{app.title}</h3>
-					{app.description && (
+					<h3 class="mt-2 font-semibold leading-tight group-hover:underline">
+						{link.title}
+						{link.newTab && (
+							<svg class="inline-block size-3.5 ml-0.5 align-baseline text-slate-400 dark:text-slate-500" viewBox="0 0 24 24" aria-hidden="true"
+								><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+								></path></svg
+							>
+						)}
+					</h3>
+					{link.description && (
 						<p class="mt-1 text-sm text-slate-500 dark:text-slate-400 leading-normal line-clamp-2">
-							{app.description}
+							{link.description}
 						</p>
 					)}
 				</li>
@@ -88,18 +94,18 @@ const { apps, title = 'Apps' } = Astro.props as { apps: App[]; title?: string };
 </section>
 
 <style>
-	@property --app-strip-fade-start {
+	@property --link-strip-fade-start {
 		syntax: '<length>';
 		inherits: false;
 		initial-value: 0px;
 	}
-	@property --app-strip-fade-end {
+	@property --link-strip-fade-end {
 		syntax: '<length>';
 		inherits: false;
 		initial-value: 0px;
 	}
 
-	.app-strip {
+	.link-strip {
 		scroll-snap-type: x mandatory;
 		scrollbar-width: none;
 		overscroll-behavior-x: contain;
@@ -109,47 +115,47 @@ const { apps, title = 'Apps' } = Astro.props as { apps: App[]; title?: string };
 		mask-image: linear-gradient(
 			to right,
 			transparent,
-			#000 var(--app-strip-fade-start),
-			#000 calc(100% - var(--app-strip-fade-end)),
+			#000 var(--link-strip-fade-start),
+			#000 calc(100% - var(--link-strip-fade-end)),
 			transparent
 		);
 	}
-	.app-strip::-webkit-scrollbar {
+	.link-strip::-webkit-scrollbar {
 		display: none;
 	}
 
 	@supports (animation-timeline: scroll()) {
-		.app-strip {
-			animation: app-strip-fade linear both;
+		.link-strip {
+			animation: link-strip-fade linear both;
 		}
 		/*
 		 * Separate rule on purpose: the CSS minifier folds a same-rule
 		 * animation-timeline into the `animation` shorthand, which Chrome rejects.
 		 */
-		ul.app-strip {
+		ul.link-strip {
 			animation-timeline: scroll(self inline);
 		}
 	}
 
 	/* Fade grows in over the first ~5% of scroll and out over the last ~5%. */
-	@keyframes app-strip-fade {
+	@keyframes link-strip-fade {
 		0% {
-			--app-strip-fade-start: 0px;
-			--app-strip-fade-end: 3rem;
+			--link-strip-fade-start: 0px;
+			--link-strip-fade-end: 3rem;
 		}
 		5% {
-			--app-strip-fade-start: 3rem;
+			--link-strip-fade-start: 3rem;
 		}
 		95% {
-			--app-strip-fade-end: 3rem;
+			--link-strip-fade-end: 3rem;
 		}
 		100% {
-			--app-strip-fade-start: 3rem;
-			--app-strip-fade-end: 0px;
+			--link-strip-fade-start: 3rem;
+			--link-strip-fade-end: 0px;
 		}
 	}
 
-	.app-strip-button {
+	.link-strip-button {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -161,25 +167,25 @@ const { apps, title = 'Apps' } = Astro.props as { apps: App[]; title?: string };
 		background: transparent;
 		cursor: pointer;
 	}
-	.app-strip-button:hover:not(:disabled) {
+	.link-strip-button:hover:not(:disabled) {
 		color: var(--pf-text);
 	}
-	.app-strip-button:disabled {
+	.link-strip-button:disabled {
 		opacity: 0.4;
 		cursor: default;
 	}
-	.app-strip-button:focus-visible {
+	.link-strip-button:focus-visible {
 		outline: 2px solid var(--pf-outline-focus);
 		outline-offset: 2px;
 	}
 </style>
 
 <script>
-	for (const section of document.querySelectorAll<HTMLElement>('[data-app-strip]')) {
-		const track = section.querySelector<HTMLElement>('[data-app-strip-track]');
-		const buttons = section.querySelector<HTMLElement>('[data-app-strip-buttons]');
-		const prev = section.querySelector<HTMLButtonElement>('[data-app-strip-prev]');
-		const next = section.querySelector<HTMLButtonElement>('[data-app-strip-next]');
+	for (const section of document.querySelectorAll<HTMLElement>('[data-link-strip]')) {
+		const track = section.querySelector<HTMLElement>('[data-link-strip-track]');
+		const buttons = section.querySelector<HTMLElement>('[data-link-strip-buttons]');
+		const prev = section.querySelector<HTMLButtonElement>('[data-link-strip-prev]');
+		const next = section.querySelector<HTMLButtonElement>('[data-link-strip-next]');
 		if (!track || !buttons || !prev || !next) continue;
 
 		const update = () => {

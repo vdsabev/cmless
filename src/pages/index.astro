@@ -1,12 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PostCard from '../components/PostCard.astro';
-import AppStrip from '../components/AppStrip.astro';
+import LinkStrip from '../components/LinkStrip.astro';
 import { abs, getPublishedPosts, indexMdPath } from '../lib/content';
 import { blogJsonLd } from '../lib/jsonld';
 import { getReadingTimeInMinutes } from '../lib/reading-time';
 import site from '../generated/site.json';
-import { getApps } from '../lib/apps';
+import { getLinkSections } from '../lib/links';
 
 const publishedPosts = getPublishedPosts().map((post) => ({
 	slug: post.slug,
@@ -19,7 +19,7 @@ const publishedPosts = getPublishedPosts().map((post) => ({
 	tags: post.tags,
 }));
 
-const apps = getApps();
+const linkSections = getLinkSections();
 
 // Prioritize the first card that has a cover (LCP candidate on the index).
 const firstPostWithImage = publishedPosts.find((post) => post.image);
@@ -37,8 +37,8 @@ const jsonLd = blogJsonLd({
 ---
 
 <Layout title="Posts" siteTitle={site.siteTitle} description={site.siteDescription || undefined} markdownHref={markdownHref} jsonLd={jsonLd}>
-	{apps.length > 0 && <AppStrip apps={apps} />}
-	{apps.length > 0 && <h2 class="text-xl font-semibold mb-3">Posts</h2>}
+	{linkSections.map((section, index) => <LinkStrip title={section.title} links={section.links} id={`links-${index}`} />)}
+	{linkSections.length > 0 && <h2 class="text-xl font-semibold mb-3">Posts</h2>}
 	{
 		publishedPosts.length === 0 ? (
 			<p>No published posts yet. Create a GitHub Issue and apply the <code>status: published</code> label.</p>

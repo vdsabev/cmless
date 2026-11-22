@@ -94,19 +94,25 @@ describe('deleted / transferred issues', () => {
   });
 });
 
-describe('app label', () => {
-  test('adding or removing app on a live issue rebuilds', () => {
+describe('link label', () => {
+  test('adding or removing link on a live issue rebuilds', () => {
     expect(
-      issueEventNeedsGenerate({ action: 'labeled', labelName: 'app', labelNames: ['status: published', 'app'] }),
+      issueEventNeedsGenerate({ action: 'labeled', labelName: 'link', labelNames: ['status: published', 'link'] }),
     ).toBe(true);
     expect(
-      issueEventNeedsGenerate({ action: 'unlabeled', labelName: 'app', labelNames: ['status: published'] }),
+      issueEventNeedsGenerate({ action: 'unlabeled', labelName: 'link', labelNames: ['status: published'] }),
     ).toBe(true);
   });
 
-  test('app label on a draft is skipped', () => {
+  test('the old app label still counts', () => {
     expect(
-      issueEventNeedsGenerate({ action: 'labeled', labelName: 'app', labelNames: ['status: draft', 'app'] }),
+      issueEventNeedsGenerate({ action: 'labeled', labelName: 'app', labelNames: ['status: published', 'app'] }),
+    ).toBe(true);
+  });
+
+  test('link label on a draft is skipped', () => {
+    expect(
+      issueEventNeedsGenerate({ action: 'labeled', labelName: 'link', labelNames: ['status: draft', 'link'] }),
     ).toBe(false);
   });
 });

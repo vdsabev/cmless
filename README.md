@@ -7,7 +7,7 @@ Seamless blogging with GitHub issues.
 - Manually manage post publishing by applying labels: `status: draft`, `status: unlisted`, `status: published`
 - Set metadata via Frontmatter
 - Add a link to a page in the header or footer
-- Showcase your apps in a scrollable strip at the top of the homepage
+- Showcase projects, talks and other links in scrollable strips at the top of the homepage
 - Full-text client-side search (Pagefind) — titles, content, tags, and descriptions
 
 ## 🚀 Get Started
@@ -22,7 +22,7 @@ The labels are provided by the "Blog post" issue template. Or create them with t
 gh label create "status: draft"    --color "d73a4a" --description "Not published"
 gh label create "status: unlisted" --color "5319e7" --description "Published but hidden from list"
 gh label create "status: published" --color "0e8a16" --description "Published and listed"
-gh label create "app" --color "1d76db" --description "Shown in the homepage Apps strip"
+gh label create "link" --color "1d76db" --description "Shown as a card at the top of the homepage"
 ```
 
 ## 🏷️ Publishing States
@@ -38,17 +38,19 @@ gh label create "app" --color "1d76db" --description "Shown in the homepage Apps
 > [!TIP]
 > When you're done writing and editing a post you can close its respective issue.
 
-## 📱 Apps
-Issues labeled `app` are shown as cards in a horizontally scrollable **Apps** strip at the top of the homepage instead of as posts. A card opens the app's URL; apps get no page of their own. With no published apps the homepage is just the post list.
+## 🔗 Links
+Issues labeled `link` are shown as cards in horizontally scrollable strips at the top of the homepage instead of as posts: projects, talks, anything you want to point to. A card opens the link's URL in a new tab; links get no page of their own. With no published links the homepage is just the post list.
 
-1. **Issues → New issue → "App"** (or add the `app` label to any issue).
-2. Set `url:` in the Frontmatter (required). The title is the app's name.
-3. Drag a screenshot into the body: the first image becomes the thumbnail (or set `image:`). Without one the card shows the name's first letter.
+1. **Issues → New issue → "Link"** (or add the `link` label to any issue).
+2. Set `url:` in the Frontmatter (required). The issue title is the card title.
+3. Drag a screenshot into the body: the first image becomes the thumbnail (or set `image:`). Without one the card shows the title's first letter.
 4. `description:` is the card blurb; without it the first paragraph is used.
-5. `order:` sorts the strip: lower numbers first, apps without `order` after them, newest first. Leave gaps (10, 20, 30) to slot apps in between.
-6. Apply `status: published` to show the app; `status: draft` or `status: unlisted` hides it.
+5. `section:` is the strip heading the card goes under (default **Projects**). Each section is its own strip, e.g. `section: Talks`.
+6. `order:` sorts cards: lower numbers first, cards without `order` after them, newest first. Sections follow their lowest-numbered card, so Projects at 10–90 and Talks at 100+ puts Projects first. Leave gaps to slot cards in between. Posts always come after all sections.
+7. `newTab: false` opens the card in the same tab (e.g. for a page on this site).
+8. Apply `status: published` to show the card; `status: draft` or `status: unlisted` hides it.
 
-Find all your apps with the issue filter `is:issue label:app` (add `label:"status: published"` for the live ones).
+Find all your links with the issue filter `is:issue label:link` (add `label:"status: published"` for the live ones). The older `app` label still works.
 
 ## ✍️ Writing Posts
 ### On GitHub
