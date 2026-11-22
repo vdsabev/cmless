@@ -8,11 +8,7 @@ describe('isLinkLabel', () => {
     expect(isLinkLabel(' link ')).toBe(true);
     expect(isLinkLabel('links')).toBe(false);
     expect(isLinkLabel('status: published')).toBe(false);
-  });
-
-  test('still accepts the old app label', () => {
-    expect(isLinkLabel('app')).toBe(true);
-    expect(isLinkLabel('App')).toBe(true);
+    expect(isLinkLabel('app')).toBe(false);
   });
 });
 

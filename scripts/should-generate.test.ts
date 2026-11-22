@@ -104,12 +104,6 @@ describe('link label', () => {
     ).toBe(true);
   });
 
-  test('the old app label still counts', () => {
-    expect(
-      issueEventNeedsGenerate({ action: 'labeled', labelName: 'app', labelNames: ['status: published', 'app'] }),
-    ).toBe(true);
-  });
-
   test('link label on a draft is skipped', () => {
     expect(
       issueEventNeedsGenerate({ action: 'labeled', labelName: 'link', labelNames: ['status: draft', 'link'] }),

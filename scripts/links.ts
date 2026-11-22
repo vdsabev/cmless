@@ -10,14 +10,11 @@ import { autoDescription } from './markdown';
 
 /** Label that marks an issue as a link card instead of a blog post. */
 export const LINK_LABEL = 'link';
-/** Older name for the same label, still accepted. */
-const LEGACY_LINK_LABELS = ['app'];
 
 export const DEFAULT_SECTION = 'Projects';
 
 export function isLinkLabel(label: string): boolean {
-  const name = label.trim().toLowerCase();
-  return name === LINK_LABEL || LEGACY_LINK_LABELS.includes(name);
+  return label.trim().toLowerCase() === LINK_LABEL;
 }
 
 export type Link = {

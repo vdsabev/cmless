@@ -50,7 +50,7 @@ Issues labeled `link` are shown as cards in horizontally scrollable strips at th
 7. `newTab: false` opens the card in the same tab (e.g. for a page on this site).
 8. Apply `status: published` to show the card; `status: draft` or `status: unlisted` hides it.
 
-Find all your links with the issue filter `is:issue label:link` (add `label:"status: published"` for the live ones). The older `app` label still works.
+Find all your links with the issue filter `is:issue label:link` (add `label:"status: published"` for the live ones).
 
 ## ✍️ Writing Posts
 ### On GitHub
@@ -60,7 +60,27 @@ Find all your links with the issue filter `is:issue label:link` (add `label:"sta
 4. Apply `status: published` (or `unlisted`).
 5. Site updates in ~1 minute.
 
-The template documents Frontmatter options.
+Frontmatter is optional. Put it at the very top of the issue body, between `---` lines, one `key: value` per line. Every field can be left out, and `key:` with no value is ignored.
+
+```yaml
+---
+description: Short summary for the post list, SEO and social cards
+tags: tech, dev
+---
+```
+
+| Field | Default | Notes |
+|-------|---------|-------|
+| `description` | first paragraph | Post list, SEO, social cards |
+| `tags` | none | `a, b` or a YAML list |
+| `date` | issue creation date | `2026-07-10` |
+| `slug` | from the title | Set it to keep the URL stable when renaming |
+| `series` | none | See **Series** below |
+| `image` | leading body image, else repo social preview | Cover for the list, post hero and social cards |
+| `imageAlt` | that image's alt text | |
+| `title` | issue title | |
+| `author`, `authorUrl`, `authorAvatar` | issue author | |
+| `navigation`, `navigationIndex` | none | See **Navigation pages** below |
 
 ### With the gh CLI
 ```sh
